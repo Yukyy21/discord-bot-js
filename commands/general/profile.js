@@ -9,7 +9,11 @@ module.exports = {
     .setName('profile')
     .setDescription('Lihat profil lengkap kamu (balance, streak, poin, level)'),
   async execute(interaction) {
-    await interaction.deferReply();
+    try {
+      await interaction.deferReply();
+    } catch {
+      return;
+    }
     const p = getProfile(interaction.user.id, interaction.guildId);
     const rank = getXpRank(interaction.user.id, interaction.guildId) || 0;
     const rankInfo = getRank(p.level);

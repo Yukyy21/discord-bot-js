@@ -9,7 +9,11 @@ module.exports = {
     .setName('rank')
     .setDescription('Lihat rank & level kamu dalam bentuk gambar'),
   async execute(interaction) {
-    await interaction.deferReply();
+    try {
+      await interaction.deferReply();
+    } catch {
+      return;
+    }
     const p = getProfile(interaction.user.id, interaction.guildId);
     const rank = getXpRank(interaction.user.id, interaction.guildId);
     const rankInfo = getRank(p.level);

@@ -1,7 +1,8 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
 const { buyItem } = require('../../db/database');
 const { getShopItemById } = require('../../utils/shopRotation');
 const { successEmbed, errorEmbed } = require('../../utils/embeds');
+const { getItemImageAttachment } = require('../../utils/itemImages');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,15 @@ module.exports = {
     if (!result.ok) {
       return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
     }
+
     const embed = successEmbed('✅ Pembelian Berhasil', result.message);
-    await interaction.reply({ embeds: [embed] });
+    const files = [];
+    const img = getItemImageAttachment(id);
+    if (img) {
+      files.push(new AttachmentBuilder(img.filePath, { name: img.attachmentName }));
+      embed.setImage(img.attachmentProtocol);
+    }
+
+    await interaction.reply({ embeds: [embed], files });
   },
 };

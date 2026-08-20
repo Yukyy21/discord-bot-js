@@ -1,0 +1,148 @@
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.deferReply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:122:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:30:7)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1539994975486615613/aW50ZXJhY3Rpb246MTUzOTk5NDk3NTQ4NjYxNTYxMzp4M1E2cnBBRHhlV0lZZGtsS1pGZlBZSVJ4enRtbHlCSEtNMzJ5ZENzNXJWYTRuZjBrRE5WVUlpdzVqZks3WklnNjE1RFdNRFZjNkgySGNJSzlsWWt2SEFHZnQxQlBScUhqUEVhYUFUUWJ2SzNjTzJzbzh3S1BiUVpuT0tsQm9FRg/callback?with_response=false',
+  requestBody: { files: undefined, json: { type: 5, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.reply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:193:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\guide.js:76:5)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1539996545502412880/aW50ZXJhY3Rpb246MTUzOTk5NjU0NTUwMjQxMjg4MDprVDY5T3RnNURRR2lNOWNtd3pxSExsaktHQ1NhYmg1NVZ2RkNUNDdvUHVhUEFvZ2NKUDN4Q3Y5WHl3UmgwMjdVRkJUN1R3VzkxalZkdnJUR1ZFQVc1bXpwaU41TER3UURZZG5jSDVkOW1vbm9ORGdKb2N1UVpsenFxRFBXaWtsbQ/callback?with_response=false',
+  requestBody: { files: [], json: { type: 4, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.deferReply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:122:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:30:7)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1539998436601102367/aW50ZXJhY3Rpb246MTUzOTk5ODQzNjYwMTEwMjM2Nzp6M3BDQnpjMEJtYXVBWDZuRG9ZUHdUM0xQbzM4VXc4VVJCU1JzOXFhT01zWHhGMnRGOXNjYWdEVm84Y0FtVEJhcGd6M2ZhcnhEdGpqZ293SWJhdDgzYUx6NGJMZEZCdDJPQWVrc2tOQnVyM0pkeFpXVE9ScFgxOVBNcDZ0ZklZeg/callback?with_response=false',
+  requestBody: { files: undefined, json: { type: 5, data: [Object] } }
+}
+Client error: SqliteError: UNIQUE constraint failed: points.userId, points.guildId
+    at getPoints (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\db\database.js:80:70)
+    at addVoiceSeconds (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\db\database.js:103:3)
+    at Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\voiceStateUpdate.js:31:31)
+    at Client.<anonymous> (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\index.js:42:46)
+    at Client.emit (node:events:509:28)
+    at VoiceStateUpdate.handle (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\client\actions\VoiceStateUpdate.js:38:14)
+    at module.exports [as VOICE_STATE_UPDATE] (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\client\websocket\handlers\VOICE_STATE_UPDATE.js:4:35)
+    at WebSocketManager.handlePacket (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:352:31)
+    at WebSocketManager.<anonymous> (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:236:12)
+    at WebSocketManager.emit (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:2504:31) {
+  code: 'SQLITE_CONSTRAINT_PRIMARYKEY'
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.deferReply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:122:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:30:7)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540031177681936484/aW50ZXJhY3Rpb246MTU0MDAzMTE3NzY4MTkzNjQ4NDpXdUZPa1hKT0NCR2ptczZkRjY4TDFpVXpiNXJlb0lianRsamFMd0RaclZ5UW10ZGRzUjhrWFZrOVk1a2lVMHQ4aUhVanhvdjJHbHhxR2c1WmVJTkFQQXZqZGo4eFhEYUV4ZVd3TjBHbkpWOURZNWkwdlF4TFBPckY3VlhaVnlFOQ/callback?with_response=false',
+  requestBody: { files: undefined, json: { type: 5, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.deferReply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:122:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:30:7)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540044641775390720/aW50ZXJhY3Rpb246MTU0MDA0NDY0MTc3NTM5MDcyMDpWeVVJaHc0VmxndzJwRTNUOUE3SXM5QU1OWkFBdTRIM21oRXduMnRRbFJKMVNKZ2FzVFFEMWppdWFpaWhhNEhWQUJRUjJQY1FpZjJBQm1RUUJvS2VJdDJRV2tZSjVkemdyQ3VDMGpZbDF2bU4wWU11Q1ZyUHNqZENBanVhNkhzaA/callback?with_response=false',
+  requestBody: { files: undefined, json: { type: 5, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.reply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:193:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:75:5)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540046416066650172/aW50ZXJhY3Rpb246MTU0MDA0NjQxNjA2NjY1MDE3MjoxZE5ESUZydDFYNEI5czVRaHVjd1BTU044NTNORVJVcHRQZkxBU0UwWVEzNEJKbEVOT0F6UTlxYW5pZzdBblFkTkVCQWZpWXNBa2NSN1NQY0YxZ1BGSmRZNFQ1Tmc2Y0d4bTNrZHdnaDg0QVExWk1ncnVnMkthUno2OWV3cGRmdg/callback?with_response=false',
+  requestBody: { files: [], json: { type: 4, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.deferReply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:122:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:30:7)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540046528981372989/aW50ZXJhY3Rpb246MTU0MDA0NjUyODk4MTM3Mjk4OTpOSTlQaDhHOE5CazVmOHVxVXN5M0lJMFl0SEZZUnByYjRFZ0FJOWV3bWw4eUF6cTl3UzhTeHJvNFlYVXRwaklRRHl4emw5VVk5czdzZU1TMFA0NmlaMW9JRkh2WUlFVU54ekk2ODhmTEhqTk5TbHplQ2JLNVJQNG85RkE0TFN1OQ/callback?with_response=false',
+  requestBody: { files: undefined, json: { type: 5, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.reply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:193:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\general\leaderboard.js:75:5)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540046595490320546/aW50ZXJhY3Rpb246MTU0MDA0NjU5NTQ5MDMyMDU0NjpDeGs3eE0weVFUZmR4eWRUV3Yxbksya3FtVEJjWlpuN0xDeEdsUkdCOUlYcGpMcWk5Mll1VFpBdk1PVEIzUWt3ZlFsblhFS0N2Uk9PTWhWcEYyMFpFRGw3dWozUkNjd3VvcU5yeWp2VXlxOFgySUUxbElGVUpwdEY1bFBaMmtSZA/callback?with_response=false',
+  requestBody: { files: [], json: { type: 4, data: [Object] } }
+}
+DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:791:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BurstHandler.runRequest (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:898:23)
+    at async _REST.request (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\@discordjs\rest\dist\index.js:1342:22)
+    at async ChatInputCommandInteraction.reply (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:193:22)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\commands\economy\shop.js:24:5)
+    at async Object.execute (C:\Users\LENOVO\OneDrive\Documents\discord-bot-js-20260819T114125Z-1-001\discord-bot-js\discord-bot\events\interactionCreate.js:28:7) {
+  rawError: { message: 'Unknown interaction', code: 10062 },
+  code: 10062,
+  status: 404,
+  method: 'POST',
+  url: 'https://discord.com/api/v10/interactions/1540058341928337538/aW50ZXJhY3Rpb246MTU0MDA1ODM0MTkyODMzNzUzODpCV05Wem1BVUFLTkpNSzBoOEZjOGZreHFoaGFSWk8xSFhDSUl2TEN4MktTdm92NEFZcTNNbGRMTWhBbVdHVTk5NXVHQm56RElaRjdhWEhPS1B3T1dtNkVVYjBaSEpqbEhZS3VuRGxqZ015ZmFTd1A2anZYN3d6V0RKVkRPeGY5Qg/callback?with_response=false',
+  requestBody: { files: [], json: { type: 4, data: [Object] } }
+}

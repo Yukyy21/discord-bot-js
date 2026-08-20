@@ -27,7 +27,11 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'card') {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
+      } catch {
+        return;
+      }
       return renderLeaderboardCard(interaction, interaction.options.getString('kategori'));
     }
 

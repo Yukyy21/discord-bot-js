@@ -193,7 +193,7 @@ function buyItem(userId, guildId, itemId) {
 
 function getInventory(userId, guildId) {
   return db.prepare(`
-    SELECT si.name, si.description, ui.quantity
+    SELECT si.id AS itemId, si.name, si.description, ui.quantity
     FROM user_items ui
     JOIN shop_items si ON si.id = ui.itemId
     WHERE ui.userId = ? AND ui.guildId = ?
