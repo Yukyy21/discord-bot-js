@@ -26,7 +26,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] Sistem quest harian/mingguan. `/quest` dengan 2 quest harian + 1
   mingguan yang diundi dari katalog `src/lib/quests.js`; progres otomatis
   dari chat, voice, daily, use, buy, dan give; klaim lewat tombol.
-- [ ] `/shop` dengan filter tier dan pencarian nama.
+- [x] `/shop` dengan filter tier dan pencarian nama. Opsi `tier:` (pilihan
+  Common–Mythic) dan `cari:` (substring nama); filter ikut tersimpan di
+  customId supaya tombol halaman tetap jalan setelah bot restart.
 - [ ] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin set-level`.
 - [ ] Leaderboard mingguan (butuh tabel snapshot per periode).
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## Filter & Pencarian di /shop
+
+`/shop` kini punya dua opsi opsional: `tier:` (pilihan Common–Mythic) dan
+`cari:` (potongan nama, tidak peduli huruf besar-kecil).
+
+- Keduanya bisa dipakai bersamaan; embed menampilkan baris "Filter aktif"
+  beserta jumlah item yang cocok, atau pesan kosong yang jelas.
+- Tombol halaman tetap bekerja dengan filter aktif: state filter ikut
+  tersimpan di customId (`shop_page:<tier>:<kata kunci>:<halaman>`), jadi
+  tetap stateless dan tahan restart. Tombol dari format lama tetap didukung.
+- Kata kunci dibersihkan dari karakter `:` dan dipatok 40 karakter agar
+  customId tidak meluap.
+
 ## Quest Harian & Mingguan
 
 Command `/quest`: tiap user dapat 2 quest harian + 1 quest mingguan yang

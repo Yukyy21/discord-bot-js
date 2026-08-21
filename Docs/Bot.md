@@ -27,7 +27,7 @@ level yang terpisah.
 | `/balance` | Saldo dompet, bank, dan streak daily |
 | `/bank deposit\|withdraw <jumlah>` | Simpan / ambil coin dari bank |
 | `/daily` | Klaim reward harian; makin panjang streak makin besar |
-| `/shop` | Stok toko saat ini (10 item, berganti tiap 10 menit) |
+| `/shop` | Stok toko saat ini (10 item, berganti tiap 10 menit); bisa disaring per tier (`tier:`) atau dicari per nama (`cari:`) |
 | `/buy <id>` | Beli item yang sedang ada di stok |
 | `/inventory` | Item yang kamu punya, 5 per halaman |
 | `/use <id>` | Pakai satu buah item yang punya efek |

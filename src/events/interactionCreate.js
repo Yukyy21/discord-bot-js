@@ -41,8 +41,12 @@ async function handleButton(interaction) {
       case 'pager_noop': // tombol indikator halaman, memang tidak melakukan apa-apa
         return;
 
-      case 'shop_page':
-        return await interaction.update(buildShop(Number(a) || 0));
+      case 'shop_page': {
+        // Format baru: shop_page:<tier>:<kata kunci>:<halaman> — filter ikut
+        // tersimpan di customId. Tombol lama (shop_page:<halaman>) tetap jalan.
+        if (c === undefined) return await interaction.update(buildShop(Number(a) || 0));
+        return await interaction.update(buildShop(Number(c) || 0, { tier: a, query: b || '' }));
+      }
 
       case 'inv_page': {
         // a = pemilik inventori, b = halaman
