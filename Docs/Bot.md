@@ -62,6 +62,12 @@ panjang tidak lebih untung daripada ngobrol normal.
 
 Kalau `POINT_CHANNEL_ID` diisi di `.env`, semua ini hanya berlaku di channel itu.
 
+**Anti-spam.** Pesan yang datang kurang dari 3 detik sejak pesan sebelumnya,
+atau yang mengulang isi pesan sebelumnya dalam 5 menit, tidak dihitung sama
+sekali — tanpa poin, XP, maupun akumulasi kata. Pembanding isi tidak peduli
+huruf besar/kecil. Daftar pesan terakhir disimpan di memori, jadi restart bot
+menghapus riwayat spam (tidak masalah; ini penyaring, bukan data ekonomi).
+
 **Voice.** Tiap 15 menit di voice channel bernilai 5 poin. Total durasi dicatat
 dalam detik untuk leaderboard jam voice. Pindah channel tidak memutus sesi;
 yang dihitung hanya join dan leave.

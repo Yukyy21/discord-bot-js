@@ -8,9 +8,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] **Item di inventori belum bisa dipakai.** Sudah ada `/use <id>` plus
   kolom `effect` di katalog (`src/database/shopCatalog.js`); item tanpa efek
   tetap jadi koleksi.
-- [ ] **Anti-spam poin chat.** Kata dihitung apa adanya, jadi mengirim satu kata
-  berulang kali tetap menghasilkan poin. Perlu cooldown per user atau
-  pengecekan pesan duplikat di `src/events/messageCreate.js`.
+- [x] **Anti-spam poin chat.** Sudah ada cooldown 3 detik per user plus
+  pengecekan isi duplikat (jendela 5 menit) di `src/events/messageCreate.js`;
+  angkanya di `CHAT.COOLDOWN_MS` / `CHAT.DUPLICATE_WINDOW_MS`.
 - [ ] **Poin voice untuk user yang sendirian atau AFK.** Duduk sendirian di
   channel atau di AFK channel tetap dihitung. Perlu syarat minimal dua orang
   yang tidak deaf.

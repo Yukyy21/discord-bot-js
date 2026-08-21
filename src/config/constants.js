@@ -7,6 +7,10 @@ const CHAT = {
   POINTS_PER_CHUNK: 2,
   XP_PER_WORD: 1,
   MAX_XP_PER_MESSAGE: 20, // batas biar spam pesan panjang tidak dieksploitasi
+  // Anti-spam: pesan yang datang lebih cepat dari ini diabaikan, begitu juga
+  // isi yang sama berulang dalam jendela duplikat. Tidak dapat poin, XP, kata.
+  COOLDOWN_MS: 3 * 1000,
+  DUPLICATE_WINDOW_MS: 5 * 60 * 1000,
 };
 
 /** Poin dari nongkrong di voice channel. */
