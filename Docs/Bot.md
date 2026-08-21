@@ -68,9 +68,14 @@ sekali — tanpa poin, XP, maupun akumulasi kata. Pembanding isi tidak peduli
 huruf besar/kecil. Daftar pesan terakhir disimpan di memori, jadi restart bot
 menghapus riwayat spam (tidak masalah; ini penyaring, bukan data ekonomi).
 
-**Voice.** Tiap 15 menit di voice channel bernilai 5 poin. Total durasi dicatat
-dalam detik untuk leaderboard jam voice. Pindah channel tidak memutus sesi;
-yang dihitung hanya join dan leave.
+**Voice.** Tiap 15 menit di voice channel bernilai 5 poin, dengan syarat
+channel berisi minimal dua manusia yang tidak deaf — user yang dinilai ikut
+terhitung, jadi duduk berdua sudah cukup. AFK channel tidak pernah dihitung.
+Kalau syarat hilang di tengah jalan (teman keluar atau semua deaf), sisa masa
+layak dibayar seketika lalu penghitungan dijeda sampai syarat terpenuhi lagi;
+waktu sendirian tidak pernah menumpuk jadi poin. Total durasi untuk
+leaderboard jam voice tetap mencatat semua waktu di voice. Pindah channel
+tidak memutus sesi, tapi kelayakan dievaluasi ulang.
 
 **Level.** XP yang dibutuhkan untuk naik dari level N adalah `N × 100`. Naik
 level memberi `level × 10` poin, `level × 50` coin, dan peluang item acak dari

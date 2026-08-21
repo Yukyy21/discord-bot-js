@@ -11,9 +11,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] **Anti-spam poin chat.** Sudah ada cooldown 3 detik per user plus
   pengecekan isi duplikat (jendela 5 menit) di `src/events/messageCreate.js`;
   angkanya di `CHAT.COOLDOWN_MS` / `CHAT.DUPLICATE_WINDOW_MS`.
-- [ ] **Poin voice untuk user yang sendirian atau AFK.** Duduk sendirian di
-  channel atau di AFK channel tetap dihitung. Perlu syarat minimal dua orang
-  yang tidak deaf.
+- [x] **Poin voice untuk user yang sendirian atau AFK.** Sekarang butuh
+  minimal `VOICE.MIN_LISTENERS` (2) manusia tidak deaf di channel dan bukan
+  AFK channel; kelayakan dicek ulang tiap perubahan voice state.
 - [ ] **Backup database.** `data/economy.db` tidak pernah di-backup. Tambahkan
   skrip yang menyalin file pakai `db.backup()` bawaan better-sqlite3.
 

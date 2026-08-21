@@ -17,6 +17,10 @@ const CHAT = {
 const VOICE = {
   INTERVAL_MS: 15 * 60 * 1000,
   POINTS_PER_INTERVAL: 5,
+  // Minimal manusia yang tidak deaf di satu channel (termasuk yang bersangkutan)
+  // supaya waktu voice layak poin. Sendirian, semua teman deaf, atau duduk di
+  // AFK channel tidak menghasilkan poin.
+  MIN_LISTENERS: 2,
 };
 
 /** Reward /daily. Bonus naik tiap hari selama streak tidak putus. */

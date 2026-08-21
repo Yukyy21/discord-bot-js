@@ -1,5 +1,19 @@
 # Changelog
 
+## Poin Voice Butuh Teman
+
+Duduk sendirian atau di AFK channel tidak lagi menghasilkan poin.
+
+- Syarat layak: channel berisi minimal 2 manusia yang tidak deaf (termasuk
+  yang bersangkutan) dan bukan AFK channel. Angkanya di
+  `VOICE.MIN_LISTENERS` (`src/config/constants.js`).
+- Kelayakan dievaluasi ulang di setiap perubahan voice state — join, keluar,
+  pindah, deafen — karena satu peristiwa bisa mengubah nasib orang lain di
+  channel yang sama.
+- Saat kehilangan kelayakan, sisa masa layak dibayar seketika lalu jam poin
+  direset; waktu tidak layak tidak pernah menumpuk jadi utang poin.
+- Leaderboard jam voice tetap mencatat semua durasi, termasuk saat sendirian.
+
 ## Anti-Spam Poin Chat
 
 Mengirim kata berulang-ulang tidak lagi menghasilkan poin.
