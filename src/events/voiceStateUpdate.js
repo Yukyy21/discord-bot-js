@@ -1,9 +1,10 @@
-const { addPoints, addVoiceSeconds, addQuestProgress } = require('../database');
+const { addPoints, addVoiceSeconds, addQuestProgress, saveVoiceSession, getVoiceSession, deleteVoiceSession, getAllVoiceSessions } = require('../database');
 const { VOICE } = require('../config/constants');
 
-// Sesi voice yang sedang berjalan, key-nya `guildId:userId`.
-// Sengaja disimpan di memori: kalau bot restart, sesi dibangun ulang lewat
-// restoreVoiceTracking() dari daftar member yang saat itu ada di voice.
+// Sesi voice yang sedang berjalan, key-nya `guildId:userId`. Memori tetap
+// sumber kebenaran selama bot hidup, tapi setiap perubahan ditulis juga ke
+// tabel `voice_sessions` — kalau bot mati di tengah sesi, waktunya bisa
+// dilanjutkan lewat restoreVoiceTracking() alih-alih hangus.
 const sessions = new Map();
 
 // Referensi client untuk membaca voiceStates saat menilai kelayakan. Terisi
@@ -35,20 +36,34 @@ function isEligible(guildId, userId) {
 
 function startSession(guildId, userId) {
   const now = Date.now();
-  sessions.set(`${guildId}:${userId}`, {
+  const session = {
     userId,
     guildId,
     joinedAt: now,
     lastGrant: now,
     eligible: isEligible(guildId, userId),
-  });
+  };
+  sessions.set(`${guildId}:${userId}`, session);
+  saveVoiceSession(userId, guildId, session);
 }
 
 /** Bayar sisa poin yang belum sempat dibagi, lalu catat total durasinya. */
 function endSession(guildId, userId) {
   const key = `${guildId}:${userId}`;
-  const session = sessions.get(key);
-  if (!session) return;
+  // Kalau bot sempat restart dan sesi belum di-restore, data masih ada di
+  // tabel — pakai itu supaya waktu voice sebelum mati tetap dibayar.
+  let session = sessions.get(key);
+  if (!session) {
+    const saved = getVoiceSession(userId, guildId);
+    if (!saved) return;
+    session = {
+      userId,
+      guildId,
+      joinedAt: saved.joinedAt,
+      lastGrant: saved.lastGrant,
+      eligible: !!saved.eligible,
+    };
+  }
 
   const now = Date.now();
   // Sisa poin hanya dibayar kalau sesi berakhir dalam kondisi layak; kalau
@@ -65,6 +80,7 @@ function endSession(guildId, userId) {
   }
 
   sessions.delete(key);
+  deleteVoiceSession(userId, guildId);
 }
 
 /**
@@ -87,6 +103,7 @@ function syncEligibility(guildId, userId) {
   }
   session.lastGrant = now;
   session.eligible = eligible;
+  saveVoiceSession(session.userId, guildId, session);
 }
 
 // Pembagi poin berkala untuk yang masih betah di voice.
@@ -97,32 +114,75 @@ setInterval(() => {
     // utang yang tiba-tiba cair begitu teman masuk.
     if (!session.eligible) {
       session.lastGrant = now;
+      saveVoiceSession(session.userId, session.guildId, session);
       continue;
     }
     if (now - session.lastGrant < VOICE.INTERVAL_MS) continue;
     addPoints(session.userId, session.guildId, VOICE.POINTS_PER_INTERVAL);
     session.lastGrant = now;
+    saveVoiceSession(session.userId, session.guildId, session);
   }
 }, VOICE.INTERVAL_MS);
 
 /**
- * Dipanggil sekali saat bot siap. Tanpa ini, orang yang sudah duduk di voice
- * sebelum bot menyala tidak akan dapat poin sampai dia keluar-masuk lagi.
+ * Dipanggil sekali saat bot siap. Dua hal yang dilakukan:
+ * 1. User yang sudah duduk di voice sebelum bot menyala tetap dilacak.
+ * 2. Sesi yang tersimpan di tabel (bot mati di tengah sesi) dilanjutkan dengan
+ *    waktu aslinya, jadi durasi sebelum mati tidak hangus.
  */
 function restoreVoiceTracking(ref) {
   clientRef = ref;
-  let restored = 0;
+  let resumed = 0;
+  let fresh = 0;
+  const liveKeys = new Set();
+
   for (const guild of ref.guilds.cache.values()) {
     for (const state of guild.voiceStates.cache.values()) {
       if (!state.channelId) continue;
       if (state.member?.user.bot) continue;
-      if (sessions.has(`${guild.id}:${state.id}`)) continue;
-      startSession(guild.id, state.id);
-      restored++;
+      const key = `${guild.id}:${state.id}`;
+      liveKeys.add(key);
+      if (sessions.has(key)) continue;
+
+      const saved = getVoiceSession(state.id, guild.id);
+      if (!saved) {
+        startSession(guild.id, state.id);
+        fresh++;
+        continue;
+      }
+
+      // Lanjutkan sesi lama dengan joinedAt/lastGrant aslinya.
+      const session = {
+        userId: state.id,
+        guildId: guild.id,
+        joinedAt: saved.joinedAt,
+        lastGrant: saved.lastGrant,
+        eligible: !!saved.eligible,
+      };
+      // Kelayakan bisa berubah selama bot mati (teman keluar, pindah AFK).
+      // Masa downtime tidak jelas siapa bersama siapa — kalau status berubah,
+      // majukan jam poin tanpa membayar supaya tidak ada pembayaran hantu.
+      const eligibleNow = isEligible(guild.id, state.id);
+      if (eligibleNow !== session.eligible) {
+        session.lastGrant = Date.now();
+        session.eligible = eligibleNow;
+      }
+      sessions.set(key, session);
+      saveVoiceSession(session.userId, session.guildId, session);
+      resumed++;
     }
   }
-  if (restored > 0) console.log(`[Voice] Melanjutkan tracking untuk ${restored} user yang sudah di voice.`);
-  return restored;
+
+  // Baris sisa = user yang keluar voice saat bot mati. Buang supaya tidak
+  // menggantung dan ikut terbayar di sesi yang jauh lebih baru.
+  for (const row of getAllVoiceSessions()) {
+    if (!liveKeys.has(`${row.guildId}:${row.userId}`)) deleteVoiceSession(row.userId, row.guildId);
+  }
+
+  if (resumed + fresh > 0) {
+    console.log(`[Voice] Tracking dilanjutkan: ${resumed} sesi dari sebelum restart, ${fresh} sesi baru.`);
+  }
+  return { resumed, fresh };
 }
 
 module.exports = {
@@ -153,4 +213,5 @@ module.exports = {
   },
   restoreVoiceTracking,
   isEligible,
+  endSession, // diekspos untuk smoke test
 };

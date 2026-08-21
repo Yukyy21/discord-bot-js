@@ -1,5 +1,20 @@
 # Changelog
 
+## Sesi Voice Tahan Restart
+
+Sesi voice yang sedang berjalan kini dicerminkan ke tabel `voice_sessions`
+(write-through dari memori). Manfaatnya:
+
+- Bot mati di tengah sesi tidak lagi menghanguskan waktu voice — saat boot,
+  `restoreVoiceTracking()` melanjutkan sesi dengan `joinedAt` dan jam poin
+  aslinya, jadi durasi dan sisa poin tetap dibayar.
+- Kalau kelayakan berubah selama bot mati (teman keluar, pindah AFK), masa
+  downtime tidak dibayar — jam poin dimajukan tanpa pembayaran hantu.
+- Baris sesi untuk user yang sudah keluar voice selama bot mati dibuang
+  otomatis saat restore.
+- User yang keluar voice sebelum bot sempat restore tetap dibayar penuh:
+  `endSession` jatuh ke baris tabel kalau sesinya tidak ada di memori.
+
 ## Leaderboard Mingguan
 
 Subcommand baru `/leaderboard mingguan`: poin yang didapat user di pekan

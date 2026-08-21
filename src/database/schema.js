@@ -60,6 +60,17 @@ function createTables() {
       points INTEGER DEFAULT 0,
       PRIMARY KEY (userId, guildId, period)
     );
+
+    -- Cerminan sesi voice yang sedang berjalan (write-through dari memori).
+    -- Kalau bot mati di tengah sesi, waktu mulai bisa dilanjutkan saat boot.
+    CREATE TABLE IF NOT EXISTS voice_sessions (
+      userId TEXT,
+      guildId TEXT,
+      joinedAt INTEGER NOT NULL,
+      lastGrant INTEGER NOT NULL,
+      eligible INTEGER DEFAULT 0,
+      PRIMARY KEY (userId, guildId)
+    );
   `);
 }
 

@@ -81,7 +81,10 @@ Kalau syarat hilang di tengah jalan (teman keluar atau semua deaf), sisa masa
 layak dibayar seketika lalu penghitungan dijeda sampai syarat terpenuhi lagi;
 waktu sendirian tidak pernah menumpuk jadi poin. Total durasi untuk
 leaderboard jam voice tetap mencatat semua waktu di voice. Pindah channel
-tidak memutus sesi, tapi kelayakan dievaluasi ulang.
+tidak memutus sesi, tapi kelayakan dievaluasi ulang. Sesi berjalan dicerminkan
+ke tabel `voice_sessions` (write-through), jadi kalau bot mati di tengah sesi,
+waktu sebelum mati dilanjutkan saat boot — bukan hangus. Baris untuk user yang
+sudah keluar voice selama bot mati dibuang otomatis saat restore.
 
 **Level.** XP yang dibutuhkan untuk naik dari level N adalah `N × 100`. Naik
 level memberi `level × 10` poin, `level × 50` coin, dan peluang item acak dari

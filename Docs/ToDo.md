@@ -38,9 +38,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 
 ## Teknis
 
-- [ ] **Voice tracking hilang saat restart.** Sesi berjalan disimpan di memori;
-  kalau bot mati di tengah sesi, waktunya hangus. Simpan waktu mulai ke tabel
-  supaya bisa dilanjutkan.
+- [x] **Voice tracking hilang saat restart.** Sesi berjalan kini dicerminkan
+  ke tabel `voice_sessions` (write-through); saat boot sesi dilanjutkan dengan
+  waktu aslinya, baris usang dibuang, dan `endSession` bisa jatuh ke tabel.
 - [ ] **Belum ada test sama sekali.** Yang paling layak diuji lebih dulu:
   perhitungan level, streak daily, dan bobot undian shop — semuanya fungsi
   murni.

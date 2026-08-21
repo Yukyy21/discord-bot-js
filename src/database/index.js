@@ -10,6 +10,7 @@ const shop = require('./shop');
 const quests = require('./quests');
 const admin = require('./admin');
 const weekly = require('./weekly');
+const voiceSessions = require('./voiceSessions');
 
 createTables();
 runMigrations();
@@ -38,4 +39,5 @@ module.exports = {
   ...quests,
   ...admin,
   ...weekly,
+  ...voiceSessions,
 };
