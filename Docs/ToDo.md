@@ -29,7 +29,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] `/shop` dengan filter tier dan pencarian nama. Opsi `tier:` (pilihan
   Common–Mythic) dan `cari:` (substring nama); filter ikut tersimpan di
   customId supaya tombol halaman tetap jalan setelah bot restart.
-- [ ] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin set-level`.
+- [x] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin
+  set-level`. Terkunci lewat `setDefaultMemberPermissions(Administrator)`;
+  reset-user wajib `konfirmasi: true` dan menghapus baris di keempat tabel.
 - [ ] Leaderboard mingguan (butuh tabel snapshot per periode).
 
 ## Teknis

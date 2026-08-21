@@ -51,6 +51,9 @@ level yang terpisah.
 |---|---|
 | `/guide` | Panduan interaktif dengan dropdown kategori |
 | `/ping` | Latency websocket bot |
+| `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
+| `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user — saldo, poin, level, inventori, quest |
+| `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
 
 ## Aturan Angka
 
@@ -112,6 +115,14 @@ terisi otomatis dari aktivitas: pesan chat yang lolos anti-spam, detik voice
 saat sesi berakhir, klaim `/daily`, `/use`, `/buy`, dan `/give`. Reward coin
 diklaim manual lewat tombol di `/quest`; tombolnya stateless (pemilik +
 periode + quest ada di `customId`), jadi tetap berfungsi setelah bot restart.
+
+**Command admin.** `/admin` (give-coin, reset-user, set-level) terkunci lewat
+`setDefaultMemberPermissions(Administrator)`, jadi tidak muncul untuk member
+biasa. Pemilik server tetap bisa membukanya untuk role moderator tertentu
+lewat pengaturan integrasi bot. `reset-user` butuh opsi `konfirmasi: true`
+secara eksplisit; dia menghapus baris user di keempat tabel (users, points,
+user_items, quests), bukan sekadar men-nol-kan. Semua aksi admin tercatat di
+log konsol dengan awalan `[Admin]`.
 
 ## Arsitektur
 

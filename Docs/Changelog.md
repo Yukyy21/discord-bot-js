@@ -1,5 +1,21 @@
 # Changelog
 
+## Command Admin
+
+Command `/admin` baru dengan tiga subcommand, terkunci ke izin Administrator
+Discord (bisa dibuka per-role oleh pemilik server lewat pengaturan
+integrasi):
+
+- `/admin give-coin <user> <jumlah>` — beri coin untuk event/hadiah.
+- `/admin reset-user <user> <konfirmasi>` — hapus seluruh data user di guild
+  (saldo/bank/streak, poin/level/XP, inventori, quest) dalam satu transaksi;
+  wajib mengisi `konfirmasi: true`.
+- `/admin set-level <user> <level>` — atur level manual; XP di-reset ke 0 di
+  level baru.
+
+Modul database `src/database/admin.js` menampung SQL reset; semua aksi admin
+tercatat di log konsol dengan awalan `[Admin]`.
+
 ## Filter & Pencarian di /shop
 
 `/shop` kini punya dua opsi opsional: `tier:` (pilihan Common–Mythic) dan
