@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getUser, transferCoins } = require('../../database');
+const { getUser, transferCoins, addQuestProgress } = require('../../database');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 
@@ -37,6 +37,7 @@ module.exports = {
     }
 
     transferCoins(senderId, target.id, guildId, amount);
+    addQuestProgress(senderId, guildId, 'give', 1);
 
     const embed = themedEmbed('give', 'Transfer Berhasil', COLORS.economy)
       .setDescription(`${interaction.user} ${e('arrow')} ${target}`)

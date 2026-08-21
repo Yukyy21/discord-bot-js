@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getUser, claimDaily } = require('../../database');
+const { getUser, claimDaily, addQuestProgress } = require('../../database');
 const { DAILY } = require('../../config/constants');
 const { themedEmbed, infoEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
@@ -28,6 +28,7 @@ module.exports = {
     const reward = DAILY.BASE_REWARD + bonus;
 
     claimDaily(interaction.user.id, interaction.guildId, { reward, streak, dateKey: todayKey });
+    addQuestProgress(interaction.user.id, interaction.guildId, 'daily', 1);
 
     const embed = themedEmbed('daily', 'Reward Harian Diklaim', COLORS.economy)
       .setDescription(`Kamu dapat **${reward.toLocaleString()}** ${e('coin')}\n${DIVIDER}`)

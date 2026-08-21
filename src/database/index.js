@@ -7,6 +7,7 @@ const { createTables, runMigrations } = require('./schema');
 const users = require('./users');
 const points = require('./points');
 const shop = require('./shop');
+const quests = require('./quests');
 
 createTables();
 runMigrations();
@@ -32,4 +33,5 @@ module.exports = {
   ...users,
   ...points,
   ...shop,
+  ...quests,
 };

@@ -7,6 +7,7 @@ const {
   updateBalance,
   getShopItems,
   grantItem,
+  addQuestProgress,
 } = require('../database');
 const { LEVEL_ROLES } = require('../config');
 const { CHAT, xpForLevel } = require('../config/constants');
@@ -30,6 +31,8 @@ module.exports = {
 
     const words = message.content.trim().split(/\s+/).filter(Boolean).length;
     if (words === 0) return;
+
+    addQuestProgress(userId, guildId, 'chat', 1);
 
 
     const before = getPoints(userId, guildId);

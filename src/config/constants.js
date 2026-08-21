@@ -37,9 +37,15 @@ const SHOP = {
   STOCK_SIZE: 10,
 };
 
+/** Quest harian & mingguan. Jumlah yang ditugaskan per periode per user. */
+const QUEST = {
+  DAILY_COUNT: 2,
+  WEEKLY_COUNT: 1,
+};
+
 /** XP yang dibutuhkan untuk naik dari level tertentu. */
 function xpForLevel(level) {
   return level * 100;
 }
 
-module.exports = { CHAT, VOICE, DAILY, EXCHANGE_RATE, SHOP, xpForLevel };
+module.exports = { CHAT, VOICE, DAILY, EXCHANGE_RATE, SHOP, QUEST, xpForLevel };

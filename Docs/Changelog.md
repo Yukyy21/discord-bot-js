@@ -1,5 +1,22 @@
 # Changelog
 
+## Quest Harian & Mingguan
+
+Command `/quest`: tiap user dapat 2 quest harian + 1 quest mingguan yang
+diundi dari katalog (`src/lib/quests.js`), dengan reward coin yang diklaim
+lewat tombol.
+
+- Quest baru ditugaskan malas — dibuat saat pertama kali disentuh di periode
+  itu, jadi user pasif tidak menyisakan data. Periode harian pakai tanggal
+  UTC, mingguan pakai nomor pekan ISO.
+- Progres otomatis dari aktivitas yang sudah ada: pesan chat (lolos
+  anti-spam), detik voice saat sesi berakhir, klaim `/daily`, `/use`, `/buy`,
+  dan `/give`. Progres dipatok di target.
+- Tabel `quests` baru; target & reward disimpan per baris supaya perubahan
+  katalog tidak mengubah quest yang sedang berjalan.
+- Tombol klaim stateless (`quest_claim:pemilik:periode:quest`) dan hanya
+  bisa ditekan pemiliknya.
+
 ## Bank Bisa Diisi
 
 Command `/bank` dengan dua subcommand: `deposit` (dompet → bank) dan

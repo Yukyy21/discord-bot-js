@@ -23,7 +23,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 
 - [x] `/bank deposit` dan `/bank withdraw` — kolom di tabel ternyata bernama
   `bank` (bukan `bankBalance`); command baru `/bank` dengan dua subcommand.
-- [ ] Sistem quest harian/mingguan.
+- [x] Sistem quest harian/mingguan. `/quest` dengan 2 quest harian + 1
+  mingguan yang diundi dari katalog `src/lib/quests.js`; progres otomatis
+  dari chat, voice, daily, use, buy, dan give; klaim lewat tombol.
 - [ ] `/shop` dengan filter tier dan pencarian nama.
 - [ ] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin set-level`.
 - [ ] Leaderboard mingguan (butuh tabel snapshot per periode).

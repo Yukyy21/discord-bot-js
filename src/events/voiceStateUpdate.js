@@ -1,4 +1,4 @@
-const { addPoints, addVoiceSeconds } = require('../database');
+const { addPoints, addVoiceSeconds, addQuestProgress } = require('../database');
 const { VOICE } = require('../config/constants');
 
 // Sesi voice yang sedang berjalan, key-nya `guildId:userId`.
@@ -59,7 +59,10 @@ function endSession(guildId, userId) {
   }
 
   const seconds = Math.floor((now - session.joinedAt) / 1000);
-  if (seconds > 0) addVoiceSeconds(userId, session.guildId, seconds);
+  if (seconds > 0) {
+    addVoiceSeconds(userId, session.guildId, seconds);
+    addQuestProgress(userId, session.guildId, 'voice', seconds);
+  }
 
   sessions.delete(key);
 }

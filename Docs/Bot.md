@@ -39,6 +39,7 @@ level yang terpisah.
 | Command | Fungsi |
 |---|---|
 | `/points` | Total poin, level, tier, dan progress bar XP |
+| `/quest` | Quest harian & mingguan: progres dan tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
 | `/leaderboard balance\|points\|voice\|rank` | Papan peringkat teks, 10 baris per halaman sampai 50 user |
@@ -103,6 +104,14 @@ Sengaja tidak ada efek "dapat coin" yang nilainya di atas harga item, supaya
 beli-pakai-beli tidak jadi mesin cetak uang. XP dari item tidak langsung
 memunculkan level baru; level ter-reconcile saat pesan chat berikutnya,
 mengikuti pola event `messageCreate`.
+
+**Quest.** Tiap user dapat 2 quest harian + 1 quest mingguan yang diundi dari
+katalog (`src/lib/quests.js`) saat pertama kali disentuh di periode itu.
+Periode harian memakai tanggal UTC, mingguan memakai nomor pekan ISO. Progres
+terisi otomatis dari aktivitas: pesan chat yang lolos anti-spam, detik voice
+saat sesi berakhir, klaim `/daily`, `/use`, `/buy`, dan `/give`. Reward coin
+diklaim manual lewat tombol di `/quest`; tombolnya stateless (pemilik +
+periode + quest ada di `customId`), jadi tetap berfungsi setelah bot restart.
 
 ## Arsitektur
 

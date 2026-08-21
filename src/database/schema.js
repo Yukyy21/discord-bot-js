@@ -38,6 +38,18 @@ function createTables() {
       quantity INTEGER DEFAULT 1,
       PRIMARY KEY (userId, guildId, itemId)
     );
+
+    CREATE TABLE IF NOT EXISTS quests (
+      userId TEXT,
+      guildId TEXT,
+      period TEXT,
+      questId TEXT,
+      target INTEGER NOT NULL,
+      reward INTEGER NOT NULL DEFAULT 0,
+      progress INTEGER DEFAULT 0,
+      claimed INTEGER DEFAULT 0,
+      PRIMARY KEY (userId, guildId, period, questId)
+    );
   `);
 }
 

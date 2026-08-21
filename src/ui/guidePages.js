@@ -122,6 +122,7 @@ const PAGES = {
             value: [
               `${e('clock')} Tiap 15 menit di voice = **+5 poin**`,
               `${e('voice')} Total durasi voice dicatat buat leaderboard`,
+              `${e('daily')} \`/quest\` — misi harian & mingguan, ada hadiah coin`,
             ].join('\n'),
           },
         ),

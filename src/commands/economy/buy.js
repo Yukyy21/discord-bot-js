@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { buyItem } = require('../../database');
+const { buyItem, addQuestProgress } = require('../../database');
 const { getShopItemById } = require('../../lib/shopRotation');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
@@ -23,6 +23,7 @@ module.exports = {
     if (!result.ok) {
       return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
     }
+    addQuestProgress(interaction.user.id, interaction.guildId, 'buy_item', 1);
 
     const embed = themedEmbed('buy', 'Pembelian Berhasil', COLORS.economy)
       .setDescription(result.message)

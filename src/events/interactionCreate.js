@@ -1,8 +1,10 @@
 const { MessageFlags } = require('discord.js');
-const { errorEmbed } = require('../ui/embeds');
+const { errorEmbed, warnEmbed } = require('../ui/embeds');
+const { claimQuest } = require('../database');
 const { buildGuide } = require('../ui/guidePages');
 const { buildShop } = require('../commands/economy/shop');
 const { buildInventory } = require('../commands/economy/inventory');
+const { buildQuest } = require('../commands/economy/quest');
 const { buildLeaderboard } = require('../commands/general/leaderboard');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 
@@ -26,7 +28,7 @@ module.exports = {
  * tetap berfungsi walau bot sudah restart (tidak ada cache di memori).
  */
 async function handleButton(interaction) {
-  const [action, a, b] = interaction.customId.split(':');
+  const [action, a, b, c] = interaction.customId.split(':');
 
   try {
     switch (action) {
@@ -51,6 +53,25 @@ async function handleButton(interaction) {
           });
         }
         return await interaction.update(buildInventory(interaction.user, interaction.guildId, Number(b) || 0));
+      }
+
+      case 'quest_claim': {
+        // a = pemilik quest, b = periode, c = id quest
+        if (a !== interaction.user.id) {
+          return await interaction.reply({
+            embeds: [errorEmbed('Ini quest orang lain. Pakai `/quest` buat lihat punyamu.')],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+        const result = claimQuest(interaction.user.id, interaction.guildId, b, c);
+        if (!result.ok) {
+          return await interaction.reply({
+            embeds: [warnEmbed(result.message)],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+        // Render ulang: tombol yang sudah diklaim hilang, sisa quest tetap.
+        return await interaction.update(buildQuest(interaction.user, interaction.guildId));
       }
 
       case 'lb_page': // a = kategori, b = halaman
