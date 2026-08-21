@@ -1,11 +1,11 @@
 {
   "name": "discord-bot",
   "version": "1.0.0",
-  "description": "Bot Discord: ekonomi, poin otomatis dari chat & voice, dan game",
-  "main": "index.js",
+  "description": "Bot Discord: ekonomi, poin otomatis dari chat & voice, dan kartu profil",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "deploy": "node deploy-commands.js"
+    "start": "node src/index.js",
+    "deploy": "node scripts/deploy-commands.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.7",

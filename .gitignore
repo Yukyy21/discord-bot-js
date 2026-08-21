@@ -1,3 +1,11 @@
 node_modules/
 .env
+
+# Database & cache runtime — dibuat ulang otomatis oleh bot
 data/
+*.db
+*.db-shm
+*.db-wal
+
+# Log
+*.log
