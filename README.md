@@ -12,6 +12,7 @@ npm install
 cp .env.example .env   # isi token & ID
 npm run deploy         # daftarkan slash command (sekali, atau saat definisi berubah)
 npm start
+npm run backup         # opsional: salin database ke data/backups/ (simpan 7 terakhir)
 ```
 
 Butuh Node.js 18+ (bot memakai `fetch` bawaan Node).
@@ -38,9 +39,9 @@ src/
   cards/            render gambar pakai canvas (profile, rank, leaderboard)
   ui/               embed, pagination, halaman /guide
   lib/              logika yang berdiri sendiri: emoji, rank, rotasi shop, path
-scripts/            deploy-commands.js
+scripts/            deploy-commands.js, backup-db.js
 assets/             background kartu, logo rank, sumber emoji
-data/               economy.db + cache avatar (dibuat otomatis, tidak masuk git)
+data/               economy.db + cache avatar + backups/ (dibuat otomatis, tidak masuk git)
 Docs/               dokumentasi lengkap
 ```
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## Backup Database
+
+`npm run backup` (`scripts/backup-db.js`) menyalin `data/economy.db` ke
+`data/backups/economy-<timestamp>.db`.
+
+- Memakai `db.backup()` bawaan better-sqlite3, jadi aman dipanggil saat bot
+  sedang berjalan — hasilnya konsisten walau ada transaksi berjalan.
+- Retensi default 7 salinan terbaru, bisa diubah lewat variabel `BACKUP_KEEP`.
+- Cocok dijadwalkan lewat cron / Task Scheduler.
+
 ## Poin Voice Butuh Teman
 
 Duduk sendirian atau di AFK channel tidak lagi menghasilkan poin.

@@ -14,8 +14,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] **Poin voice untuk user yang sendirian atau AFK.** Sekarang butuh
   minimal `VOICE.MIN_LISTENERS` (2) manusia tidak deaf di channel dan bukan
   AFK channel; kelayakan dicek ulang tiap perubahan voice state.
-- [ ] **Backup database.** `data/economy.db` tidak pernah di-backup. Tambahkan
-  skrip yang menyalin file pakai `db.backup()` bawaan better-sqlite3.
+- [x] **Backup database.** Ada `npm run backup` (`scripts/backup-db.js`) yang
+  menyalin lewat `db.backup()` bawaan better-sqlite3 ke `data/backups/`,
+  aman saat bot berjalan, retensi default 7 salinan (`BACKUP_KEEP`).
 
 ## Fitur
 
