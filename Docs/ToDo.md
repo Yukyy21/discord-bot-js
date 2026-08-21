@@ -41,10 +41,12 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] **Voice tracking hilang saat restart.** Sesi berjalan kini dicerminkan
   ke tabel `voice_sessions` (write-through); saat boot sesi dilanjutkan dengan
   waktu aslinya, baris usang dibuang, dan `endSession` bisa jatuh ke tabel.
-- [ ] **Belum ada test sama sekali.** Yang paling layak diuji lebih dulu:
-  perhitungan level, streak daily, dan bobot undian shop — semuanya fungsi
-  murni.
-- [ ] **Belum ada linter.** ESLint + Prettier supaya gaya kode konsisten.
+- [x] **Belum ada test sama sekali.** `npm test` (node:test bawaan Node, tanpa
+  dependency runner) menguji `src/lib/leveling.js`, `src/lib/daily.js`,
+  `src/lib/tiers.js`, dan peta emoji item — 25 test, semuanya fungsi murni.
+- [x] **Belum ada linter.** ESLint 9 (flat config di `eslint.config.js`) +
+  Prettier: `npm run lint`, `npm run lint:fix`, `npm run format`.
 - [ ] Ganti `console.log` dengan logger yang punya level dan timestamp.
-- [ ] Ukuran font kartu belum menyesuaikan nama panjang; nama sangat panjang
-  masih terpotong.
+- [x] Ukuran font kartu sudah menyesuaikan nama panjang: helper `fitText()` di
+  `src/cards/canvasKit.js` mengecilkan font bertahap sampai batas minimum, baru
+  memotong dengan elipsis. Dipakai di kartu profile, rank, dan leaderboard.

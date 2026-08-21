@@ -74,7 +74,7 @@ function buyItem(userId, guildId, itemId) {
 
 function getInventory(userId, guildId) {
   return db.prepare(`
-    SELECT si.name, si.description, si.effect, ui.quantity
+    SELECT si.id, si.name, si.price, si.description, si.effect, ui.quantity
     FROM user_items ui
     JOIN shop_items si ON si.id = ui.itemId
     WHERE ui.userId = ? AND ui.guildId = ?
@@ -117,7 +117,7 @@ function useItem(userId, guildId, itemId) {
   consume();
 
   const info = describeEffect(effect);
-  return { ok: true, effect, message: `Kamu memakai **${item.name}**. Efek: ${info.text}.` };
+  return { ok: true, effect, name: item.name, message: `Kamu memakai **${item.name}**. Efek: ${info.text}.` };
 }
 
 module.exports = { getShopItems, seedShop, backfillEffects, grantItem, buyItem, getInventory, useItem };

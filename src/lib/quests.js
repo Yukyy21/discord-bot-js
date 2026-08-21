@@ -1,6 +1,5 @@
 // Katalog & logika murni quest. Tanpa SQL dan tanpa Discord — dipakai oleh
 // database/quests.js (penyimpanan) dan commands/economy/quest.js (tampilan).
-const { QUEST } = require('../config/constants');
 
 /**
  * Tipe `type` di sini harus sama dengan yang dikirim pemanggil lewat

@@ -55,6 +55,15 @@ const REGISTRY = {
   guide:      { name: 'guide',       id: '1540187752652607639', animated: false, fallback: '📖' },
   ping:       { name: 'ping',        id: '1540187772927873084', animated: true,  fallback: '🏓' },
 
+  // — Credit & Info Bot —
+  backend:    { name: 'Backend',      id: '1540378495320981564', animated: false, fallback: '🧠' },
+  person:     { name: 'Dev_human',    id: '1540378492246556683', animated: false, fallback: '👤' },
+  developer:  { name: 'developer',    id: '1540378489767731260', animated: true,  fallback: '💻' },
+  frontend:   { name: 'Frontend',     id: '1540378497921319013', animated: false, fallback: '🎨' },
+  discordjs:  { name: 'Discordjs',    id: '1540378499926196425', animated: false, fallback: '🤖' },
+  nodejs:     { name: 'Nodejs',       id: '1540378501549400124', animated: false, fallback: '🟩' },
+  database:   { name: 'Sql_database', id: '1540378503407607928', animated: false, fallback: '🗄️' },
+
   // — Rank Tier —
   tier_novice:     { name: 'Novice',     id: '1540187768330784798', animated: false, fallback: '🔹' },
   tier_apprentice: { name: 'Apprentice', id: '1540187723577430016', animated: false, fallback: '🔸' },

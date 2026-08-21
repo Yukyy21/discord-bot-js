@@ -1,5 +1,47 @@
 # Changelog
 
+## UI Shop Ringkas + /credit & /botinfo
+
+- `/shop` dirampingkan: daftar item pindah dari field ke satu blok deskripsi,
+  satu item = dua baris (nama + ID, lalu harga · rarity · efek). Lore/deskripsi
+  item dihapus, emoji rarity dihapus (teks rarity tetap ada, juga di select
+  menu filter), dan penanda `error` untuk item yang tak terbeli dihilangkan —
+  hanya item yang mampu dibeli yang dapat centang.
+- Command baru `/credit`: daftar kontributor beserta perannya (backend,
+  frontend, dll). User ID diisi manual di array `CREDITS` pada file command.
+- Command baru `/botinfo`: versi bot, Node.js, discord.js, SQLite3
+  (better-sqlite3) + ukuran database, uptime, latency, memori, jumlah server,
+  member, dan command.
+- Emoji baru di registry: `backend`, `frontend`, `person`, `developer`,
+  `nodejs`, `discordjs`, `database`.
+
+## Ikon Item & Rombak UI Shop
+
+- Tiap item shop punya emoji sendiri (`src/lib/itemEmojis.js`, ID dari
+  `assets/items/emoji_itam.md`), dipakai di `/shop`, `/inventory`, `/buy`, dan
+  `/use`. Nama tak dikenal jatuh ke `📦`, jadi item tambahan tidak bikin error.
+- Rarity item bawaan sekarang mengikuti daftar resmi `assets/items/ListItem.md`
+  lewat peta `ITEM_TIERS`, bukan ditebak dari rentang harga (harga tetap jadi
+  fallback untuk item di luar katalog).
+- `/shop`: header saldo, hitung mundur refresh dengan timestamp relatif,
+  badge warna rarity + peluang drop, penanda mampu/tidak beli, deskripsi item,
+  select menu filter tier di pesan, warna embed mengikuti tier yang difilter,
+  dan urutan rarity tertinggi lebih dulu.
+- `/inventory`: menampilkan ID item asli untuk `/use`, ikon, dan badge rarity.
+
+## Test, Linter, dan Font Kartu Adaptif
+
+- Logika murni dipisah ke `src/lib/leveling.js`, `src/lib/daily.js`, dan
+  `src/lib/tiers.js`; `messageCreate`, `/daily`, dan rotasi shop tinggal
+  memanggilnya. `src/database/shop.js` kini juga mengembalikan `price` dan `id`
+  item inventori supaya UI bisa menghitung rarity.
+- `npm test`: 25 test dengan runner bawaan Node (`node:test`), tanpa dependency
+  tambahan.
+- `npm run lint` / `npm run format`: ESLint 9 flat config + Prettier.
+- `fitText()` di `src/cards/canvasKit.js` mengecilkan font bertahap untuk nama
+  panjang sebelum memotong dengan elipsis — dipakai di kartu profile, rank, dan
+  leaderboard.
+
 ## Sesi Voice Tahan Restart
 
 Sesi voice yang sedang berjalan kini dicerminkan ke tabel `voice_sessions`

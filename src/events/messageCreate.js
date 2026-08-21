@@ -12,6 +12,7 @@ const {
 const { LEVEL_ROLES } = require('../config');
 const { CHAT, xpForLevel } = require('../config/constants');
 const { getRank, getLevelUpReward } = require('../lib/ranks');
+const { computeLevelUp } = require('../lib/leveling');
 const { e, tierEmoji } = require('../lib/emojis');
 const { shouldCountMessage } = require('../lib/antispam');
 
@@ -61,8 +62,8 @@ async function handleLevelUp(message, stats, xpNeeded) {
   const guildId = message.guildId;
 
   // Bisa lompat lebih dari satu level kalau XP-nya menumpuk banyak.
-  const newLevel = stats.level + Math.floor(stats.xp / xpNeeded);
-  setLevel(userId, guildId, newLevel, stats.xp % xpNeeded);
+  const { level: newLevel, xp: remainingXp } = computeLevelUp(stats, xpNeeded);
+  setLevel(userId, guildId, newLevel, remainingXp);
 
   const roleId = LEVEL_ROLES[newLevel];
   if (roleId && message.member) {

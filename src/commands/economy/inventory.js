@@ -3,6 +3,8 @@ const { getInventory } = require('../../database');
 const { parseEffect, describeEffect } = require('../../database/shopCatalog');
 const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
+const { itemEmoji, tierMark } = require('../../lib/itemEmojis');
+const { getTier } = require('../../lib/tiers');
 const { paginate, pagerRow } = require('../../ui/pager');
 
 /** Dipakai juga oleh handler tombol pagination di interactionCreate.js. */
@@ -22,12 +24,13 @@ function buildInventory(user, guildId, page = 0) {
   embed
     .setDescription(`**${items.length}** jenis item • total **${totalQty}** buah\n${DIVIDER}`)
     .addFields(slice.map((i, idx) => {
-      // Item dengan efek ditandai supaya user tahu mana yang bisa dipakai lewat /use.
       const info = describeEffect(parseEffect(i.effect));
-      const effectLine = info ? `\n${e(info.emoji)} Bisa dipakai: **${info.text}**` : '\nItem koleksi';
+      const tier = getTier(i.price ?? 0, i.name);
+      const lines = [`Jumlah **x${i.quantity}** · ${tierMark(tier)} ${tier}`];
+      lines.push(info ? `${e(info.emoji)} Bisa dipakai: **${info.text}** — \`/use ${i.id}\`` : 'Item koleksi');
       return {
-        name: `${e('buy')} ${offset + idx + 1}. ${i.name}`,
-        value: `Jumlah: **x${i.quantity}**${effectLine}`,
+        name: `${itemEmoji(i.name)} ${offset + idx + 1}. ${i.name}`,
+        value: lines.join('\n'),
         inline: false,
       };
     }))

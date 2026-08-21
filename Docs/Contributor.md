@@ -17,6 +17,17 @@ npm run deploy   # hanya kalau nama/opsi command berubah
 npm start
 ```
 
+## Cek Sebelum Commit
+
+```bash
+npm test        # node:test, fungsi murni (level, daily, tier, emoji item)
+npm run lint    # ESLint 9 flat config
+npm run format  # Prettier
+```
+
+Logika baru yang murni (tanpa Discord/SQL) sebaiknya ditaruh di `src/lib/`
+lalu dites di `test/<nama>.test.js`.
+
 ## Menambah Command Baru
 
 1. Buat file di `src/commands/<kategori>/<nama>.js`. Kategori yang ada:
@@ -75,6 +86,7 @@ kartu sudah melakukannya; token interaksi hangus setelah 3 detik.
 
 ## Sebelum Kirim PR
 
+- `npm test` dan `npm run lint` lolos.
 - Bot bisa start tanpa error dan command yang disentuh berhasil dijalankan.
 - Perilaku baru sudah tercatat di [Bot.md](Bot.md).
 - Item yang selesai dicoret dari [ToDo.md](ToDo.md).

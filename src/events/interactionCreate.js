@@ -44,8 +44,9 @@ async function handleButton(interaction) {
       case 'shop_page': {
         // Format baru: shop_page:<tier>:<kata kunci>:<halaman> — filter ikut
         // tersimpan di customId. Tombol lama (shop_page:<halaman>) tetap jalan.
-        if (c === undefined) return await interaction.update(buildShop(Number(a) || 0));
-        return await interaction.update(buildShop(Number(c) || 0, { tier: a, query: b || '' }));
+        const viewer = { userId: interaction.user.id, guildId: interaction.guildId };
+        if (c === undefined) return await interaction.update(buildShop(Number(a) || 0, {}, viewer));
+        return await interaction.update(buildShop(Number(c) || 0, { tier: a, query: b || '' }, viewer));
       }
 
       case 'inv_page': {
@@ -94,6 +95,14 @@ async function handleSelectMenu(interaction) {
   try {
     if (interaction.customId === 'guide_select') {
       return await interaction.update(buildGuide(interaction.values[0]));
+    }
+    if (interaction.customId.startsWith('shop_tier:')) {
+      const query = interaction.customId.slice('shop_tier:'.length);
+      const tier = interaction.values[0] === 'all' ? '' : interaction.values[0];
+      return await interaction.update(buildShop(0, { tier, query }, {
+        userId: interaction.user.id,
+        guildId: interaction.guildId,
+      }));
     }
     if (interaction.customId === 'lb_filter') {
       return await renderLeaderboardCard(interaction, interaction.values[0]);

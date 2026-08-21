@@ -105,4 +105,26 @@ async function loadAvatar(url, name = '', size = 128) {
   }
 }
 
-module.exports = { roundRect, hexToRgb, fetchAvatarBuffer, loadAvatar };
+/**
+ * Tulis teks yang pasti muat di lebar `maxWidth`: font dikecilkan bertahap
+ * sampai batas `minSize`, baru sisanya dipotong dengan elipsis.
+ * Mengembalikan lebar teks yang tergambar.
+ */
+function fitText(ctx, text, x, y, maxWidth, { weight = 'bold', size = 28, minSize = 14, family = 'sans-serif' } = {}) {
+  let current = size;
+  const setFont = s => { ctx.font = `${weight} ${s}px ${family}`.trim(); };
+  setFont(current);
+  let value = String(text ?? '');
+  while (ctx.measureText(value).width > maxWidth && current > minSize) {
+    current -= 1;
+    setFont(current);
+  }
+  while (value.length > 1 && ctx.measureText(value + '…').width > maxWidth) {
+    value = value.slice(0, -1);
+  }
+  if (ctx.measureText(String(text ?? '')).width > maxWidth) value += '…';
+  ctx.fillText(value, x, y);
+  return { width: ctx.measureText(value).width, fontSize: current };
+}
+
+module.exports = { roundRect, hexToRgb, fetchAvatarBuffer, loadAvatar, fitText };

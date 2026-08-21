@@ -51,6 +51,8 @@ level yang terpisah.
 |---|---|
 | `/guide` | Panduan interaktif dengan dropdown kategori |
 | `/ping` | Latency websocket bot |
+| `/credit` | Tim yang membangun bot beserta perannya |
+| `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
 | `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
 | `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user — saldo, poin, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
@@ -100,8 +102,19 @@ Perbandingan hari memakai tanggal kalender, bukan selisih 24 jam — klaim jam
 kembali ke 1.
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
-ditentukan tier harga: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
-Mythic 5. Stok hidup di memori, jadi bot restart = undian baru.
+ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
+Mythic 5. Rarity tiap item bawaan mengikuti daftar resmi di
+`assets/items/ListItem.md` (peta `ITEM_TIERS` di `src/lib/tiers.js`); item di
+luar daftar itu jatuh ke penentuan lewat rentang harga. Stok hidup di memori,
+jadi bot restart = undian baru.
+
+Tampilan `/shop`: tiap item punya ikon emoji sendiri, badge warna rarity,
+harga dengan penanda centang/silang apakah saldomu cukup, efek item, deskripsi
+singkat, dan perintah `/buy <id>` siap salin. Header menampilkan saldo,
+hitung mundur refresh (timestamp relatif Discord), dan filter yang aktif.
+Selain opsi `tier:`/`cari:`, ada select menu tier langsung di pesan; warna
+embed ikut warna tier saat filter tier aktif. Item diurutkan dari rarity
+tertinggi lalu harga termahal.
 
 **Item & efek.** Sebagian item punya efek dan bisa dipakai lewat `/use <id>`:
 sekali pakai mengurangi stok di inventori lalu memberi XP atau poin. Daftar
@@ -163,6 +176,13 @@ memori, jadi tombol pada pesan lama tetap berfungsi setelah bot restart.
 dengan retry lalu di-cache ke `data/avatar-cache/`; kalau gagal, dibuat avatar
 huruf awal supaya kartu tetap terkirim. Avatar GIF selalu dipaksa jadi PNG
 karena canvas tidak bisa membacanya.
+
+**`src/lib/tiers.js`** memegang rarity, bobot undian, dan warna tier tanpa
+menyentuh database — dipakai `shopRotation.js`, `/shop`, dan `/inventory`, dan
+dites langsung di `test/tiers.test.js`.
+
+**`src/lib/leveling.js` & `src/lib/daily.js`** memuat perhitungan level-up dan
+streak daily sebagai fungsi murni; command dan event hanya memanggilnya.
 
 **`src/lib/emojis.js`** memusatkan semua custom emoji. Jangan tulis emoji
 unicode langsung di command — detailnya di [Emoji.md](Emoji.md).

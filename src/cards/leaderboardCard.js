@@ -1,7 +1,7 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const { AttachmentBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
-const { roundRect, loadAvatar } = require('./canvasKit');
+const { roundRect, loadAvatar, fitText } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 const { getBalanceLeaderboard, getPointsLeaderboard, getVoiceHoursLeaderboard, getLevelLeaderboard } = require('../database');
 const { baseEmbed } = require('../ui/embeds');
@@ -75,9 +75,7 @@ async function buildLeaderboardCard(entries, label) {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 18px sans-serif';
-    const name = e.name.length > 26 ? e.name.slice(0, 25) + '…' : e.name;
-    ctx.fillText(name, 110, y + rowH / 2 + 4);
+    fitText(ctx, e.name, 110, y + rowH / 2 + 4, w - pad - 110 - 160, { size: 18, minSize: 12 });
 
     ctx.fillStyle = '#b5bac1';
     ctx.font = '16px sans-serif';

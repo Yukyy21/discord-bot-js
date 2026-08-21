@@ -3,6 +3,7 @@ const { buyItem, addQuestProgress } = require('../../database');
 const { getShopItemById } = require('../../lib/shopRotation');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
+const { itemEmoji, tierMark } = require('../../lib/itemEmojis');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,7 +27,7 @@ module.exports = {
     addQuestProgress(interaction.user.id, interaction.guildId, 'buy_item', 1);
 
     const embed = themedEmbed('buy', 'Pembelian Berhasil', COLORS.economy)
-      .setDescription(result.message)
+      .setDescription(`${itemEmoji(stock.name)} ${tierMark(stock.tier)} **${stock.name}**\n${result.message}`)
       .setFooter({ text: 'Lihat barangmu di /inventory' });
 
     await interaction.reply({ embeds: [embed] });

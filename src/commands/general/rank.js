@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { asset } = require('../../lib/paths');
 const { buildRankCard } = require('../../cards/rankCard');
-const { getPoints, getProfile, getXpRank } = require('../../database');
+const { getProfile, getXpRank } = require('../../database');
 const { getRank } = require('../../lib/ranks');
 const { xpForLevel } = require('../../config/constants');
 

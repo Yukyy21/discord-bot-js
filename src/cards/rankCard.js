@@ -1,6 +1,6 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const fs = require('node:fs');
-const { roundRect, loadAvatar } = require('./canvasKit');
+const { roundRect, loadAvatar, fitText } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 
 async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rankName, rankLogo }) {
@@ -37,8 +37,7 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
   ctx.restore();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 26px sans-serif';
-  ctx.fillText(username.length > 16 ? username.slice(0, 15) + '…' : username, 150, 65);
+  fitText(ctx, username, 150, 65, 410, { size: 26, minSize: 15 });
 
   ctx.fillStyle = '#b5bac1';
   ctx.font = '16px sans-serif';
