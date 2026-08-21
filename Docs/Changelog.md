@@ -37,11 +37,12 @@ Mengirim kata berulang-ulang tidak lagi menghasilkan poin.
 
 - Pesan dalam jarak kurang dari 3 detik sejak pesan sebelumnya diabaikan
   (cooldown per user per server).
-- Isi yang sama dengan pesan sebelumnya dalam 5 menit juga diabaikan;
-  perbandingan tidak peduli huruf besar/kecil.
-- Pesan spam tidak mendapat apa pun: tanpa poin, XP, maupun akumulasi
-  `pendingWords`. Angka aturan ada di `CHAT.COOLDOWN_MS` dan
+- Isi yang sama persis dengan pesan sebelumnya dalam 30 detik juga diabaikan;
+  pesan spam tidak mendapat apa pun: tanpa poin, XP, maupun akumulasi
+  `pendingWords`. Angka aturan ada di `CHAT.ANTISPAM_COOLDOWN_MS` dan
   `CHAT.DUPLICATE_WINDOW_MS` (`src/config/constants.js`).
+- Logika diekstrak ke `src/lib/antispam.js` dengan jejak memori terbatas
+  (maksimum 1000 user terlacak).
 
 ## Item Bisa Dipakai
 

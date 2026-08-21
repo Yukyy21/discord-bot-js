@@ -9,8 +9,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
   kolom `effect` di katalog (`src/database/shopCatalog.js`); item tanpa efek
   tetap jadi koleksi.
 - [x] **Anti-spam poin chat.** Sudah ada cooldown 3 detik per user plus
-  pengecekan isi duplikat (jendela 5 menit) di `src/events/messageCreate.js`;
-  angkanya di `CHAT.COOLDOWN_MS` / `CHAT.DUPLICATE_WINDOW_MS`.
+  pengecekan isi duplikat persis (jendela 30 detik); logika di
+  `src/lib/antispam.js`, angkanya di `CHAT.ANTISPAM_COOLDOWN_MS` /
+  `CHAT.DUPLICATE_WINDOW_MS`.
 - [x] **Poin voice untuk user yang sendirian atau AFK.** Sekarang butuh
   minimal `VOICE.MIN_LISTENERS` (2) manusia tidak deaf di channel dan bukan
   AFK channel; kelayakan dicek ulang tiap perubahan voice state.
