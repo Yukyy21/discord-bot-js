@@ -9,6 +9,7 @@ const points = require('./points');
 const shop = require('./shop');
 const quests = require('./quests');
 const admin = require('./admin');
+const weekly = require('./weekly');
 
 createTables();
 runMigrations();
@@ -36,4 +37,5 @@ module.exports = {
   ...shop,
   ...quests,
   ...admin,
+  ...weekly,
 };

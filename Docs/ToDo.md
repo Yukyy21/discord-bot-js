@@ -32,7 +32,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin
   set-level`. Terkunci lewat `setDefaultMemberPermissions(Administrator)`;
   reset-user wajib `konfirmasi: true` dan menghapus baris di keempat tabel.
-- [ ] Leaderboard mingguan (butuh tabel snapshot per periode).
+- [x] Leaderboard mingguan. `/leaderboard mingguan` membaca tabel snapshot
+  `weekly_points` (kunci pekan ISO); terisi otomatis dari `addPoints()` jadi
+  semua sumber poin terhitung.
 
 ## Teknis
 

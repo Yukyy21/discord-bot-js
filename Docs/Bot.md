@@ -42,7 +42,7 @@ level yang terpisah.
 | `/quest` | Quest harian & mingguan: progres dan tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
-| `/leaderboard balance\|points\|voice\|rank` | Papan peringkat teks, 10 baris per halaman sampai 50 user |
+| `/leaderboard balance\|points\|voice\|rank\|mingguan` | Papan peringkat teks, 10 baris per halaman sampai 50 user; `mingguan` = poin yang didapat pekan ini |
 | `/leaderboard card [kategori]` | Papan peringkat versi gambar, top 10 |
 
 ### Umum
@@ -123,6 +123,13 @@ lewat pengaturan integrasi bot. `reset-user` butuh opsi `konfirmasi: true`
 secara eksplisit; dia menghapus baris user di keempat tabel (users, points,
 user_items, quests), bukan sekadar men-nol-kan. Semua aksi admin tercatat di
 log konsol dengan awalan `[Admin]`.
+
+**Leaderboard mingguan.** `/leaderboard mingguan` menampilkan poin yang
+didapat user di pekan berjalan (kunci pekan ISO yang sama dengan quest
+mingguan, reset tiap Senin). Snapshot-nya terisi otomatis di `addPoints()` —
+satu pintu untuk semua sumber poin (chat, voice, exchange) — ke tabel
+`weekly_points`. Baris pekan lama dipertahankan sebagai riwayat; tidak ada
+pekerjaan reset berkala.
 
 ## Arsitektur
 

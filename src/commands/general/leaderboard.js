@@ -4,7 +4,9 @@ const {
   getPointsLeaderboard,
   getVoiceHoursLeaderboard,
   getLevelLeaderboard,
+  getWeeklyLeaderboard,
 } = require('../../database');
+const { weeklyKey } = require('../../lib/quests');
 const { themedEmbed, baseEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { renderLeaderboardCard } = require('../../cards/leaderboardCard');
 const { getRank } = require('../../lib/ranks');
@@ -18,6 +20,7 @@ const CATEGORIES = {
   points: { label: 'Poin', emoji: 'point', fetch: g => getPointsLeaderboard(g, MAX_ROWS) },
   voice: { label: 'Jam Voice', emoji: 'voice', fetch: g => getVoiceHoursLeaderboard(g, MAX_ROWS) },
   rank: { label: 'Rank', emoji: 'rank', fetch: g => getLevelLeaderboard(g, MAX_ROWS) },
+  mingguan: { label: 'Poin Mingguan', emoji: 'clock', fetch: g => getWeeklyLeaderboard(g, MAX_ROWS) },
 };
 
 function formatValue(sub, row) {
@@ -48,9 +51,14 @@ function buildLeaderboard(sub, guildId, page = 0) {
 
   const { slice, page: current, totalPages, offset } = paginate(rows, page, 10);
 
+  const headLines = [`${e(cat.emoji)} Peringkat **${cat.label}** di server ini`];
+  if (sub === 'mingguan') {
+    headLines.push(`${e('clock')} Periode \`${weeklyKey().replace('weekly:', '')}\` — reset tiap Senin`);
+  }
+
   const embed = themedEmbed('leaderboard', `Leaderboard ${cat.label}`, COLORS.leaderboard)
     .setDescription([
-      `${e(cat.emoji)} Peringkat **${cat.label}** di server ini`,
+      ...headLines,
       DIVIDER,
       slice
         .map((row, i) => `${medal(offset + i)} <@${row.userId}>\n${e(cat.emoji)} **${formatValue(sub, row)}**`)
@@ -70,6 +78,7 @@ module.exports = {
     .addSubcommand(s => s.setName('points').setDescription('Top poin terbanyak'))
     .addSubcommand(s => s.setName('voice').setDescription('Top jam voice terbanyak'))
     .addSubcommand(s => s.setName('rank').setDescription('Top level/rank tertinggi'))
+    .addSubcommand(s => s.setName('mingguan').setDescription('Top poin yang didapat pekan ini'))
     .addSubcommand(s =>
       s.setName('card')
         .setDescription('Leaderboard versi gambar')

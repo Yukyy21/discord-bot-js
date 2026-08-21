@@ -1,5 +1,16 @@
 # Changelog
 
+## Leaderboard Mingguan
+
+Subcommand baru `/leaderboard mingguan`: poin yang didapat user di pekan
+berjalan, diurutkan dari terbesar.
+
+- Snapshot per periode disimpan di tabel `weekly_points` dengan kunci pekan
+  ISO yang sama dengan quest mingguan; ganti pekan = mulai dari nol tanpa
+  pekerjaan reset berkala, dan baris lama tetap tersimpan sebagai riwayat.
+- Pengisian terjadi otomatis di `addPoints()`, jadi semua sumber poin (chat,
+  voice, exchange) terhitung tanpa hook tambahan.
+
 ## Command Admin
 
 Command `/admin` baru dengan tiga subcommand, terkunci ke izin Administrator

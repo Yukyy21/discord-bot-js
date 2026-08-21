@@ -50,6 +50,16 @@ function createTables() {
       claimed INTEGER DEFAULT 0,
       PRIMARY KEY (userId, guildId, period, questId)
     );
+
+    -- Snapshot akumulasi poin per periode (kunci pekan ISO dari lib/quests).
+    -- Baris pekan lama sengaja dipertahankan sebagai riwayat.
+    CREATE TABLE IF NOT EXISTS weekly_points (
+      userId TEXT,
+      guildId TEXT,
+      period TEXT,
+      points INTEGER DEFAULT 0,
+      PRIMARY KEY (userId, guildId, period)
+    );
   `);
 }
 

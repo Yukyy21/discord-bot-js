@@ -1,4 +1,5 @@
 const { db } = require('./connection');
+const { addWeeklyPoints } = require('./weekly');
 
 /** Ambil baris poin/XP; dibuat dulu kalau user belum pernah tercatat. */
 function getPoints(userId, guildId) {
@@ -13,6 +14,9 @@ function getPoints(userId, guildId) {
 function addPoints(userId, guildId, amount) {
   getPoints(userId, guildId);
   db.prepare('UPDATE points SET points = points + ? WHERE userId = ? AND guildId = ?').run(amount, userId, guildId);
+  // Snapshot ke pekan berjalan; satu pintu supaya chat/voice/exchange
+  // semuanya otomatis masuk leaderboard mingguan.
+  addWeeklyPoints(userId, guildId, amount);
 }
 
 function addXp(userId, guildId, amount) {
