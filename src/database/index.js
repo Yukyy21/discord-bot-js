@@ -11,6 +11,7 @@ const shop = require('./shop');
 createTables();
 runMigrations();
 shop.seedShop();
+shop.backfillEffects();
 
 /** Gabungan data ekonomi + poin untuk kartu /profile dan /rank. */
 function getProfile(userId, guildId) {

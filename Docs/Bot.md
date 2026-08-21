@@ -29,6 +29,7 @@ level yang terpisah.
 | `/shop` | Stok toko saat ini (10 item, berganti tiap 10 menit) |
 | `/buy <id>` | Beli item yang sedang ada di stok |
 | `/inventory` | Item yang kamu punya, 5 per halaman |
+| `/use <id>` | Pakai satu buah item yang punya efek |
 | `/give <user> <jumlah>` | Transfer coin ke member lain |
 | `/exchange <jumlah>` | Tukar coin jadi poin (500 coin = 1 poin) |
 
@@ -81,6 +82,14 @@ kembali ke 1.
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan tier harga: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
 Mythic 5. Stok hidup di memori, jadi bot restart = undian baru.
+
+**Item & efek.** Sebagian item punya efek dan bisa dipakai lewat `/use <id>`:
+sekali pakai mengurangi stok di inventori lalu memberi XP atau poin. Daftar
+efeknya ada di `src/database/shopCatalog.js` — item tanpa efek hanya koleksi.
+Sengaja tidak ada efek "dapat coin" yang nilainya di atas harga item, supaya
+beli-pakai-beli tidak jadi mesin cetak uang. XP dari item tidak langsung
+memunculkan level baru; level ter-reconcile saat pesan chat berikutnya,
+mengikuti pola event `messageCreate`.
 
 ## Arsitektur
 

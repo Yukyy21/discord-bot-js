@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getShopStock, getShopTimers, TIER_CONFIG } = require('../../lib/shopRotation');
+const { parseEffect, describeEffect } = require('../../database/shopCatalog');
 const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 const { paginate, pagerRow } = require('../../ui/pager');
@@ -21,11 +22,15 @@ function buildShop(page = 0) {
       DIVIDER,
       `**Drop rate:** ${tierLines}`,
     ].join('\n'))
-    .addFields(slice.map(i => ({
-      name: `${e('buy')} [${i.id}] ${i.name}`,
-      value: `${i.tier} • **${i.price.toLocaleString()}** ${e('coin')}`,
-      inline: false,
-    })))
+    .addFields(slice.map(i => {
+      const info = describeEffect(parseEffect(i.effect));
+      const effectLine = info ? `\n${e(info.emoji)} ${info.text}` : '';
+      return {
+        name: `${e('buy')} [${i.id}] ${i.name}`,
+        value: `${i.tier} • **${i.price.toLocaleString()}** ${e('coin')}${effectLine}`,
+        inline: false,
+      };
+    }))
     .setFooter({ text: `Halaman ${current + 1} dari ${totalPages} • ${items.length} item tersedia` });
 
   if (!items.length) embed.addFields({ name: 'Kosong', value: 'Stok sedang di-refresh, coba sebentar lagi.' });

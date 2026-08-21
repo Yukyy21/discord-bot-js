@@ -58,6 +58,7 @@ const PAGES = {
               `${e('shop')} \`/shop\` — lihat stok toko (refresh tiap 10 menit)`,
               `${e('buy')} \`/buy <id>\` — beli item`,
               `${e('inventory')} \`/inventory\` — isi tas kamu`,
+              `${e('xp')} \`/use <id>\` — pakai item yang punya efek`,
             ].join('\n'),
           },
           {

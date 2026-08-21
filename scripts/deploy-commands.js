@@ -15,7 +15,13 @@ const { REST, Routes } = require('discord.js');
 const commandsPath = path.join(__dirname, '..', 'src', 'commands');
 const commands = [];
 
-for (const category of fs.readdirSync(commandsPath)) {
+// withFileTypes + isDirectory: lewati file penjaga git seperti .nekokeep yang
+// bukan folder kategori.
+const categories = fs.readdirSync(commandsPath, { withFileTypes: true })
+  .filter(entry => entry.isDirectory())
+  .map(entry => entry.name);
+
+for (const category of categories) {
   const dir = path.join(commandsPath, category);
   for (const file of fs.readdirSync(dir).filter(f => f.endsWith('.js'))) {
     const command = require(path.join(dir, file));

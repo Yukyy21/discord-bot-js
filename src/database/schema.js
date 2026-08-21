@@ -58,6 +58,7 @@ function runMigrations() {
   ensureColumn('points', 'xp', 'INTEGER DEFAULT 0');
   ensureColumn('points', 'level', 'INTEGER DEFAULT 1');
   ensureColumn('points', 'voice_seconds', 'INTEGER DEFAULT 0');
+  ensureColumn('shop_items', 'effect', 'TEXT');
 }
 
 module.exports = { createTables, runMigrations };

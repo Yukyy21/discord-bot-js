@@ -5,9 +5,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 
 ## Prioritas
 
-- [ ] **Item di inventori belum bisa dipakai.** Sekarang pembelian hanya
-  menumpuk di `/inventory` tanpa efek apa pun. Minimal butuh `/use <item>` dan
-  kolom efek di katalog (`src/database/shopCatalog.js`).
+- [x] **Item di inventori belum bisa dipakai.** Sudah ada `/use <id>` plus
+  kolom `effect` di katalog (`src/database/shopCatalog.js`); item tanpa efek
+  tetap jadi koleksi.
 - [ ] **Anti-spam poin chat.** Kata dihitung apa adanya, jadi mengirim satu kata
   berulang kali tetap menghasilkan poin. Perlu cooldown per user atau
   pengecekan pesan duplikat di `src/events/messageCreate.js`.

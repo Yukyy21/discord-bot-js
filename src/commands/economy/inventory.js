@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getInventory } = require('../../database');
+const { parseEffect, describeEffect } = require('../../database/shopCatalog');
 const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 const { paginate, pagerRow } = require('../../ui/pager');
@@ -20,11 +21,16 @@ function buildInventory(user, guildId, page = 0) {
   const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
   embed
     .setDescription(`**${items.length}** jenis item • total **${totalQty}** buah\n${DIVIDER}`)
-    .addFields(slice.map((i, idx) => ({
-      name: `${e('buy')} ${offset + idx + 1}. ${i.name}`,
-      value: `Jumlah: **x${i.quantity}**`,
-      inline: false,
-    })))
+    .addFields(slice.map((i, idx) => {
+      // Item dengan efek ditandai supaya user tahu mana yang bisa dipakai lewat /use.
+      const info = describeEffect(parseEffect(i.effect));
+      const effectLine = info ? `\n${e(info.emoji)} Bisa dipakai: **${info.text}**` : '\nItem koleksi';
+      return {
+        name: `${e('buy')} ${offset + idx + 1}. ${i.name}`,
+        value: `Jumlah: **x${i.quantity}**${effectLine}`,
+        inline: false,
+      };
+    }))
     .setFooter({ text: `Halaman ${current + 1} dari ${totalPages}` });
 
   return { embeds: [embed], components: pagerRow(`inv_page:${user.id}`, current, totalPages) };

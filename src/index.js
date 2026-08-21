@@ -18,7 +18,12 @@ client.commands = new Collection();
 /** Muat semua file command dari commands/<kategori>/<nama>.js. */
 function loadCommands() {
   const root = path.join(__dirname, 'commands');
-  for (const category of fs.readdirSync(root)) {
+  // withFileTypes + isDirectory: folder kategori bisa berisi file penjaga git
+  // seperti .nekokeep yang bukan direktori dan harus dilewati.
+  const categories = fs.readdirSync(root, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name);
+  for (const category of categories) {
     const dir = path.join(root, category);
     for (const file of fs.readdirSync(dir).filter(f => f.endsWith('.js'))) {
       const command = require(path.join(dir, file));

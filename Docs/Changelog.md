@@ -1,5 +1,26 @@
 # Changelog
 
+## Item Bisa Dipakai
+
+Fitur `/use` — item dengan efek kini punya fungsi, tidak lagi sekadar numpuk di
+`/inventory`.
+
+- Kolom `effect` (JSON) baru di tabel `shop_items`, ditambal `ensureColumn()`
+  dan di-backfill dari katalog untuk database lama.
+- Sepuluh item jadi consumable (Slime Gel, Tattered Parchment, Glowing
+  Mushroom, Beast Fang, Stardust Core, Tears of the Fallen, Holy Grail
+  Fragment, Astral Fragment, Heart of the Primordial, Chrono Core) — efeknya
+  XP atau poin. Sisanya tetap koleksi.
+- Command baru `/use <id>`: memakai satu buah item; pengurangan stok dan
+  pemberian efek dalam satu transaksi SQLite.
+- `/shop` dan `/inventory` kini menampilkan teks efek item yang bisa dipakai.
+
+## Perbaikan
+
+- Loader command (`src/index.js` dan `scripts/deploy-commands.js`) crash dengan
+  `ENOTDIR` kalau `src/commands/` berisi file biasa seperti penjaga git
+  `.nekokeep`. Sekarang hanya folder yang dipindai.
+
 ## Restrukturisasi
 
 Perombakan susunan proyek. Tidak ada perubahan perilaku bot bagi pengguna —
