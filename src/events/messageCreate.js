@@ -12,12 +12,10 @@ const { LEVEL_ROLES } = require('../config');
 const { CHAT, xpForLevel } = require('../config/constants');
 const { getRank, getLevelUpReward } = require('../lib/ranks');
 const { e, tierEmoji } = require('../lib/emojis');
+const { shouldCountMessage } = require('../lib/antispam');
 
 const POINT_CHANNEL_ID = process.env.POINT_CHANNEL_ID;
 
-// Penyaring anti-spam sengaja di memori: ini alat penyaring, bukan data
-// ekonomi, jadi hilang saat restart tidak merugikan siapa pun.
-const recentMessages = new Map();
 
 module.exports = {
   name: 'messageCreate',
@@ -26,13 +24,14 @@ module.exports = {
     // Kalau POINT_CHANNEL_ID diisi, poin hanya jalan di channel itu.
     if (POINT_CHANNEL_ID && message.channel.id !== POINT_CHANNEL_ID) return;
 
+    const userId = message.author.id;
+    const guildId = message.guildId;
+    if (!shouldCountMessage(userId, guildId, message.content)) return;
+
     const words = message.content.trim().split(/\s+/).filter(Boolean).length;
     if (words === 0) return;
 
-    if (isSpam(message)) return;
 
-    const userId = message.author.id;
-    const guildId = message.guildId;
     const before = getPoints(userId, guildId);
 
     // Sisa kata dari pesan sebelumnya ikut dihitung, jadi chat pendek pun
@@ -52,34 +51,6 @@ module.exports = {
   },
 };
 
-/**
- * Pesan dianggap spam kalau datang lebih cepat dari COOLDOWN_MS sejak pesan
- * sebelumnya, atau isinya sama dengan pesan sebelumnya dalam jendela
- * DUPLICATE_WINDOW_MS. Timestamp dicatat untuk semua pesan — bukan cuma yang
- * lolos — supaya spam tanpa henti tidak pernah genap cooldown.
- */
-function isSpam(message) {
-  const key = `${message.guildId}:${message.author.id}`;
-  const now = Date.now();
-  const prev = recentMessages.get(key);
-  const content = message.content.trim().toLowerCase();
-
-  let spam = false;
-  if (prev) {
-    if (now - prev.at < CHAT.COOLDOWN_MS) spam = true;
-    else if (
-      prev.content === content &&
-      now - prev.contentAt < CHAT.DUPLICATE_WINDOW_MS
-    ) spam = true;
-  }
-
-  // Saat spam, konten lama dipertahankan agar jendela duplikat tidak ikut
-  // bergeser dan pesan yang sama tetap terdeteksi begitu cooldown selesai.
-  if (spam) recentMessages.set(key, { ...prev, at: now });
-  else recentMessages.set(key, { at: now, content, contentAt: now });
-
-  return spam;
-}
 
 /** Naikkan level, kasih role & hadiah, lalu umumkan di channel yang sama. */
 async function handleLevelUp(message, stats, xpNeeded) {
