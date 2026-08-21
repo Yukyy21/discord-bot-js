@@ -70,6 +70,7 @@ function getShopTimers() {
 }
 
 refreshShop();
-setInterval(() => refreshShop(), REFRESH_INTERVAL_MS);
+const shopTimer = setInterval(() => refreshShop(), REFRESH_INTERVAL_MS);
+shopTimer.unref();
 
 module.exports = { getShopStock, getShopItemById, getShopTimers, TIER_CONFIG };

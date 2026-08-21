@@ -32,5 +32,6 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     console.log(`Berhasil mendaftarkan ${data.length} command.`);
   } catch (error) {
     console.error(error);
+    process.exitCode = 1;
   }
 })();
