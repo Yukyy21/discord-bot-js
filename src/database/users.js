@@ -37,8 +37,30 @@ function transferCoins(fromId, toId, guildId, amount) {
   transfer();
 }
 
+/** Dompet -> bank. Isi dompet wajib dicek lebih dulu oleh pemanggil. */
+function depositToBank(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET balance = balance - ?, bank = bank + ? WHERE userId = ? AND guildId = ?')
+    .run(amount, amount, userId, guildId);
+}
+
+/** Bank -> dompet. Isi bank wajib dicek lebih dulu oleh pemanggil. */
+function withdrawFromBank(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET bank = bank - ?, balance = balance + ? WHERE userId = ? AND guildId = ?')
+    .run(amount, amount, userId, guildId);
+}
+
 function getBalanceLeaderboard(guildId, limit = 10) {
   return db.prepare('SELECT * FROM users WHERE guildId = ? ORDER BY balance DESC LIMIT ?').all(guildId, limit);
 }
 
-module.exports = { getUser, updateBalance, claimDaily, transferCoins, getBalanceLeaderboard };
+module.exports = {
+  getUser,
+  updateBalance,
+  claimDaily,
+  transferCoins,
+  depositToBank,
+  withdrawFromBank,
+  getBalanceLeaderboard,
+};

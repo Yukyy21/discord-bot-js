@@ -50,6 +50,7 @@ const PAGES = {
             value: [
               `${e('bank')} \`/balance\` — cek dompet + bank`,
               `${e('daily')} \`/daily\` — klaim reward harian, streak makin lama makin gede`,
+              `${e('bank')} \`/bank deposit|withdraw <jumlah>\` — simpan / ambil coin dari bank`,
             ].join('\n'),
           },
           {

@@ -1,5 +1,12 @@
 # Changelog
 
+## Bank Bisa Diisi
+
+Command `/bank` dengan dua subcommand: `deposit` (dompet → bank) dan
+`withdraw` (bank → dompet). Kolom `bank` di tabel users sebenarnya sudah ada
+sejak awal, kini akhirnya terpakai. Validasi kecukupan saldo di command,
+mutasi dua kolom di `src/database/users.js`.
+
 ## Backup Database
 
 `npm run backup` (`scripts/backup-db.js`) menyalin `data/economy.db` ke

@@ -20,8 +20,8 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 
 ## Fitur
 
-- [ ] `/bank deposit` dan `/bank withdraw` — kolom `bankBalance` sudah ada di
-  tabel, tapi belum ada command yang mengisinya.
+- [x] `/bank deposit` dan `/bank withdraw` — kolom di tabel ternyata bernama
+  `bank` (bukan `bankBalance`); command baru `/bank` dengan dua subcommand.
 - [ ] Sistem quest harian/mingguan.
 - [ ] `/shop` dengan filter tier dan pencarian nama.
 - [ ] Command admin: `/admin give-coin`, `/admin reset-user`, `/admin set-level`.
