@@ -1,0 +1,128 @@
+# Cara Kerja Bot
+
+Dokumen ini menjelaskan apa yang dilakukan bot, aturan angkanya, dan bagaimana
+kodenya disusun. Untuk cara menjalankan, lihat [README](../README.md).
+
+## Gambaran Singkat
+
+Ada dua mata uang yang sengaja dipisah:
+
+- **Poin** — nilai "kontribusi". Didapat dari aktivitas: ngobrol dan duduk di
+  voice channel. Tidak bisa ditransfer antar user.
+- **Coin** — mata uang belanja. Didapat dari `/daily`, hadiah naik level, atau
+  tukar poin. Bisa ditransfer lewat `/give` dan dipakai di `/shop`.
+
+Selain itu ada **XP** yang menentukan level, dan level menentukan **tier rank**
+(Novice sampai Demigod).
+
+Semua data disimpan per server. Member yang aktif di dua server punya saldo dan
+level yang terpisah.
+
+## Daftar Command
+
+### Ekonomi
+
+| Command | Fungsi |
+|---|---|
+| `/balance` | Saldo dompet, bank, dan streak daily |
+| `/daily` | Klaim reward harian; makin panjang streak makin besar |
+| `/shop` | Stok toko saat ini (10 item, berganti tiap 10 menit) |
+| `/buy <id>` | Beli item yang sedang ada di stok |
+| `/inventory` | Item yang kamu punya, 5 per halaman |
+| `/give <user> <jumlah>` | Transfer coin ke member lain |
+| `/exchange <jumlah>` | Tukar coin jadi poin (500 coin = 1 poin) |
+
+### Poin & Progres
+
+| Command | Fungsi |
+|---|---|
+| `/points` | Total poin, level, tier, dan progress bar XP |
+| `/profile` | Kartu gambar berisi semua statistik |
+| `/rank` | Kartu gambar ringkas: level, tier, progres XP |
+| `/leaderboard balance\|points\|voice\|rank` | Papan peringkat teks, 10 baris per halaman sampai 50 user |
+| `/leaderboard card [kategori]` | Papan peringkat versi gambar, top 10 |
+
+### Umum
+
+| Command | Fungsi |
+|---|---|
+| `/guide` | Panduan interaktif dengan dropdown kategori |
+| `/ping` | Latency websocket bot |
+
+## Aturan Angka
+
+Semua nilai di bawah ada di `src/config/constants.js` — itu satu-satunya tempat
+yang perlu diubah kalau mau balancing ulang.
+
+**Chat.** Tiap 7 kata bernilai 2 poin. Sisa kata yang belum genap disimpan di
+kolom `pendingWords`, jadi chat pendek tetap terakumulasi dan tidak hangus.
+XP-nya 1 per kata dengan batas 20 XP per pesan, supaya menempel satu paragraf
+panjang tidak lebih untung daripada ngobrol normal.
+
+Kalau `POINT_CHANNEL_ID` diisi di `.env`, semua ini hanya berlaku di channel itu.
+
+**Voice.** Tiap 15 menit di voice channel bernilai 5 poin. Total durasi dicatat
+dalam detik untuk leaderboard jam voice. Pindah channel tidak memutus sesi;
+yang dihitung hanya join dan leave.
+
+**Level.** XP yang dibutuhkan untuk naik dari level N adalah `N × 100`. Naik
+level memberi `level × 10` poin, `level × 50` coin, dan peluang item acak dari
+katalog sebesar `10% + level × 1%` (maksimum 50%). Kalau `LEVEL_ROLES` di
+`src/config/index.js` diisi, role juga otomatis diberikan.
+
+**Tier rank.** Novice (Lv 1), Apprentice (6), Adept (11), Veteran (21),
+Champion (36), Hero (51), Demigod (71). Diatur di `src/lib/ranks.js`.
+
+**Daily.** Klaim pertama 500 coin, tiap hari berturut-turut menambah 100 coin.
+Perbandingan hari memakai tanggal kalender, bukan selisih 24 jam — klaim jam
+23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong sehari, streak
+kembali ke 1.
+
+**Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
+ditentukan tier harga: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
+Mythic 5. Stok hidup di memori, jadi bot restart = undian baru.
+
+## Arsitektur
+
+```
+Discord  ──►  events/          ──►  database/     (baca-tulis SQLite)
+              commands/        ──►  lib/          (rank, rotasi shop, emoji)
+                               ──►  ui/           (embed, pagination, /guide)
+                               ──►  cards/        (render PNG)
+```
+
+**`src/index.js`** memuat isi `commands/` dan `events/` otomatis berdasarkan
+struktur folder. Menambah command = menambah file, tidak ada daftar manual yang
+perlu diperbarui.
+
+**`src/database/`** dipecah per domain: `users.js` (saldo, daily, transfer),
+`points.js` (poin, XP, leaderboard), `shop.js` (katalog, pembelian, inventori).
+`index.js` menyatukan semuanya, jadi pemakai cukup
+`require('../../database')`. Skema dibuat lewat `CREATE TABLE IF NOT EXISTS`
+dan kolom baru ditambal `ensureColumn()` saat start — database lama tidak perlu
+dihapus saat update.
+
+**`src/ui/`** memegang semua tampilan Discord. `embeds.js` menyediakan warna per
+kategori dan helper `themedEmbed()`, `pager.js` menyediakan tombol navigasi.
+State halaman disimpan di `customId` tombol (`aksi:kategori:halaman`), bukan di
+memori, jadi tombol pada pesan lama tetap berfungsi setelah bot restart.
+
+**`src/cards/`** merender gambar dengan `@napi-rs/canvas`. Avatar diunduh
+dengan retry lalu di-cache ke `data/avatar-cache/`; kalau gagal, dibuat avatar
+huruf awal supaya kartu tetap terkirim. Avatar GIF selalu dipaksa jadi PNG
+karena canvas tidak bisa membacanya.
+
+**`src/lib/emojis.js`** memusatkan semua custom emoji. Jangan tulis emoji
+unicode langsung di command — detailnya di [Emoji.md](Emoji.md).
+
+## Hal yang Gampang Bikin Bingung
+
+- **Command tidak muncul di Discord.** Definisi command hanya sampai ke Discord
+  lewat `npm run deploy`. Command global butuh waktu sampai sejenak untuk
+  tersebar; pakai `GUILD_ID` saat development.
+- **Poin tidak bertambah.** Cek Message Content Intent aktif, dan cek apakah
+  `POINT_CHANNEL_ID` mengunci ke channel lain.
+- **Muncul teks mentah `<:coin:123>`.** ID emoji salah atau emoji sudah dihapus
+  dari aplikasi.
+- **Item di `/shop` hilang sebelum dibeli.** Wajar, stok diundi ulang tiap 10
+  menit dan `/buy` memvalidasi ke stok yang sedang aktif.
