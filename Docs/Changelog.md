@@ -1,5 +1,31 @@
 # Changelog
 
+## Isi /guide Dirombak + ToDo v2
+
+- `/guide` sekarang punya **11 halaman** (dari 7) dan isinya disamakan dengan
+  perilaku kode yang sebenarnya: halaman baru **Quest**, **Item & Rarity**,
+  **Utilitas**, dan **Admin**.
+- Angka-angka nyata masuk ke panduan: 7 kata = 2 poin, 1 XP/kata dengan batas
+  20 XP per pesan, cooldown anti-spam 3 detik, jendela duplikat 30 detik,
+  voice 15 menit = 5 poin dengan syarat minimal 2 pendengar dan bukan AFK
+  channel, daily 500 + 100 x streak, kurs 500 coin = 1 poin, dan rumus level
+  (level x 100 XP).
+- Halaman **Ekonomi** melengkapi opsi `/shop tier:` dan `/shop cari:`, serta
+  `/bank deposit|withdraw`.
+- Halaman **Poin & Level** memuat seluruh subcommand leaderboard, termasuk
+  `rank` dan `mingguan` yang sebelumnya tidak disebut sama sekali.
+- Halaman **Reward** menyebut peluang item random naik level (10% + 1% per
+  level, maksimal 50%) dan XP berlebih yang bisa melompati beberapa level.
+- Halaman **Quest** menjelaskan undian 2 harian + 1 mingguan, hadiah tiap
+  misi, dan bahwa progres tercatat otomatis.
+- Halaman **Item & Rarity** menjelaskan bobot undian tier
+  (Common 30 sampai Mythic 5) dan beda item berefek vs item koleksi.
+- Halaman **Admin** mendokumentasikan tiga subcommand `/admin` beserta
+  syarat izin Administrator.
+- Dokumentasi: `Docs/ToDoV2.md` baru berisi rencana asset rank baru, tambahan
+  quest, mini boss tiap jam 00:00 & 12:00, dan ability/stat per item.
+  `Docs/ToDo.md` lama tidak diubah isinya, hanya diberi penunjuk ke v2.
+
 ## UI Shop Ringkas + /credit & /botinfo
 
 - `/shop` dirampingkan: daftar item pindah dari field ke satu blok deskripsi,
