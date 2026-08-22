@@ -1,7 +1,7 @@
 # Discord Economy & Points Bot
 
 Bot Discord untuk server komunitas: member dapat poin dan XP dari ngobrol dan
-nongkrong di voice, coin-nya dipakai belanja di shop yang stoknya berganti tiap
+nongkrong di voice, coin-nya dipakai belanja dri shop yang stoknya berganti tiap
 10 menit, dan progresnya ditampilkan lewat kartu gambar (`/profile`, `/rank`,
 `/leaderboard card`).
 
@@ -49,6 +49,7 @@ Docs/               dokumentasi lengkap
 
 - [Docs/Bot.md](Docs/Bot.md) — cara kerja bot, daftar command, aturan poin, arsitektur
 - [Docs/Emoji.md](Docs/Emoji.md) — sistem custom emoji dan cara menggantinya
-- [Docs/ToDo.md](Docs/ToDo.md) — yang masih menganggur
+- [Docs/ToDo.md](Docs/ToDo.md) — yang masih menganggur (gelombang pertama)
+- [Docs/ToDoV2.md](Docs/ToDoV2.md) — rencana berikutnya: asset rank baru, tambah quest, mini boss, stat item
 - [Docs/Contributor.md](Docs/Contributor.md) — cara ikut ngoding di sini
 - [Docs/Changelog.md](Docs/Changelog.md) — riwayat perubahan
