@@ -50,3 +50,9 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
 - [x] Ukuran font kartu sudah menyesuaikan nama panjang: helper `fitText()` di
   `src/cards/canvasKit.js` mengecilkan font bertahap sampai batas minimum, baru
   memotong dengan elipsis. Dipakai di kartu profile, rank, dan leaderboard.
+
+## Lanjutan
+
+Rencana gelombang berikutnya (asset rank baru, tambah quest, mini boss dua kali
+sehari, ability/stat item) pindah ke [ToDoV2.md](ToDoV2.md). Isi halaman ini
+dibiarkan apa adanya sebagai riwayat.
