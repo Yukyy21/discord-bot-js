@@ -49,7 +49,7 @@ level yang terpisah.
 
 | Command | Fungsi |
 |---|---|
-| `/guide` | Panduan interaktif dengan dropdown kategori |
+| `/guide` | Panduan interaktif dengan dropdown kategori (11 halaman: Beranda, Ekonomi, Poin & Level, Aktivitas, Quest, Rank Tier, Item & Rarity, Reward, Utilitas, Admin, Tips) |
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim yang membangun bot beserta perannya |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
@@ -146,6 +146,16 @@ mingguan, reset tiap Senin). Snapshot-nya terisi otomatis di `addPoints()` —
 satu pintu untuk semua sumber poin (chat, voice, exchange) — ke tabel
 `weekly_points`. Baris pekan lama dipertahankan sebagai riwayat; tidak ada
 pekerjaan reset berkala.
+
+## Panduan Dalam Bot (`/guide`)
+
+Isi halaman didefinisikan di `src/ui/guidePages.js` (objek `PAGES`), bukan di
+file command, supaya select menu dan tombol di
+`src/events/interactionCreate.js` bisa memakainya ulang. Menambah halaman =
+menambah satu entri `PAGES`; select menu dan tombol Beranda ikut menyesuaikan
+otomatis. Angka yang ditulis di halaman harus dijaga sinkron dengan
+`src/config/constants.js`, `src/lib/ranks.js`, `src/lib/tiers.js`, dan
+`src/lib/quests.js`.
 
 ## Arsitektur
 
