@@ -8,6 +8,7 @@ const {
   getShopItems,
   grantItem,
   addQuestProgress,
+  applyBuff,
 } = require('../database');
 const { LEVEL_ROLES } = require('../config');
 const { CHAT, xpForLevel } = require('../config/constants');
@@ -42,10 +43,11 @@ module.exports = {
     // lama-lama tetap jadi poin.
     const totalWords = words + before.pendingWords;
     const chunks = Math.floor(totalWords / CHAT.WORDS_PER_POINT);
-    if (chunks > 0) addPoints(userId, guildId, chunks * CHAT.POINTS_PER_CHUNK);
+    if (chunks > 0) addPoints(userId, guildId, applyBuff(userId, guildId, 'points', chunks * CHAT.POINTS_PER_CHUNK));
     setPendingWords(userId, guildId, totalWords % CHAT.WORDS_PER_POINT);
 
-    addXp(userId, guildId, Math.min(words * CHAT.XP_PER_WORD, CHAT.MAX_XP_PER_MESSAGE));
+    const xpGain = Math.min(words * CHAT.XP_PER_WORD, CHAT.MAX_XP_PER_MESSAGE);
+    addXp(userId, guildId, applyBuff(userId, guildId, 'xp', xpGain));
 
     const after = getPoints(userId, guildId);
     const xpNeeded = xpForLevel(after.level);
@@ -77,8 +79,8 @@ async function handleLevelUp(message, stats, xpNeeded) {
 
   const rankInfo = getRank(newLevel);
   const reward = getLevelUpReward(newLevel);
-  addPoints(userId, guildId, reward.points);
-  updateBalance(userId, guildId, reward.coins);
+  addPoints(userId, guildId, applyBuff(userId, guildId, 'points', reward.points));
+  updateBalance(userId, guildId, applyBuff(userId, guildId, 'coin', reward.coins));
 
   let rewardText = `${e('point')} +${reward.points} poin  ${e('coin')} +${reward.coins} coin`;
 
