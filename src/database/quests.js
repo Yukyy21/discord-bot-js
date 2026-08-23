@@ -1,5 +1,6 @@
 const { db } = require('./connection');
 const { updateBalance } = require('./users');
+const { getMultiplier } = require('./buffs');
 const { QUEST_CATALOG, currentPeriodKeys, drawQuests } = require('../lib/quests');
 const { QUEST } = require('../config/constants');
 
@@ -67,6 +68,10 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
   const update = db.prepare(
     'UPDATE quests SET progress = ? WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?',
   );
+  // Insight menggandakan progres, kecuali quest mode 'max' (streak) yang
+  // nilainya sudah absolut.
+  const questMult = getMultiplier(userId, guildId, 'quest');
+
   const bump = db.transaction(() => {
     for (const row of rows) {
       const quest = QUEST_CATALOG[row.questId];
@@ -76,7 +81,7 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
       // nilai terbesar yang pernah tercapai, bukan hasil penjumlahan.
       const next = quest.mode === 'max'
         ? Math.min(Math.max(row.progress, amount), row.target)
-        : Math.min(row.progress + amount, row.target);
+        : Math.min(row.progress + Math.round(amount * questMult), row.target);
       if (next !== row.progress) update.run(next, userId, guildId, row.period, row.questId);
     }
   });
@@ -99,15 +104,21 @@ function claimQuest(userId, guildId, period, questId) {
   if (row.claimed) return { ok: false, message: 'Quest ini sudah pernah diklaim.' };
   if (row.progress < row.target) return { ok: false, message: 'Quest belum selesai.' };
 
+  // Deep Current menaikkan coin dari quest; buff coin biasa juga berlaku.
+  const reward = Math.round(row.reward * Math.max(
+    getMultiplier(userId, guildId, 'coin'),
+    getMultiplier(userId, guildId, 'quest_coin'),
+  ));
+
   const claim = db.transaction(() => {
     db.prepare(`
       UPDATE quests SET claimed = 1 WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?
     `).run(userId, guildId, period, questId);
-    updateBalance(userId, guildId, row.reward);
+    updateBalance(userId, guildId, reward);
   });
   claim();
 
-  return { ok: true, reward: row.reward, message: `Reward **${row.reward.toLocaleString()}** coin diterima!` };
+  return { ok: true, reward, message: `Reward **${reward.toLocaleString()}** coin diterima!` };
 }
 
 module.exports = { ensureQuests, getQuests, addQuestProgress, claimQuest };
