@@ -37,9 +37,10 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
     `src/config/constants.js`,
   - tabel baru untuk boss aktif + kontribusi damage per user supaya event
     tidak hilang saat bot mati,
-  - katalog boss (nama, HP, gambar, tabel loot) terpisah di `src/lib/`.
+  - katalog boss (nama, HP, gambar, tabel loot) terpisah di `src/lib/`,
+  - pembacaan buff ability yang sudah ada — lihat [bossplan.md](bossplan.md).
 
-- [ ] **Ability/stat per item.** Setiap item punya stat (ATK, DEF, HP, LUCK)
+- [x] **Ability/stat per item.** Setiap item punya stat (ATK, DEF, HP, LUCK)
   dan/atau ability yang berlaku saat dipakai atau saat ikut event boss.
   Sekarang kolom `effect` hanya mengenal `xp` dan `points`
   (`src/database/shopCatalog.js`), jadi butuh perluasan format efek, migrasi

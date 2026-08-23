@@ -30,7 +30,7 @@ const PAGES = {
             `${e('coin')} **Ekonomi** — saldo, bank, daily, shop, inventory, transfer`,
             `${e('point')} **Poin & Level** — profil, rank, leaderboard`,
             `${e('voice')} **Aktivitas** — cara dapat poin dari chat & voice`,
-            `${e('daily')} **Quest** — misi harian, mingguan & bulanan berhadiah coin`,
+            `${e('quest')} **Quest** — misi harian, mingguan & bulanan berhadiah coin`,
             `${e('leaderboard')} **Rank Tier** — daftar tier dan syarat levelnya`,
             `${e('inventory')} **Item & Rarity** — tier item dan efek yang bisa dipakai`,
             `${e('streak')} **Reward** — hadiah tiap naik level & daily streak`,
@@ -69,7 +69,7 @@ const PAGES = {
               `${e('shop')} \`/shop cari:<nama>\` — cari item dari namanya`,
               `${e('buy')} \`/buy <id>\` — beli item pakai ID dari \`/shop\``,
               `${e('inventory')} \`/inventory\` — isi tas + ID item buat \`/use\``,
-              `${e('xp')} \`/use <id>\` — pakai item yang punya efek`,
+              `${e('ability')} \`/use <id>\` — pakai item yang punya efek`,
             ].join('\n'),
           },
           {
@@ -152,15 +152,15 @@ const PAGES = {
 
   quest: {
     label: 'Quest',
-    emoji: 'daily',
+    emoji: 'quest',
     description: 'Misi harian, mingguan & bulanan berhadiah coin',
     build: () =>
       baseEmbed()
         .setColor(COLORS.economy)
-        .setTitle(`${e('daily')} Quest`)
+        .setTitle(`${e('quest')} Quest`)
         .setDescription(
           [
-            `${e('guide')} \`/quest\` — lihat misi kamu; klaim lewat tombol kalau sudah penuh`,
+            `${e('quest')} \`/quest\` — lihat misi kamu; klaim lewat tombol kalau sudah penuh`,
             `${e('clock')} Tiap hari diundi **2 quest harian**, tiap pekan **1 mingguan**, tiap bulan **1 bulanan**`,
             `${e('point')} Progres dicatat otomatis — tidak perlu daftar dulu`,
             line,
@@ -231,7 +231,7 @@ const PAGES = {
           {
             name: 'Item Pakai vs Koleksi',
             value: [
-              `${e('xp')} Item berefek bisa dipakai \`/use <id>\` — memberi **XP** atau **poin**`,
+              `${e('ability')} Item berefek bisa dipakai \`/use <id>\` — memberi **XP** atau **poin**`,
               `${e('inventory')} Item tanpa efek murni koleksi, tetap tercatat di tas`,
               `${e('warn')} Item habis setelah dipakai; efeknya tidak bisa dijual balik`,
             ].join('\n'),
@@ -365,7 +365,7 @@ function buildComponents(active = 'home') {
     .setCustomId('guide_close')
     .setLabel('Tutup')
     .setStyle(ButtonStyle.Danger);
-  const closeEmoji = eo('error');
+  const closeEmoji = eo('cancel');
   if (closeEmoji) closeBtn.setEmoji(closeEmoji);
 
   return [

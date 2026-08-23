@@ -2,14 +2,16 @@ File yang berubah / ditambah pada update ini
 ============================================
 
 Diubah:
-- src/commands/economy/shop.js
 - src/lib/emojis.js
-- Docs/Bot.md
-- Docs/Changelog.md
+- src/ui/pager.js
+- src/ui/guidePages.js
+- src/commands/economy/quest.js
+- src/commands/economy/buffs.js
+- src/database/shopCatalog.js
 - Docs/Emoji.md
+- Docs/Changelog.md
 
 Ditambah:
-- src/commands/general/credit.js
-- src/commands/general/botinfo.js
+- (tidak ada file baru)
 
-Catatan: jalankan `npm run deploy` karena ada command baru.
+Catatan: tidak ada command baru, tidak perlu `npm run deploy`.

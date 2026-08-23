@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getUser, claimDaily, addQuestProgress } = require('../../database');
+const { getUser, claimDaily, addQuestProgress, applyBuff } = require('../../database');
 const { computeDailyClaim } = require('../../lib/daily');
 const { themedEmbed, infoEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
@@ -17,7 +17,9 @@ module.exports = {
       });
     }
 
-    const { reward, streak, bonus, todayKey, nextReward } = claim;
+    const { streak, bonus, todayKey, nextReward } = claim;
+    // Multiplier coin dari buff ikut berlaku untuk hadiah harian.
+    const reward = applyBuff(interaction.user.id, interaction.guildId, 'coin', claim.reward);
 
     claimDaily(interaction.user.id, interaction.guildId, { reward, streak, dateKey: todayKey });
     addQuestProgress(interaction.user.id, interaction.guildId, 'daily', 1);
