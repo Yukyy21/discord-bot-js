@@ -25,7 +25,7 @@ const QUEST_CATALOG = {
   use_1:       { scope: 'daily',  type: 'use_item', target: 1,    reward: 300,  emoji: 'xp',    label: 'Pakai satu item' },
   buy_1:       { scope: 'daily',  type: 'buy_item', target: 1,    reward: 300,  emoji: 'buy',   label: 'Beli satu item di shop' },
   spend_2000:  { scope: 'daily',  type: 'spend',    target: 2000, reward: 400,  emoji: 'shop',  label: 'Belanja 2.000 coin di /shop' },
-  streak_3:    { scope: 'daily',  type: 'daily_streak', mode: 'max', target: 3, reward: 450, emoji: 'streak', label: 'Klaim /daily saat streak minimal 3 hari' },
+  streak_1:    { scope: 'daily',  type: 'daily_streak', mode: 'max', target: 1, reward: 300, emoji: 'streak', label: 'Klaim /daily hari ini' },
 
   // — Mingguan —
   chat_100:      { scope: 'weekly', type: 'chat',  target: 100,   reward: 3000, emoji: 'chat',  label: 'Rajin mengobrol 100 pesan' },
