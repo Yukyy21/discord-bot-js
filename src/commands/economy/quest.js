@@ -7,7 +7,7 @@ const { progressLine } = require('../../ui/embeds');
 /** Dipakai juga oleh handler tombol klaim di interactionCreate.js. */
 function buildQuest(user, guildId) {
   const quests = getQuests(user.id, guildId);
-  const embed = themedEmbed('daily', `Quest ${user.displayName ?? user.username}`, COLORS.economy)
+  const embed = themedEmbed('quest', `Quest ${user.displayName ?? user.username}`, COLORS.economy)
     .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 128 }));
 
   if (!quests.length) {
