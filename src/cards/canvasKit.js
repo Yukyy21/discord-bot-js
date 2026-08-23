@@ -127,4 +127,22 @@ function fitText(ctx, text, x, y, maxWidth, { weight = 'bold', size = 28, minSiz
   return { width: ctx.measureText(value).width, fontSize: current };
 }
 
-module.exports = { roundRect, hexToRgb, fetchAvatarBuffer, loadAvatar, fitText };
+/**
+ * Gambar logo rank setelah teks info rank. Dipakai bersama kartu rank dan
+ * profile supaya ukuran/posisinya konsisten; rasio asli gambar diikuti, hanya
+ * sisi terpanjang yang dipatok `maxSize` (logo tier berukuran kotak).
+ */
+async function drawRankLogo(ctx, logoPath, x, baselineY, maxSize = 26) {
+  if (!logoPath || !fs.existsSync(logoPath)) return;
+  try {
+    const logo = await loadImage(logoPath);
+    const ratio = Math.min(maxSize / logo.width, maxSize / logo.height);
+    const w = logo.width * ratio;
+    const h = logo.height * ratio;
+    ctx.drawImage(logo, x, baselineY - h / 2 - 7, w, h);
+  } catch (error) {
+    console.error('Gagal load rank logo:', error.message);
+  }
+}
+
+module.exports = { roundRect, hexToRgb, fetchAvatarBuffer, loadAvatar, fitText, drawRankLogo };

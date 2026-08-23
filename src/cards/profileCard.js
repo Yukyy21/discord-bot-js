@@ -1,6 +1,6 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const fs = require('node:fs');
-const { roundRect, loadAvatar, fitText } = require('./canvasKit');
+const { roundRect, loadAvatar, fitText, drawRankLogo } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 
 async function buildProfileCard({ avatar, username, level, rank, xp, xpNeeded, balance, bank, streak, points, rankName, rankLogo }) {
@@ -44,19 +44,7 @@ async function buildProfileCard({ avatar, username, level, rank, xp, xpNeeded, b
   const rankText = `${rankName || 'Novice'}  •  Level ${level}  •  Rank #${rank}`;
   ctx.fillText(rankText, 150, 110);
 
-  if (rankLogo && fs.existsSync(rankLogo)) {
-    try {
-      const logo = await loadImage(rankLogo);
-      const max = 42;
-      const ratio = Math.min(max / logo.width, max / logo.height);
-      const w = logo.width * ratio;
-      const h = logo.height * ratio;
-      const textW = ctx.measureText(rankText).width;
-      ctx.drawImage(logo, 150 + textW + 8, 110 - h + 3, w, h);
-    } catch (e) {
-      console.error('Gagal load rank logo:', e.message);
-    }
-  }
+  await drawRankLogo(ctx, rankLogo, 150 + ctx.measureText(rankText).width + 8, 110);
 
   const barW = 400;
   const barH = 22;

@@ -8,7 +8,7 @@ const ASSETS_DIR = path.join(ROOT, 'assets');
 const DATA_DIR = path.join(ROOT, 'data');
 const AVATAR_CACHE_DIR = path.join(DATA_DIR, 'avatar-cache');
 
-/** Path ke file di dalam assets/, contoh: asset('ranks', 'HERO.png'). */
+/** Path ke file di dalam assets/, contoh: asset('ranks', 'Demigod.png'). */
 function asset(...segments) {
   return path.join(ASSETS_DIR, ...segments);
 }

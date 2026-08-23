@@ -26,6 +26,20 @@
   quest, mini boss tiap jam 00:00 & 12:00, dan ability/stat per item.
   `Docs/ToDo.md` lama tidak diubah isinya, hanya diberi penunjuk ke v2.
 
+## Asset Rank Baru di Kartu
+
+- Logo tier di `assets/ranks/` diganti total: set lama strip landscape
+  (677x369) diganti set kotak yang sama dengan sumber emoji `tier_*`
+  (Novice–Demigod, dari `assets/emoji/`). Peta `logo` di `src/lib/ranks.js`
+  mengikuti nama file baru.
+- Blok gambar logo yang tadinya disalin di kartu `rank` dan `profile`
+  dipindah ke helper `drawRankLogo()` (`src/cards/canvasKit.js`) — satu tempat
+  untuk ukuran & posisi. Logo kini dipatok sisi terpanjang 26px dan
+  disejajarkan dengan garis teks info rank, bukan kotak 42px yang dulu
+  di-tuning untuk gambar landscape.
+- Background `assets/rank/Rank.jpeg`, warna tier, dan emoji `tier_*` tidak
+  berubah.
+
 ## UI Shop Ringkas + /credit & /botinfo
 
 - `/shop` dirampingkan: daftar item pindah dari field ke satu blok deskripsi,

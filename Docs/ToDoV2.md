@@ -5,12 +5,16 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
 
 ## Prioritas
 
-- [ ] **Ganti asset rank di kartu.** Logo tier di `assets/ranks/*.png`
+- [x] **Ganti asset rank di kartu.** Logo tier di `assets/ranks/*.png`
   (dipakai `src/cards/rankCard.js` lewat field `rankLogo` dari
   `src/lib/ranks.js`) diganti dengan set gambar baru. Perlu dicek juga:
   ukuran/posisi gambar di kartu `rank` dan `profile`, background
   `assets/rank/Rank.jpeg`, serta emoji tier `tier_*` di `src/lib/emojis.js`
   supaya gaya visualnya tetap satu keluarga.
+  Selesai: set baru kotak dari `assets/emoji/` (Novice–Demigod), ukuran/posisi
+  lewat helper `drawRankLogo()` di `src/cards/canvasKit.js`; background dan
+  emoji tier tidak berubah karena set barunya memang satu keluarga dengan
+  emoji `tier_*`.
 
 - [ ] **Tambah quest.** Katalog `QUEST_CATALOG` di `src/lib/quests.js` baru
   berisi 5 quest harian dan 3 mingguan, jadi undian sering mengulang misi yang
