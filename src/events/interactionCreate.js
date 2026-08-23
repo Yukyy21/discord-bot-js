@@ -61,14 +61,19 @@ async function handleButton(interaction) {
       }
 
       case 'quest_claim': {
-        // a = pemilik quest, b = periode, c = id quest
-        if (a !== interaction.user.id) {
+        // Format: quest_claim:<pemilik>:<periode>:<id quest>. Periode mengandung
+        // ':' juga (daily:2026-08-23), jadi pecah dari kanan — id quest paling
+        // belakang, sisanya antara pemilik dan quest adalah periode utuh.
+        const parts = interaction.customId.split(':');
+        if (parts[1] !== interaction.user.id) {
           return await interaction.reply({
             embeds: [errorEmbed('Ini quest orang lain. Pakai `/quest` buat lihat punyamu.')],
             flags: MessageFlags.Ephemeral,
           });
         }
-        const result = claimQuest(interaction.user.id, interaction.guildId, b, c);
+        const questId = parts.pop();
+        const period = parts.slice(2).join(':');
+        const result = claimQuest(interaction.user.id, interaction.guildId, period, questId);
         if (!result.ok) {
           return await interaction.reply({
             embeds: [warnEmbed(result.message)],
