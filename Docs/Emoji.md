@@ -42,6 +42,24 @@ Dipakai oleh `/credit` dan `/botinfo`:
 | `discordjs` | `<:Discordjs:...>` |
 | `database` | `<:Sql_database:...>` |
 
+## Emoji Navigasi, Quest, Ability & Boss
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `back` | `<:Back:...>` | Tombol "Sebelumnya" di pager |
+| `next` | `<:Next:...>` | Tombol "Berikutnya" di pager |
+| `cancel` | `<a:cancel:...>` (animated) | Tombol tutup `/guide` |
+| `quest` | `<:quest:...>` | `/quest` dan halaman Quest di `/guide` |
+| `ability` | `<:ability:...>` | Ikon universal semua ability item (`/use`) |
+| `buff` | `<:buff:...>` | Judul embed `/buffs` |
+| `buff_active` | `<a:Buffactive:...>` (animated) | Tiap baris buff yang sedang aktif |
+| `boss` | `<:boss:...>` | Disiapkan untuk mini boss (belum dipakai) |
+| `boss_hp` | `<:bosshp:...>` | Disiapkan untuk mini boss (belum dipakai) |
+| `boss_loot` | `<:lootboss:...>` | Disiapkan untuk mini boss (belum dipakai) |
+
+Tiga key boss sengaja hanya terdaftar di registry — sistem mini boss belum ada,
+jadi belum dipasang di command mana pun.
+
 ## Emoji Item Shop
 
 Ikon tiap item shop terpisah di `src/lib/itemEmojis.js` (sumber ID:
