@@ -4,6 +4,7 @@ const { describeEffect } = require('../../database/shopCatalog');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 const { itemEmoji } = require('../../lib/itemEmojis');
+const { getTier } = require('../../lib/tiers');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,6 +20,7 @@ module.exports = {
 
     const info = describeEffect(result.effect);
     addQuestProgress(interaction.user.id, interaction.guildId, 'use_item', 1);
+    addQuestProgress(interaction.user.id, interaction.guildId, 'use_tier', 1, getTier(result.price, result.name));
     const embed = themedEmbed(info.emoji, 'Item Digunakan', COLORS.economy)
       .setDescription(`${result.name ? `${itemEmoji(result.name)} ` : ''}${e(info.emoji)} ${result.message}`)
       .setFooter({ text: 'Sisa itemmu bisa dilihat di /inventory' });

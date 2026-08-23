@@ -39,7 +39,7 @@ level yang terpisah.
 | Command | Fungsi |
 |---|---|
 | `/points` | Total poin, level, tier, dan progress bar XP |
-| `/quest` | Quest harian & mingguan: progres dan tombol klaim reward |
+| `/quest` | Quest harian, mingguan & bulanan: progres dan tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
 | `/leaderboard balance\|points\|voice\|rank\|mingguan` | Papan peringkat teks, 10 baris per halaman sampai 50 user; `mingguan` = poin yang didapat pekan ini |
@@ -124,13 +124,17 @@ beli-pakai-beli tidak jadi mesin cetak uang. XP dari item tidak langsung
 memunculkan level baru; level ter-reconcile saat pesan chat berikutnya,
 mengikuti pola event `messageCreate`.
 
-**Quest.** Tiap user dapat 2 quest harian + 1 quest mingguan yang diundi dari
-katalog (`src/lib/quests.js`) saat pertama kali disentuh di periode itu.
-Periode harian memakai tanggal UTC, mingguan memakai nomor pekan ISO. Progres
-terisi otomatis dari aktivitas: pesan chat yang lolos anti-spam, detik voice
-saat sesi berakhir, klaim `/daily`, `/use`, `/buy`, dan `/give`. Reward coin
-diklaim manual lewat tombol di `/quest`; tombolnya stateless (pemilik +
-periode + quest ada di `customId`), jadi tetap berfungsi setelah bot restart.
+**Quest.** Tiap user dapat 2 quest harian + 1 mingguan + 1 bulanan yang
+diundi dari katalog (`src/lib/quests.js`) saat pertama kali disentuh di
+periode itu. Periode harian memakai tanggal UTC, mingguan nomor pekan ISO,
+bulanan `YYYY-MM`. Progres terisi otomatis dari aktivitas: pesan chat yang
+lolos anti-spam, detik voice saat sesi berakhir, klaim `/daily` (quest streak
+mencatat nilai terbesar yang pernah tercapai, bukan penjumlahan), total
+belanja `/buy`, pakai item lewat `/use` (ada varian per rarity), `/give`, dan
+naik level. Reward coin diklaim manual lewat tombol di `/quest`; tombolnya
+stateless (pemilik + periode + quest ada di `customId`), jadi tetap berfungsi
+setelah bot restart. Tipe "ikut/menang event" sengaja belum ada — menunggu
+sistem event/boss.
 
 **Command admin.** `/admin` (give-coin, reset-user, set-level) terkunci lewat
 `setDefaultMemberPermissions(Administrator)`, jadi tidak muncul untuk member

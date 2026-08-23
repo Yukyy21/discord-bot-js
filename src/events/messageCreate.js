@@ -62,8 +62,9 @@ async function handleLevelUp(message, stats, xpNeeded) {
   const guildId = message.guildId;
 
   // Bisa lompat lebih dari satu level kalau XP-nya menumpuk banyak.
-  const { level: newLevel, xp: remainingXp } = computeLevelUp(stats, xpNeeded);
+  const { level: newLevel, xp: remainingXp, gained } = computeLevelUp(stats, xpNeeded);
   setLevel(userId, guildId, newLevel, remainingXp);
+  addQuestProgress(userId, guildId, 'level_up', gained);
 
   const roleId = LEVEL_ROLES[newLevel];
   if (roleId && message.member) {

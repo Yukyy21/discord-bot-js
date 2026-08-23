@@ -16,13 +16,17 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
   emoji tier tidak berubah karena set barunya memang satu keluarga dengan
   emoji `tier_*`.
 
-- [ ] **Tambah quest.** Katalog `QUEST_CATALOG` di `src/lib/quests.js` baru
+- [x] **Tambah quest.** Katalog `QUEST_CATALOG` di `src/lib/quests.js` baru
   berisi 5 quest harian dan 3 mingguan, jadi undian sering mengulang misi yang
   sama. Rencana: tambah tipe quest baru (naik level, belanja sampai nominal
   tertentu, menang/ikut event, klaim streak beruntun, pakai item rarity
   tertentu), plus pertimbangkan quest bulanan dan tingkat kesulitan yang
   hadiahnya menyesuaikan. Tipe baru butuh pemanggil `addQuestProgress()` di
   tempat kejadiannya.
+  Selesai: tipe `spend`, `level_up`, `daily_streak` (mode max), `use_tier`
+  (meta rarity) + scope bulanan; pool jadi 7/7/5 dengan hadiah sesuai
+  kesulitan. Varian "menang/ikut event" menunggu sistem boss/event
+  (@Nekoomaruu).
 
 - [ ] **Mini boss spawn jam 00:00 dan 12:00.** Boss muncul otomatis dua kali
   sehari di channel yang ditentukan, member ikut menyerang lewat tombol, dan

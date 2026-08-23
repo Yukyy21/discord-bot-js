@@ -30,7 +30,7 @@ const PAGES = {
             `${e('coin')} **Ekonomi** — saldo, bank, daily, shop, inventory, transfer`,
             `${e('point')} **Poin & Level** — profil, rank, leaderboard`,
             `${e('voice')} **Aktivitas** — cara dapat poin dari chat & voice`,
-            `${e('daily')} **Quest** — misi harian & mingguan berhadiah coin`,
+            `${e('daily')} **Quest** — misi harian, mingguan & bulanan berhadiah coin`,
             `${e('leaderboard')} **Rank Tier** — daftar tier dan syarat levelnya`,
             `${e('inventory')} **Item & Rarity** — tier item dan efek yang bisa dipakai`,
             `${e('streak')} **Reward** — hadiah tiap naik level & daily streak`,
@@ -153,7 +153,7 @@ const PAGES = {
   quest: {
     label: 'Quest',
     emoji: 'daily',
-    description: 'Misi harian & mingguan berhadiah coin',
+    description: 'Misi harian, mingguan & bulanan berhadiah coin',
     build: () =>
       baseEmbed()
         .setColor(COLORS.economy)
@@ -161,7 +161,7 @@ const PAGES = {
         .setDescription(
           [
             `${e('guide')} \`/quest\` — lihat misi kamu; klaim lewat tombol kalau sudah penuh`,
-            `${e('clock')} Tiap hari kamu diundi **2 quest harian**, tiap pekan **1 quest mingguan**`,
+            `${e('clock')} Tiap hari diundi **2 quest harian**, tiap pekan **1 mingguan**, tiap bulan **1 bulanan**`,
             `${e('point')} Progres dicatat otomatis — tidak perlu daftar dulu`,
             line,
           ].join('\n'),

@@ -69,7 +69,8 @@ function buyItem(userId, guildId, itemId) {
   });
   buy();
 
-  return { ok: true, message: `Berhasil membeli **${item.name}** seharga ${item.price.toLocaleString()} coin!` };
+  // price & name dipakai quest spend (nominal belanja) dan UI.
+  return { ok: true, price: item.price, name: item.name, message: `Berhasil membeli **${item.name}** seharga ${item.price.toLocaleString()} coin!` };
 }
 
 function getInventory(userId, guildId) {
@@ -117,7 +118,8 @@ function useItem(userId, guildId, itemId) {
   consume();
 
   const info = describeEffect(effect);
-  return { ok: true, effect, name: item.name, message: `Kamu memakai **${item.name}**. Efek: ${info.text}.` };
+  // price ikut dikembalikan supaya /use bisa menghitung rarity untuk quest.
+  return { ok: true, effect, name: item.name, price: item.price, message: `Kamu memakai **${item.name}**. Efek: ${info.text}.` };
 }
 
 module.exports = { getShopItems, seedShop, backfillEffects, grantItem, buyItem, getInventory, useItem };

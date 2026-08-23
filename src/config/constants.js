@@ -37,10 +37,11 @@ const SHOP = {
   STOCK_SIZE: 10,
 };
 
-/** Quest harian & mingguan. Jumlah yang ditugaskan per periode per user. */
+/** Quest harian, mingguan & bulanan. Jumlah yang ditugaskan per periode per user. */
 const QUEST = {
   DAILY_COUNT: 2,
   WEEKLY_COUNT: 1,
+  MONTHLY_COUNT: 1,
 };
 
 /** XP yang dibutuhkan untuk naik dari level tertentu. */

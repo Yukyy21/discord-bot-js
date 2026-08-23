@@ -15,14 +15,14 @@ function buildQuest(user, guildId) {
     return { embeds: [embed], components: [] };
   }
 
-  const sections = { daily: [], weekly: [] };
-  for (const row of quests) sections[row.period.startsWith('weekly') ? 'weekly' : 'daily'].push(row);
+  const sections = { daily: [], weekly: [], monthly: [] };
+  for (const row of quests) sections[row.period.split(':')[0]].push(row);
 
   const fields = [];
   const buttons = [];
-  for (const [scope, title] of [['daily', 'Harian'], ['weekly', 'Mingguan']]) {
+  for (const [scope, title, icon] of [['daily', 'Harian', 'clock'], ['weekly', 'Mingguan', 'leaderboard'], ['monthly', 'Bulanan', 'bank']]) {
     fields.push({
-      name: `${e(scope === 'daily' ? 'clock' : 'leaderboard')} Quest ${title}`,
+      name: `${e(icon)} Quest ${title}`,
       value: DIVIDER,
     });
     for (const row of sections[scope]) {
@@ -48,13 +48,17 @@ function buildQuest(user, guildId) {
   }
 
   embed.addFields(fields);
-  const components = buttons.length ? [new ActionRowBuilder().addComponents(buttons.slice(0, 5))] : [];
-  return { embeds: [embed], components };
+  // Discord maksimal 5 tombol per baris; pecah jadi beberapa ActionRow.
+  const rows = [];
+  for (let i = 0; i < buttons.length; i += 5) {
+    rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 5)));
+  }
+  return { embeds: [embed], components: rows.slice(0, 4) };
 }
 
 module.exports = {
   buildQuest,
-  data: new SlashCommandBuilder().setName('quest').setDescription('Lihat quest harian & mingguan kamu'),
+  data: new SlashCommandBuilder().setName('quest').setDescription('Lihat quest harian, mingguan & bulanan kamu'),
   async execute(interaction) {
     await interaction.reply(buildQuest(interaction.user, interaction.guildId));
   },

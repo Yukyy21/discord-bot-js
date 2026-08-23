@@ -26,6 +26,24 @@
   quest, mini boss tiap jam 00:00 & 12:00, dan ability/stat per item.
   `Docs/ToDo.md` lama tidak diubah isinya, hanya diberi penunjuk ke v2.
 
+## Katalog Quest Diperluas + Quest Bulanan
+
+- Tipe quest baru: `spend` (total belanja di `/buy`), `level_up` (naik level),
+  `daily_streak` (angka streak saat `/daily` diklaim; progres memakai nilai
+  terbesar yang pernah dicapai, bukan penjumlahan), dan `use_tier` (pakai item
+  dengan rarity tertentu, dicocokkan lewat parameter `meta` baru di
+  `addQuestProgress()`).
+- Scope **bulanan**: kunci periode `monthly:YYYY-MM` UTC tanpa pekerjaan reset;
+  tiap user dapat 1 quest bulanan dari pool baru (ngobrol 500 pesan, voice
+  12 jam, belanja 60 ribu coin, naik 8 level, streak 14 hari). `/quest`
+  menampilkan seksi Bulanan dan tombol klaim kini bisa lebih dari satu baris
+  (maksimal 5 tombol per baris).
+- Pool undian jadi 7 harian / 7 mingguan / 5 bulanan (sebelumnya 5/3), hadiah
+  mengikuti kesulitan — contoh: item Epic 2.200 coin vs Legendary 4.000.
+- `buyItem()` dan `useItem()` kini ikut mengembalikan `price` (dan `name`)
+  supaya command cukup melapor ke sistem quest tanpa query ulang.
+- Tipe "ikut/menang event" sengaja belum dibuat — menunggu sistem event/boss.
+
 ## Asset Rank Baru di Kartu
 
 - Logo tier di `assets/ranks/` diganti total: set lama strip landscape

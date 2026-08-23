@@ -9,7 +9,11 @@ const { QUEST } = require('../config/constants');
  * yang tidak pernah aktif tidak menyisakan baris apa pun.
  */
 function ensureQuests(userId, guildId) {
-  const counts = { daily: QUEST.DAILY_COUNT, weekly: QUEST.WEEKLY_COUNT };
+  const counts = {
+    daily: QUEST.DAILY_COUNT,
+    weekly: QUEST.WEEKLY_COUNT,
+    monthly: QUEST.MONTHLY_COUNT,
+  };
   const insert = db.prepare(`
     INSERT OR IGNORE INTO quests (userId, guildId, period, questId, target, reward)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -20,7 +24,7 @@ function ensureQuests(userId, guildId) {
         'SELECT COUNT(*) AS c FROM quests WHERE userId = ? AND guildId = ? AND period = ?',
       ).get(userId, guildId, period).c;
       if (existing > 0) continue;
-      for (const quest of drawQuests(period, counts[period.startsWith('weekly') ? 'weekly' : 'daily'])) {
+      for (const quest of drawQuests(period, counts[period.split(':')[0]])) {
         insert.run(userId, guildId, period, quest.id, quest.target, quest.reward);
       }
     }
@@ -49,8 +53,10 @@ function getQuests(userId, guildId) {
 /**
  * Tambah progres semua quest periode berjalan yang tipenya cocok dan belum
  * diklaim. Progres dipatok di target supaya kelebihan tidak menumpuk.
+ * `meta` opsional: kalau quest katalog punya field `meta` (mis. rarity untuk
+ * use_tier), nilainya harus sama baru progres dihitung.
  */
-function addQuestProgress(userId, guildId, type, amount = 1) {
+function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
   ensureQuests(userId, guildId);
   const rows = db.prepare(`
     SELECT period, questId, progress, target FROM quests
@@ -63,8 +69,14 @@ function addQuestProgress(userId, guildId, type, amount = 1) {
   );
   const bump = db.transaction(() => {
     for (const row of rows) {
-      if (QUEST_CATALOG[row.questId]?.type !== type) continue;
-      const next = Math.min(row.progress + amount, row.target);
+      const quest = QUEST_CATALOG[row.questId];
+      if (quest?.type !== type) continue;
+      if (quest.meta && quest.meta !== meta) continue;
+      // mode 'max' dipakai daily_streak: streak naik-turun, yang dihitung
+      // nilai terbesar yang pernah tercapai, bukan hasil penjumlahan.
+      const next = quest.mode === 'max'
+        ? Math.min(Math.max(row.progress, amount), row.target)
+        : Math.min(row.progress + amount, row.target);
       if (next !== row.progress) update.run(next, userId, guildId, row.period, row.questId);
     }
   });

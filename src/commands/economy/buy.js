@@ -25,6 +25,7 @@ module.exports = {
       return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
     }
     addQuestProgress(interaction.user.id, interaction.guildId, 'buy_item', 1);
+    addQuestProgress(interaction.user.id, interaction.guildId, 'spend', result.price);
 
     const embed = themedEmbed('buy', 'Pembelian Berhasil', COLORS.economy)
       .setDescription(`${itemEmoji(stock.name)} ${tierMark(stock.tier)} **${stock.name}**\n${result.message}`)

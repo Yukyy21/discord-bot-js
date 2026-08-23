@@ -21,6 +21,8 @@ module.exports = {
 
     claimDaily(interaction.user.id, interaction.guildId, { reward, streak, dateKey: todayKey });
     addQuestProgress(interaction.user.id, interaction.guildId, 'daily', 1);
+    // Quest streak memakai mode 'max': yang dicatat streak terbesar, bukan jumlah.
+    addQuestProgress(interaction.user.id, interaction.guildId, 'daily_streak', streak);
 
     const embed = themedEmbed('daily', 'Reward Harian Diklaim', COLORS.economy)
       .setDescription(`Kamu dapat **${reward.toLocaleString()}** ${e('coin')}\n${DIVIDER}`)
