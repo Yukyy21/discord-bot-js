@@ -1,5 +1,50 @@
 # Changelog
 
+## Emoji Baru: Pager, Guide, Quest, Ability & Boss
+
+- Pager (`/shop`, `/inventory`, `/leaderboard`) kini memakai emoji khusus:
+  `back` di tombol **Sebelumnya** dan `next` di tombol **Berikutnya**
+  (sebelumnya hanya `arrow` di satu sisi).
+- Tombol tutup `/guide` memakai `cancel` (animated), bukan lagi ikon `error`.
+- Quest punya ikon sendiri: `/quest` dan halaman Quest di `/guide` memakai
+  `quest`, menggantikan pemakaian ulang ikon `daily`/`guide`.
+- Ability & buff: efek bertipe `ability` memakai ikon universal `ability`
+  (dulu `level`), judul embed `/buffs` memakai `buff`, dan tiap baris buff
+  yang sedang berjalan diawali `buff_active` (animated).
+- Tiga emoji boss (`boss`, `boss_hp`, `boss_loot`) didaftarkan di registry
+  tapi belum dipasang di command mana pun — menunggu sistem mini boss.
+
+## Ability & Buff Item
+
+- Semua 30 item bawaan kini punya efek. Common–Rare memberi multiplier Coin/XP/
+  Poin berdurasi; Epic–Mythic punya ability bernama (Insight, Sturdy, Genesis,
+  Time Skip, dan seterusnya). Ringkasannya di [ability.md](ability.md).
+- Format kolom `effect` diperluas jadi `mult` dan `ability`; efek instan lama
+  (`xp`, `points`) tetap dikenal. Kolom `effect` sekarang selalu disamakan
+  dengan katalog tiap boot lewat `syncEffects()` (dulu `backfillEffects()` yang
+  hanya mengisi baris kosong).
+- Tabel baru `user_buffs` (satu baris per pemakaian, `expiresAt`/`charges`)
+  plus `src/lib/buffs.js` (logika murni) dan `src/database/buffs.js`
+  (penyimpanan). Buff dengan efek sama tidak menumpuk — yang dipakai pengali
+  terbesar. Baris kadaluarsa disapu tiap 10 menit sejak `ready`.
+- Multiplier terpasang di `/daily`, hadiah quest, hadiah naik level, poin & XP
+  chat, dan poin voice. `/give` dan `/exchange` sengaja tidak kena supaya item
+  tidak jadi mesin cetak uang.
+- Ability non-boss jalan penuh: Insight (progres quest ×2), Second Wind (reset
+  cooldown `/daily`), Rekindle (perpanjang semua buff), Sturdy (3 `/use` tidak
+  menghabiskan item), Deep Current (coin quest & boss ×2), Blessing (XP penuh),
+  Genesis, Astral Rift (buff se-server), Endless Pulse (durasi buff +25%), dan
+  Time Skip (reset cooldown).
+- Ability boss (Sharpened Edge, Void Grip, Heavy Impact, Kingslayer, Star
+  Cleave) sudah memasang buff-nya, tinggal dibaca sistem mini boss. Rencana
+  pembacaannya di [bossplan.md](bossplan.md).
+- Command baru `/buffs`: daftar buff aktif beserta sisa waktu atau sisa jatah.
+  Tampilan `/shop` dan `/inventory` tidak diubah — deskripsi item lengkap
+  menunggu fitur bestiary.
+- Test bertambah 8 (`test/buffs.test.js`): stacking, kadaluarsa, pembulatan,
+  bonus durasi, format sisa waktu, dan validitas efek seluruh katalog.
+- Tier Secret dari rencana awal tidak dibuat; item tetap Common–Mythic.
+
 ## Isi /guide Dirombak + ToDo v2
 
 - `/guide` sekarang punya **11 halaman** (dari 7) dan isinya disamakan dengan
