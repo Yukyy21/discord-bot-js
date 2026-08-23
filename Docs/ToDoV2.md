@@ -1,7 +1,7 @@
 # ToDo v2
 
 Gelombang kedua. Isi [ToDo.md](ToDo.md) yang lama sengaja dibiarkan sebagai
-riwayat — yang di bawah ini yang belum digarap sama sekali.
+riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan digarap oleh @ferr, Minibos, asset rank, ability,akan digarap oleh @Nekoomaruu)
 
 ## Prioritas
 
