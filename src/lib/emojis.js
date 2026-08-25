@@ -58,6 +58,11 @@ const REGISTRY = {
   back:       { name: 'Back',        id: '1541044840802820168', animated: false, fallback: '◀️' },
   cancel:     { name: 'cancel',      id: '1541044497540972625', animated: true,  fallback: '🚫' },
 
+  // — AI (/ai-ask) —
+  ai_answer:  { name: 'Aiask1',      id: '1541408696838398002', animated: true,  fallback: '🤖' },
+  ai_think:   { name: 'Aithink',     id: '1541408699241725973', animated: true,  fallback: '💭' },
+  ai_answer2: { name: 'aiask2',      id: '1541408702207234209', animated: true,  fallback: '✨' },
+
   // — Quest —
   quest:      { name: 'quest',       id: '1540598685853814834', animated: false, fallback: '📜' },
 
