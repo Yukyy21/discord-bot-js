@@ -53,6 +53,8 @@ level yang terpisah.
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim yang membangun bot beserta perannya |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
+| `/ai-ask <input>` | Tanya apa saja soal bot; dijawab AI berdasarkan `Docs/ai.md` |
+
 | `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
 | `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user — saldo, poin, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
@@ -201,12 +203,6 @@ streak daily sebagai fungsi murni; command dan event hanya memanggilnya.
 **`src/lib/emojis.js`** memusatkan semua custom emoji. Jangan tulis emoji
 unicode langsung di command — detailnya di [Emoji.md](Emoji.md).
 
-**`src/lib/logger.js`** satu-satunya jalur log: tiap baris berisi timestamp
-lokal dan level (`debug`/`info`/`warn`/`error`). Filter aktif lewat
-`LOG_LEVEL` di `.env` (default `info`); `scope('Admin')` dsw. menggantikan
-awalan bracket manual. Jangan memanggil `console.*` langsung di command atau
-event — objek `Error` dikirim sebagai argumen biasa supaya stack trace utuh.
-
 ## Hal yang Gampang Bikin Bingung
 
 - **Command tidak muncul di Discord.** Definisi command hanya sampai ke Discord
@@ -218,3 +214,61 @@ event — objek `Error` dikirim sebagai argumen biasa supaya stack trace utuh.
   dari aplikasi.
 - **Item di `/shop` hilang sebelum dibeli.** Wajar, stok diundi ulang tiap 10
   menit dan `/buy` memvalidasi ke stok yang sedang aktif.
+
+## Fitur AI (`/ai-ask`)
+
+`/ai-ask input:<pertanyaan>` menjawab pertanyaan member soal bot. Jawabannya
+tidak diambil dari database, tapi dari file pengetahuan `Docs/ai.md` — jadi
+selama dokumen itu benar, jawabannya konsisten dengan aturan bot yang asli.
+
+Alur singkatnya: command mem-`defer` balasan lalu menampilkan embed "sedang
+mikir" (emoji `ai_think`) → `src/lib/aiContext.js` membaca `Docs/ai.md` (di-cache
+5 menit) → `src/lib/ai.js` menyusun system prompt dari persona + aturan + isi
+dokumen, lalu memanggil provider AI → embed tadi diganti jawaban final berisi
+pertanyaan, jawaban, dan footer provider + model.
+
+**Provider & fallback.** Semua provider memakai format API OpenAI-compatible,
+dipakai berurutan sesuai `PROVIDERS` di `src/config/ai.js`:
+
+| Urutan | Provider | Kunci di `.env` | Model default |
+|---|---|---|---|
+| 1 | Groq (utama) | `GROQ_API_KEY` | `GROQ_MODEL` → `llama-3.3-70b-versatile` |
+| 2 | Google AI Studio | `GOOGLE_AI_API_KEY` | `GOOGLE_AI_MODEL` → `gemini-2.0-flash` |
+| 3 | Google AI Studio (kunci kedua) | `GOOGLE_AI_API_KEY_2` | `GOOGLE_AI_MODEL` |
+
+Kalau Groq kena limit/kuota/error server/timeout, permintaan yang sama langsung
+diulang ke Google AI Studio kunci pertama; kalau itu juga limit, lanjut ke kunci
+kedua. Status yang memicu fallback diatur di `FALLBACK_STATUS` (default
+402/429/5xx). Error konfigurasi (401/403 kunci salah, 404 model tidak dikenali)
+tidak di-fallback — langsung dilaporkan supaya kelihatan ada yang perlu dibetulkan.
+Provider yang kuncinya kosong di `.env` otomatis dilewati, jadi boleh pakai satu
+provider saja.
+
+**Pengaturan** ada di `src/config/ai.js`:
+
+| Kunci | Fungsi |
+|---|---|
+| `ENABLED` | Matikan fitur tanpa menghapus command |
+| `PROVIDERS` | Daftar provider berurutan: label, env kunci, base URL, model |
+| `FALLBACK_STATUS` | Status HTTP yang memicu pindah ke provider berikutnya |
+| `PERSONA.NAME` / `CHARACTER` / `LANGUAGE` / `TONE` | Kepribadian & gaya bahasa jawaban |
+| `PERSONA.RULES` | Aturan wajib yang selalu ditempel ke system prompt |
+| `TEMPERATURE` / `MAX_TOKENS` / `MAX_ANSWER_CHARS` | Kreativitas & panjang jawaban |
+| `COOLDOWN_MS` / `MAX_QUESTION_CHARS` / `REQUEST_TIMEOUT_MS` | Batas pemakaian per user (timeout per provider) |
+| `CONTEXT_FILES` / `MAX_CONTEXT_CHARS` / `CONTEXT_CACHE_MS` | File pengetahuan dan cache-nya |
+| `EPHEMERAL` | Jawaban privat (hanya penanya) atau terlihat semua orang |
+| `SHOW_PROVIDER` | Tampilkan nama provider + model di footer embed |
+
+Kunci API **tidak** ditaruh di config; isi `GROQ_API_KEY`, `GOOGLE_AI_API_KEY`,
+dan `GOOGLE_AI_API_KEY_2` di `.env`. Kalau semua kunci kosong, `/ai-ask` membalas
+pesan error yang jelas — bot lainnya tetap jalan normal.
+
+**Emoji AI** (di `src/lib/emojis.js`): `ai_think` (`Aithink`) saat pertanyaan
+masuk / bot mikir, `ai_answer` (`Aiask1`) di judul dan blok jawaban, dan
+`ai_answer2` (`aiask2`) di baris penutup. Semuanya animated dan punya fallback
+unicode kalau ID-nya dihapus.
+
+Semua kegagalan provider (401/402/429/5xx/timeout) diterjemahkan jadi pesan
+Bahasa Indonesia di embed error, dan tidak pernah dilempar sebagai exception.
+
+Karena ada command baru, jalankan `npm run deploy` sekali setelah update ini.
