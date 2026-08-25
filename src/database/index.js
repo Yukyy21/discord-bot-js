@@ -11,11 +11,12 @@ const quests = require('./quests');
 const admin = require('./admin');
 const weekly = require('./weekly');
 const voiceSessions = require('./voiceSessions');
+const buffs = require('./buffs');
 
 createTables();
 runMigrations();
 shop.seedShop();
-shop.backfillEffects();
+shop.syncEffects();
 
 /** Gabungan data ekonomi + poin untuk kartu /profile dan /rank. */
 function getProfile(userId, guildId) {
@@ -40,4 +41,5 @@ module.exports = {
   ...admin,
   ...weekly,
   ...voiceSessions,
+  ...buffs,
 };

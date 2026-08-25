@@ -22,4 +22,9 @@ function shouldCountMessage(userId, guildId, content, now = Date.now()) {
   return true;
 }
 
-module.exports = { shouldCountMessage };
+/** Time Skip: lupakan catatan anti-spam user supaya cooldownnya hilang. */
+function resetUser(userId, guildId) {
+  recent.delete(`${guildId}:${userId}`);
+}
+
+module.exports = { shouldCountMessage, resetUser };

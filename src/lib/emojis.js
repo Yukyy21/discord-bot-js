@@ -54,6 +54,22 @@ const REGISTRY = {
   home:       { name: 'home',        id: '1540187755999531109', animated: false, fallback: '🏠' },
   guide:      { name: 'guide',       id: '1540187752652607639', animated: false, fallback: '📖' },
   ping:       { name: 'ping',        id: '1540187772927873084', animated: true,  fallback: '🏓' },
+  next:       { name: 'Next',        id: '1541044838911442985', animated: false, fallback: '▶️' },
+  back:       { name: 'Back',        id: '1541044840802820168', animated: false, fallback: '◀️' },
+  cancel:     { name: 'cancel',      id: '1541044497540972625', animated: true,  fallback: '🚫' },
+
+  // — Quest —
+  quest:      { name: 'quest',       id: '1540598685853814834', animated: false, fallback: '📜' },
+
+  // — Ability & Buff —
+  ability:    { name: 'ability',     id: '1541044487789223996', animated: false, fallback: '✴️' },
+  buff:       { name: 'buff',        id: '1541044489622392965', animated: false, fallback: '🔺' },
+  buff_active:{ name: 'Buffactive',  id: '1541076451154198618', animated: true,  fallback: '🌀' },
+
+  // — Boss (belum dipakai; menunggu sistem mini boss) —
+  boss:       { name: 'boss',        id: '1541044491950231672', animated: false, fallback: '👹' },
+  boss_hp:    { name: 'bosshp',      id: '1541044493850247208', animated: false, fallback: '❤️' },
+  boss_loot:  { name: 'lootboss',    id: '1541044495502807180', animated: false, fallback: '🎁' },
 
   // — Credit & Info Bot —
   backend:    { name: 'Backend',      id: '1540378495320981564', animated: false, fallback: '🧠' },

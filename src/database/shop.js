@@ -1,7 +1,9 @@
 const { db } = require('./connection');
-const { SHOP_CATALOG, parseEffect, describeEffect } = require('./shopCatalog');
+const { SHOP_CATALOG, statList, parseEffect, describeEffect } = require('./shopCatalog');
 const { getUser, updateBalance } = require('./users');
 const { addPoints, addXp } = require('./points');
+const { addBuff, consumeCharge } = require('./buffs');
+const { runAbility } = require('./abilities');
 
 function getShopItems() {
   return db.prepare('SELECT * FROM shop_items ORDER BY id').all();
@@ -27,16 +29,19 @@ function seedShop() {
 }
 
 /**
- * Database lama dibuat sebelum kolom `effect` ada, jadi itemnya ber-effect NULL
- * padahal katalog sudah mendefinisikan. Isi hanya yang masih kosong; harga dan
- * deskripsi yang mungkin sudah diubah admin tidak ikut disentuh.
+ * Kolom `effect` sepenuhnya milik katalog di kode: format efek bisa berubah
+ * antar versi, jadi baris database disamakan lagi tiap boot. Harga dan
+ * deskripsi yang mungkin sudah diubah admin tidak disentuh.
  */
-function backfillEffects() {
-  const update = db.prepare('UPDATE shop_items SET effect = ? WHERE id = ? AND effect IS NULL');
-  const fill = db.transaction(() => {
-    for (const [id, , , , effect] of SHOP_CATALOG) update.run(effectToDb(effect), id);
+function syncEffects() {
+  const update = db.prepare('UPDATE shop_items SET effect = ? WHERE id = ? AND (effect IS NOT ? OR effect IS NULL)');
+  const sync = db.transaction(() => {
+    for (const [id, , , , effect] of SHOP_CATALOG) {
+      const json = effectToDb(effect);
+      update.run(json, id, json);
+    }
   });
-  fill();
+  sync();
 }
 
 /** Tambah satu item ke inventori, atau naikkan jumlahnya kalau sudah punya. */
@@ -103,23 +108,35 @@ function useItem(userId, guildId, itemId) {
     return { ok: false, message: `Kamu tidak punya **${item.name}**. Beli dulu di \`/shop\`.` };
   }
 
+  // Sturdy: selama jatahnya ada, item tidak berkurang saat dipakai.
+  const kept = consumeCharge(userId, guildId, 'no_consume');
+  let abilityNote = null;
+
   const consume = db.transaction(() => {
-    if (entry.quantity <= 1) {
+    if (!kept && entry.quantity <= 1) {
       db.prepare('DELETE FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?')
         .run(userId, guildId, itemId);
-    } else {
+    } else if (!kept) {
       db.prepare('UPDATE user_items SET quantity = quantity - 1 WHERE userId = ? AND guildId = ? AND itemId = ?')
         .run(userId, guildId, itemId);
     }
 
     if (effect.type === 'xp') addXp(userId, guildId, effect.value);
     if (effect.type === 'points') addPoints(userId, guildId, effect.value);
+    if (effect.type === 'mult') {
+      for (const stat of statList(effect.stat)) {
+        addBuff(userId, guildId, { key: stat, value: effect.value, durationMs: effect.durationMs });
+      }
+    }
+    if (effect.type === 'ability') abilityNote = runAbility(userId, guildId, effect);
   });
   consume();
 
   const info = describeEffect(effect);
+  const detail = abilityNote ? `${info.text} — ${abilityNote}` : info.text;
+  const keptNote = kept ? ' Item tidak berkurang berkat **Sturdy**.' : '';
   // price ikut dikembalikan supaya /use bisa menghitung rarity untuk quest.
-  return { ok: true, effect, name: item.name, price: item.price, message: `Kamu memakai **${item.name}**. Efek: ${info.text}.` };
+  return { ok: true, effect, name: item.name, price: item.price, message: `Kamu memakai **${item.name}**. Efek: ${detail}.${keptNote}` };
 }
 
-module.exports = { getShopItems, seedShop, backfillEffects, grantItem, buyItem, getInventory, useItem };
+module.exports = { getShopItems, seedShop, syncEffects, grantItem, buyItem, getInventory, useItem };

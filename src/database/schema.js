@@ -61,6 +61,19 @@ function createTables() {
       PRIMARY KEY (userId, guildId, period)
     );
 
+    -- Buff aktif dari item. Satu baris per pemakaian; buff dengan key sama
+    -- tidak dijumlahkan, yang dipakai pengali terbesar (lib/buffs.js).
+    -- userId '*' = buff milik seluruh member guild.
+    CREATE TABLE IF NOT EXISTS user_buffs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT,
+      guildId TEXT,
+      key TEXT NOT NULL,
+      value REAL NOT NULL DEFAULT 1,
+      expiresAt INTEGER,
+      charges INTEGER
+    );
+
     -- Cerminan sesi voice yang sedang berjalan (write-through dari memori).
     -- Kalau bot mati di tengah sesi, waktu mulai bisa dilanjutkan saat boot.
     CREATE TABLE IF NOT EXISTS voice_sessions (

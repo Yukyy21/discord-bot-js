@@ -28,6 +28,7 @@ function pagerRow(prefix, page, totalPages) {
       .setCustomId(`${prefix}:${page - 1}`)
       .setLabel('Sebelumnya')
       .setStyle(ButtonStyle.Secondary)
+      .setEmoji(eo('back'))
       .setDisabled(page <= 0),
     new ButtonBuilder()
       .setCustomId('pager_noop')
@@ -38,7 +39,7 @@ function pagerRow(prefix, page, totalPages) {
       .setCustomId(`${prefix}:${page + 1}`)
       .setLabel('Berikutnya')
       .setStyle(ButtonStyle.Secondary)
-      .setEmoji(eo('arrow'))
+      .setEmoji(eo('next'))
       .setDisabled(page >= totalPages - 1),
   );
   return [row];

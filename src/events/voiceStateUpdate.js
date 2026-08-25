@@ -1,5 +1,6 @@
 const {
   addPoints,
+  applyBuff,
   addVoiceSeconds,
   addQuestProgress,
   saveVoiceSession,
@@ -81,7 +82,7 @@ function endSession(guildId, userId) {
   // tidak, lastGrant sudah maju sepanjang masa tidak layak jadi memang nihil.
   if (session.eligible) {
     const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
-    if (chunks > 0) addPoints(userId, session.guildId, chunks * VOICE.POINTS_PER_INTERVAL);
+    if (chunks > 0) addPoints(userId, session.guildId, applyBuff(userId, session.guildId, 'points', chunks * VOICE.POINTS_PER_INTERVAL));
   }
 
   const seconds = Math.floor((now - session.joinedAt) / 1000);
@@ -110,7 +111,7 @@ function syncEligibility(guildId, userId) {
   const now = Date.now();
   if (!eligible) {
     const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
-    if (chunks > 0) addPoints(session.userId, guildId, chunks * VOICE.POINTS_PER_INTERVAL);
+    if (chunks > 0) addPoints(session.userId, guildId, applyBuff(session.userId, guildId, 'points', chunks * VOICE.POINTS_PER_INTERVAL));
   }
   session.lastGrant = now;
   session.eligible = eligible;
@@ -129,7 +130,7 @@ setInterval(() => {
       continue;
     }
     if (now - session.lastGrant < VOICE.INTERVAL_MS) continue;
-    addPoints(session.userId, session.guildId, VOICE.POINTS_PER_INTERVAL);
+    addPoints(session.userId, session.guildId, applyBuff(session.userId, session.guildId, 'points', VOICE.POINTS_PER_INTERVAL));
     session.lastGrant = now;
     saveVoiceSession(session.userId, session.guildId, session);
   }
