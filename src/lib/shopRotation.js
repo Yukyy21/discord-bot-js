@@ -1,6 +1,9 @@
 const { getShopItems } = require('../database');
 const { SHOP } = require('../config/constants');
 const { TIER_CONFIG, getTier, weightedRandom } = require('./tiers');
+const logger = require('./logger');
+
+const log = logger.scope('Shop');
 
 const { REFRESH_INTERVAL_MS, STOCK_SIZE } = SHOP;
 
@@ -14,7 +17,7 @@ function refreshShop() {
   }));
   currentStock = weightedRandom(allItems, STOCK_SIZE);
   nextRefreshAt = Date.now() + REFRESH_INTERVAL_MS;
-  console.log(`[Shop] Refreshed — ${currentStock.length} items`);
+  log.info(`Refreshed — ${currentStock.length} items`);
 }
 
 function getShopStock() {
@@ -43,4 +46,12 @@ function getShopTimers() {
 refreshShop();
 setInterval(() => refreshShop(), REFRESH_INTERVAL_MS);
 
-module.exports = { getShopStock, getShopItemById, getShopTimers, getShopRefreshAt, getTier, weightedRandom, TIER_CONFIG };
+module.exports = {
+  getShopStock,
+  getShopItemById,
+  getShopTimers,
+  getShopRefreshAt,
+  getTier,
+  weightedRandom,
+  TIER_CONFIG,
+};

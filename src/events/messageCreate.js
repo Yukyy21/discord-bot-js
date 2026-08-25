@@ -15,9 +15,9 @@ const { getRank, getLevelUpReward } = require('../lib/ranks');
 const { computeLevelUp } = require('../lib/leveling');
 const { e, tierEmoji } = require('../lib/emojis');
 const { shouldCountMessage } = require('../lib/antispam');
+const logger = require('../lib/logger');
 
 const POINT_CHANNEL_ID = process.env.POINT_CHANNEL_ID;
-
 
 module.exports = {
   name: 'messageCreate',
@@ -34,7 +34,6 @@ module.exports = {
     if (words === 0) return;
 
     addQuestProgress(userId, guildId, 'chat', 1);
-
 
     const before = getPoints(userId, guildId);
 
@@ -55,7 +54,6 @@ module.exports = {
   },
 };
 
-
 /** Naikkan level, kasih role & hadiah, lalu umumkan di channel yang sama. */
 async function handleLevelUp(message, stats, xpNeeded) {
   const userId = message.author.id;
@@ -71,7 +69,7 @@ async function handleLevelUp(message, stats, xpNeeded) {
     try {
       await message.member.roles.add(roleId);
     } catch (error) {
-      console.error(`Gagal memberi role level ${newLevel}:`, error.message);
+      logger.error(`Gagal memberi role level ${newLevel}:`, error.message);
     }
   }
 

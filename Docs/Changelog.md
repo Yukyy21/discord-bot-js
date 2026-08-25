@@ -1,5 +1,21 @@
 # Changelog
 
+## Logger Berlevel Menggantikan console.log
+
+- Semua `console.log`/`console.error` di `src/` dan `scripts/` diganti
+  `src/lib/logger.js` — tanpa dependency baru. Tiap baris berisi timestamp
+  lokal (`YYYY-MM-DD HH:mm:ss`) dan tag level selebar lima karakter:
+  `[INFO ]`, `[WARN ]`, `[ERROR]`, `[DEBUG]`.
+- Empat level dengan filter `LOG_LEVEL` di `.env` (default `info`; isi
+  `debug` untuk melihat semuanya). `warn` dan `error` tetap ke stderr.
+- Awalan bracket manual jadi scope: `logger.scope('Admin')`,
+  `scope('Shop')`, `scope('Voice')`.
+- Objek `Error` yang dikirim sebagai argumen tidak di-string-kan, jadi stack
+  trace tetap utuh di log.
+- Item terakhir di daftar Teknis [ToDo.md](ToDo.md) selesai; ditambah 9 test
+  (`test/logger.test.js`) untuk format timestamp, urutan level, scope, dan
+  penyaringan `LOG_LEVEL`.
+
 ## Isi /guide Dirombak + ToDo v2
 
 - `/guide` sekarang punya **11 halaman** (dari 7) dan isinya disamakan dengan

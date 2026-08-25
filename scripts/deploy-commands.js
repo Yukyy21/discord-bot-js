@@ -11,13 +11,15 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes } = require('discord.js');
+const logger = require('../src/lib/logger');
 
 const commandsPath = path.join(__dirname, '..', 'src', 'commands');
 const commands = [];
 
 // withFileTypes + isDirectory: lewati file penjaga git seperti .nekokeep yang
 // bukan folder kategori.
-const categories = fs.readdirSync(commandsPath, { withFileTypes: true })
+const categories = fs
+  .readdirSync(commandsPath, { withFileTypes: true })
   .filter(entry => entry.isDirectory())
   .map(entry => entry.name);
 
@@ -33,7 +35,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
 (async () => {
   try {
-    console.log(`Mendaftarkan ${commands.length} command...`);
+    logger.info(`Mendaftarkan ${commands.length} command...`);
 
     const route = process.env.GUILD_ID
       ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
@@ -41,9 +43,9 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
     const data = await rest.put(route, { body: commands });
 
-    console.log(`Berhasil mendaftarkan ${data.length} command.`);
+    logger.info(`Berhasil mendaftarkan ${data.length} command.`);
   } catch (error) {
-    console.error('Gagal mendaftarkan command:', error);
+    logger.error('Gagal mendaftarkan command:', error);
     process.exitCode = 1;
   }
 })();

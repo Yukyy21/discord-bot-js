@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const logger = require('./lib/logger');
 
 const client = new Client({
   intents: [
@@ -20,7 +21,8 @@ function loadCommands() {
   const root = path.join(__dirname, 'commands');
   // withFileTypes + isDirectory: folder kategori bisa berisi file penjaga git
   // seperti .nekokeep yang bukan direktori dan harus dilewati.
-  const categories = fs.readdirSync(root, { withFileTypes: true })
+  const categories = fs
+    .readdirSync(root, { withFileTypes: true })
     .filter(entry => entry.isDirectory())
     .map(entry => entry.name);
   for (const category of categories) {
@@ -50,9 +52,9 @@ function loadEvents() {
 
 // Bot harus tetap hidup walau ada error yang lolos; kalau proses mati,
 // tracking voice yang tersimpan di memori ikut hilang.
-client.on('error', error => console.error('Client error:', error));
-process.on('unhandledRejection', error => console.error('Unhandled rejection:', error));
-process.on('uncaughtException', error => console.error('Uncaught exception:', error));
+client.on('error', error => logger.error('Client error:', error));
+process.on('unhandledRejection', error => logger.error('Unhandled rejection:', error));
+process.on('uncaughtException', error => logger.error('Uncaught exception:', error));
 
 loadCommands();
 loadEvents();

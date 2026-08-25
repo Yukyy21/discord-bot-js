@@ -3,6 +3,8 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 
+const logger = require('../lib/logger');
+
 const FALLBACK_COLOR = '#5865f2';
 const AVATAR_TIMEOUT_MS = 6000;
 const AVATAR_RETRIES = 2;
@@ -95,12 +97,12 @@ async function loadAvatar(url, name = '', size = 128) {
       try {
         fs.writeFileSync(cached, buffer);
       } catch (error) {
-        console.error('Gagal tulis cache avatar:', error.message);
+        logger.error('Gagal tulis cache avatar:', error.message);
       }
     }
     return await loadImage(buffer);
   } catch (error) {
-    console.error(`Avatar gagal di-load (${url}):`, error.message);
+    logger.error(`Avatar gagal di-load (${url}):`, error.message);
     return fallbackAvatar(name, size);
   }
 }
@@ -110,9 +112,18 @@ async function loadAvatar(url, name = '', size = 128) {
  * sampai batas `minSize`, baru sisanya dipotong dengan elipsis.
  * Mengembalikan lebar teks yang tergambar.
  */
-function fitText(ctx, text, x, y, maxWidth, { weight = 'bold', size = 28, minSize = 14, family = 'sans-serif' } = {}) {
+function fitText(
+  ctx,
+  text,
+  x,
+  y,
+  maxWidth,
+  { weight = 'bold', size = 28, minSize = 14, family = 'sans-serif' } = {},
+) {
   let current = size;
-  const setFont = s => { ctx.font = `${weight} ${s}px ${family}`.trim(); };
+  const setFont = s => {
+    ctx.font = `${weight} ${s}px ${family}`.trim();
+  };
   setFont(current);
   let value = String(text ?? '');
   while (ctx.measureText(value).width > maxWidth && current > minSize) {
@@ -141,7 +152,7 @@ async function drawRankLogo(ctx, logoPath, x, baselineY, maxSize = 26) {
     const h = logo.height * ratio;
     ctx.drawImage(logo, x, baselineY - h / 2 - 7, w, h);
   } catch (error) {
-    console.error('Gagal load rank logo:', error.message);
+    logger.error('Gagal load rank logo:', error.message);
   }
 }
 

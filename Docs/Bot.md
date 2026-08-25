@@ -201,6 +201,12 @@ streak daily sebagai fungsi murni; command dan event hanya memanggilnya.
 **`src/lib/emojis.js`** memusatkan semua custom emoji. Jangan tulis emoji
 unicode langsung di command — detailnya di [Emoji.md](Emoji.md).
 
+**`src/lib/logger.js`** satu-satunya jalur log: tiap baris berisi timestamp
+lokal dan level (`debug`/`info`/`warn`/`error`). Filter aktif lewat
+`LOG_LEVEL` di `.env` (default `info`); `scope('Admin')` dsw. menggantikan
+awalan bracket manual. Jangan memanggil `console.*` langsung di command atau
+event — objek `Error` dikirim sebagai argumen biasa supaya stack trace utuh.
+
 ## Hal yang Gampang Bikin Bingung
 
 - **Command tidak muncul di Discord.** Definisi command hanya sampai ke Discord

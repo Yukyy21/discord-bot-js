@@ -1,5 +1,16 @@
-const { addPoints, addVoiceSeconds, addQuestProgress, saveVoiceSession, getVoiceSession, deleteVoiceSession, getAllVoiceSessions } = require('../database');
+const {
+  addPoints,
+  addVoiceSeconds,
+  addQuestProgress,
+  saveVoiceSession,
+  getVoiceSession,
+  deleteVoiceSession,
+  getAllVoiceSessions,
+} = require('../database');
 const { VOICE } = require('../config/constants');
+const logger = require('../lib/logger');
+
+const log = logger.scope('Voice');
 
 // Sesi voice yang sedang berjalan, key-nya `guildId:userId`. Memori tetap
 // sumber kebenaran selama bot hidup, tapi setiap perubahan ditulis juga ke
@@ -180,7 +191,7 @@ function restoreVoiceTracking(ref) {
   }
 
   if (resumed + fresh > 0) {
-    console.log(`[Voice] Tracking dilanjutkan: ${resumed} sesi dari sebelum restart, ${fresh} sesi baru.`);
+    log.info(`Tracking dilanjutkan: ${resumed} sesi dari sebelum restart, ${fresh} sesi baru.`);
   }
   return { resumed, fresh };
 }

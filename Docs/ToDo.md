@@ -46,7 +46,12 @@ Kalau mengerjakan salah satu, buka issue/PR dan centang di sini.
   `src/lib/tiers.js`, dan peta emoji item — 25 test, semuanya fungsi murni.
 - [x] **Belum ada linter.** ESLint 9 (flat config di `eslint.config.js`) +
   Prettier: `npm run lint`, `npm run lint:fix`, `npm run format`.
-- [ ] Ganti `console.log` dengan logger yang punya level dan timestamp.
+- [x] **Ganti `console.log` dengan logger yang punya level dan timestamp.**
+  Ada `src/lib/logger.js`: empat level (debug/info/warn/error) dengan filter
+  `LOG_LEVEL`, timestamp lokal di tiap baris, dan `scope()` pengganti awalan
+  bracket manual (`[Admin]`, `[Shop]`, `[Voice]`). Semua `src/` dan
+  `scripts/` sudah lewat logger; objek `Error` tetap tercetak dengan stack
+  utuh. Dites di `test/logger.test.js`.
 - [x] Ukuran font kartu sudah menyesuaikan nama panjang: helper `fitText()` di
   `src/cards/canvasKit.js` mengecilkan font bertahap sampai batas minimum, baru
   memotong dengan elipsis. Dipakai di kartu profile, rank, dan leaderboard.

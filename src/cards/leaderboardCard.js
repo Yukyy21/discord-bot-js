@@ -3,9 +3,15 @@ const { AttachmentBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require
 const fs = require('node:fs');
 const { roundRect, loadAvatar, fitText } = require('./canvasKit');
 const { asset } = require('../lib/paths');
-const { getBalanceLeaderboard, getPointsLeaderboard, getVoiceHoursLeaderboard, getLevelLeaderboard } = require('../database');
+const {
+  getBalanceLeaderboard,
+  getPointsLeaderboard,
+  getVoiceHoursLeaderboard,
+  getLevelLeaderboard,
+} = require('../database');
 const { baseEmbed } = require('../ui/embeds');
 const { getRank } = require('../lib/ranks');
+const logger = require('../lib/logger');
 
 const RANK_COLORS = { 1: '#ffd700', 2: '#c0c0c0', 3: '#cd7f32' };
 
@@ -121,16 +127,18 @@ async function renderLeaderboardCard(interaction, kategori) {
     return send({ embeds: [baseEmbed().setDescription('Belum ada data di server ini.')], components: [] });
   }
 
-  const users = await Promise.all(rows.map(async (row) => {
-    const cached = interaction.client.users.cache.get(row.userId);
-    if (cached) return cached;
-    try {
-      return await interaction.client.users.fetch(row.userId);
-    } catch (error) {
-      console.error(`Gagal fetch user ${row.userId}:`, error.message);
-      return null;
-    }
-  }));
+  const users = await Promise.all(
+    rows.map(async row => {
+      const cached = interaction.client.users.cache.get(row.userId);
+      if (cached) return cached;
+      try {
+        return await interaction.client.users.fetch(row.userId);
+      } catch (error) {
+        logger.error(`Gagal fetch user ${row.userId}:`, error.message);
+        return null;
+      }
+    }),
+  );
 
   const entries = rows.map((row, i) => {
     const user = users[i];
@@ -157,7 +165,10 @@ async function renderLeaderboardCard(interaction, kategori) {
     const send = interaction.deferred
       ? interaction.editReply.bind(interaction)
       : interaction.reply.bind(interaction);
-    return send({ embeds: [baseEmbed().setDescription('Belum ada data yang bisa ditampilkan di server ini.')], components: [] });
+    return send({
+      embeds: [baseEmbed().setDescription('Belum ada data yang bisa ditampilkan di server ini.')],
+      components: [],
+    });
   }
 
   const buffer = await buildLeaderboardCard(entries, label);

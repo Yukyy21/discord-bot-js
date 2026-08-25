@@ -1,5 +1,6 @@
 const { MessageFlags } = require('discord.js');
 const { errorEmbed, warnEmbed } = require('../ui/embeds');
+const logger = require('../lib/logger');
 const { claimQuest } = require('../database');
 const { buildGuide } = require('../ui/guidePages');
 const { buildShop } = require('../commands/economy/shop');
@@ -57,7 +58,9 @@ async function handleButton(interaction) {
             flags: MessageFlags.Ephemeral,
           });
         }
-        return await interaction.update(buildInventory(interaction.user, interaction.guildId, Number(b) || 0));
+        return await interaction.update(
+          buildInventory(interaction.user, interaction.guildId, Number(b) || 0),
+        );
       }
 
       case 'quest_claim': {
@@ -92,7 +95,7 @@ async function handleButton(interaction) {
     }
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION) return;
-    console.error(`Button "${interaction.customId}" gagal:`, error);
+    logger.error(`Button "${interaction.customId}" gagal:`, error);
   }
 }
 
@@ -104,17 +107,23 @@ async function handleSelectMenu(interaction) {
     if (interaction.customId.startsWith('shop_tier:')) {
       const query = interaction.customId.slice('shop_tier:'.length);
       const tier = interaction.values[0] === 'all' ? '' : interaction.values[0];
-      return await interaction.update(buildShop(0, { tier, query }, {
-        userId: interaction.user.id,
-        guildId: interaction.guildId,
-      }));
+      return await interaction.update(
+        buildShop(
+          0,
+          { tier, query },
+          {
+            userId: interaction.user.id,
+            guildId: interaction.guildId,
+          },
+        ),
+      );
     }
     if (interaction.customId === 'lb_filter') {
       return await renderLeaderboardCard(interaction, interaction.values[0]);
     }
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION) return;
-    console.error(`Select menu "${interaction.customId}" gagal:`, error);
+    logger.error(`Select menu "${interaction.customId}" gagal:`, error);
   }
 }
 
@@ -128,7 +137,7 @@ async function handleCommand(interaction) {
     await command.execute(interaction);
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION) return;
-    console.error(`Command /${interaction.commandName} gagal:`, error);
+    logger.error(`Command /${interaction.commandName} gagal:`, error);
 
     const reply = {
       embeds: [errorEmbed('Terjadi error saat menjalankan command ini.')],
@@ -138,7 +147,7 @@ async function handleCommand(interaction) {
       if (interaction.replied || interaction.deferred) await interaction.followUp(reply);
       else await interaction.reply(reply);
     } catch (replyError) {
-      console.error('Gagal mengirim pesan error ke user:', replyError.message);
+      logger.error('Gagal mengirim pesan error ke user:', replyError.message);
     }
   }
 }
