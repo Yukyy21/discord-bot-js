@@ -32,7 +32,7 @@ level yang terpisah.
 | `/inventory` | Item yang kamu punya, 5 per halaman |
 | `/use <id>` | Pakai satu buah item yang punya efek |
 | `/give <user> <jumlah>` | Transfer coin ke member lain |
-| `/exchange <jumlah>` | Tukar coin jadi poin (500 coin = 1 poin) |
+| `/exchange <jumlah>` | Tukar coin jadi poin (1000 coin = 1 poin) |
 
 ### Poin & Progres
 
@@ -78,7 +78,7 @@ di `src/lib/antispam.js`; daftar pesan terakhir disimpan di memori dengan
 batas 1000 user, jadi restart bot menghapus riwayat spam (tidak masalah; ini
 penyaring, bukan data ekonomi).
 
-**Voice.** Tiap 15 menit di voice channel bernilai 5 poin, dengan syarat
+**Voice.** Tiap 15 menit di voice channel bernilai 8 poin dan 10 XP, dengan syarat
 channel berisi minimal dua manusia yang tidak deaf — user yang dinilai ikut
 terhitung, jadi duduk berdua sudah cukup. AFK channel tidak pernah dihitung.
 Kalau syarat hilang di tengah jalan (teman keluar atau semua deaf), sisa masa
@@ -91,17 +91,18 @@ waktu sebelum mati dilanjutkan saat boot — bukan hangus. Baris untuk user yang
 sudah keluar voice selama bot mati dibuang otomatis saat restore.
 
 **Level.** XP yang dibutuhkan untuk naik dari level N adalah `N × 100`. Naik
-level memberi `level × 10` poin, `level × 50` coin, dan peluang item acak dari
-katalog sebesar `10% + level × 1%` (maksimum 50%). Kalau `LEVEL_ROLES` di
-`src/config/index.js` diisi, role juga otomatis diberikan.
+level memberi `level × 10` poin, `min(level × 50, 2500)` coin, dan peluang
+item acak dari katalog sebesar `10% + level × 1%` (maksimum 50%). Item acak
+diundi berdasarkan rarity lewat `weightedRandom()`, bukan uniform. Kalau
+`LEVEL_ROLES` di `src/config/index.js` diisi, role juga otomatis diberikan.
 
 **Tier rank.** Novice (Lv 1), Apprentice (6), Adept (11), Veteran (21),
 Champion (36), Hero (51), Demigod (71). Diatur di `src/lib/ranks.js`.
 
 **Daily.** Klaim pertama 500 coin, tiap hari berturut-turut menambah 100 coin.
-Perbandingan hari memakai tanggal kalender, bukan selisih 24 jam — klaim jam
-23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong sehari, streak
-kembali ke 1.
+Bonus streak dibatasi maksimum 3.000 (setara 30 hari). Perbandingan hari
+memakai tanggal kalender, bukan selisih 24 jam — klaim jam 23.00 lalu jam
+07.00 besoknya tetap dihitung streak. Bolong sehari, streak kembali ke 1.
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
@@ -153,16 +154,18 @@ satu pintu untuk semua sumber poin (chat, voice, exchange) — ke tabel
 `weekly_points`. Baris pekan lama dipertahankan sebagai riwayat; tidak ada
 pekerjaan reset berkala.
 
-**Mini boss.** Satu boss diundi tiap pukul 00:00 dan 12:00 waktu lokal event
+**Mini boss.** Satu boss diundi tiap pukul 12:00 dan 20:00 waktu lokal event
 (`BOSS.SPAWN_HOURS`, offset `BOSS_UTC_OFFSET`, default WIB) di channel
-`BOSS_CHANNEL_ID`: Pump Freakin 45% (24.000 HP), Clown Orca 45% (30.000 HP),
-Ancient Mummy 10% (60.000 HP, spesial). Player tidak punya HP — yang berdarah
-hanya boss. Satu klik tombol memberi damage acak sesuai rentang boss
-(300–900 sebelum buff `boss_damage`), dengan cooldown 10 detik per orang; boss
-kabur setelah 6 jam. Hadiah dibagi ke top 3 damager (40%/25%/15%) dan pemberi
-last hit (20%) — satu orang boleh kena dua jatah. Angka HP, damage, hadiah, dan
-loot table ada di `src/lib/bossCatalog.js`; sisanya di `BOSS`
-(`src/config/constants.js`).
+`BOSS_CHANNEL_ID`: Pump Freakin 45% (24.000 HP, 8.000 coin), Clown Orca 45%
+(30.000 HP, 10.000 coin), Ancient Mummy 10% (60.000 HP, 25.000 coin, spesial).
+Player tidak punya HP — yang berdarah hanya boss. Satu klik tombol memberi
+damage acak sesuai rentang boss (300–900 sebelum buff `boss_damage`), dengan
+cooldown 10 detik per orang; boss kabur setelah 6 jam. Hadiah: 60% pool dibagi
+proporsional damage ke semua peserta, sisanya bonus top 3 damager (15%/10%/5%)
+dan pemberi last hit (10%) — satu orang boleh kena dua jatah. Minimal 3 peserta
+(`BOSS.MIN_PARTICIPANTS`) supaya solo farm tidak penuh; kalau peserta kurang,
+hadiah tidak dibagikan. Angka HP, damage, hadiah, dan loot table ada di
+`src/lib/bossCatalog.js`; sisanya di `BOSS` (`src/config/constants.js`).
 
 **Boss menyerang balik.** Boss tidak bisa membunuh player (player tetap tanpa
 HP); yang dilakukannya adalah memasang debuff atau merampas coin dompet.

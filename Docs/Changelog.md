@@ -1,5 +1,66 @@
 # Changelog
 
+## Balancing Ekonomi (Coin, XP & Poin)
+
+Semua angka diambil dari rekomendasi [Balancing.md](Balancing.md). 12 file berubah, 76/76 test pass.
+
+**Voice**
+- `VOICE.POINTS_PER_INTERVAL` **5 → 8** poin per 15 menit.
+- Tambah `VOICE.XP_PER_INTERVAL: 10` — voice sekarang juga memberi XP, jadi
+  member voice-only tetap bisa naik level. XP dibayarkan bersama poin di
+  `voiceStateUpdate.js` (interval, endSession, syncEligibility).
+
+**Daily**
+- Tambah `DAILY.STREAK_MAX_BONUS: 3000` — bonus streak dibatasi setara 30 hari
+  (100 × 30). Streak bisa terus naik, tapi coin per hari tidak naik selamanya.
+- `computeDailyClaim()` di `src/lib/daily.js` memakai `Math.min()` untuk bonus
+  dan `nextReward`.
+
+**Exchange**
+- `EXCHANGE_RATE` **500 → 1000** coin per poin. Kurs naik supaya leaderboard
+  tetap soal aktivitas, bukan soal beli poin.
+
+**Boss — Hadiah**
+- Coin pool diturunkan: Pump Freakin **24.000 → 8.000**, Clown Orca
+  **30.000 → 10.000**, Ancient Mummy **75.000 → 25.000** (`bossCatalog.js`).
+- `computeRewards()` di `src/lib/boss.js` dirombak: 60% pool dibagi
+  **proporsional damage ke semua peserta**, sisanya bonus top 3 (15%/10%/5%)
+  + last hit (10%). Semua yang ikut menyerang dapat bagian.
+
+**Boss — Peserta Minimum**
+- Tambah `BOSS.MIN_PARTICIPANTS: 3`. Kalau boss tumbang tapi peserta kurang
+  dari 3, hadiah tidak dibagikan dan boss dianggap kabur.
+- `finishBoss()` di `src/lib/bossManager.js` mengecek jumlah peserta sebelum
+  distribusi.
+
+**Boss — Jam Spawn**
+- `BOSS.SPAWN_HOURS` **[0, 12] → [12, 20]** WIB. Slot tengah malam yang
+  sepi digeser ke jam 20:00.
+
+**Level Up — Coin Cap**
+- Coin naik level dibatasi: `Math.min(level × 50, 2500)` (`ranks.js`).
+  Sebelumnya tanpa batas (level 100 = 5.000 coin).
+
+**Level Up — Item Acak**
+- Item random saat naik level sekarang memakai `weightedRandom()` dari
+  `src/lib/tiers.js` berdasarkan rarity, bukan uniform dari seluruh katalog.
+  Mythic tidak lagi punya peluang sama dengan Slime Gel.
+
+**/give — Biaya Transfer**
+- Tambah `GIVE_FEE_RATE: 0.05` (5%). Biaya dipotong dari saldo pengirim
+  bersama jumlah transfer. Embed menampilkan rincian jumlah + biaya.
+
+**Quest — Buff Dikunci**
+- Tambah kolom `lockedMultiplier` di tabel `quests` (migrasi otomatis).
+- Multiplier coin dikunci saat quest **selesai** (progress mencapai target),
+  bukan saat diklaim. Mencegah pemain menunda klaim sambil pasang buff.
+- `addQuestProgress()` menyimpan multiplier; `claimQuest()` memakai yang
+  lebih besar antara locked dan current.
+
+**Dokumentasi & Test**
+- `test/boss.test.js`: 3 tes disesuaikan — proporsional reward, share 0.85
+  untuk top1+lasthit, spawn slot 12/20.
+
 ## Cooldown Serang 10 Detik & Boss Bisa Menyerang Player
 
 **Cooldown**
