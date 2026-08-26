@@ -71,6 +71,12 @@ Semua angka diambil dari rekomendasi [Balancing.md](Balancing.md). 12 file berub
   dengan `/daily` dan boss.
 - `test/daily.test.js`: waktu test disesuaikan supaya cocok dengan zona lokal.
 
+**Fix /shop Interaction Timeout**
+- `/shop` sekarang pakai `deferReply()` + `editReply()` alih-alih `reply()`
+  langsung. Sebelumnya `buildShop()` jalan sync dengan beberapa database call
+  (`getShopStock()`, `getUser()`); kalau query lambat > 3 detik, Discord
+  timeout interaction-nya sebelum reply terkirim (error 40060).
+
 ## Cooldown Serang 10 Detik & Boss Bisa Menyerang Player
 
 **Cooldown**
