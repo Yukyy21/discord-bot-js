@@ -135,7 +135,8 @@ module.exports = {
       .setDescription('Cari item berdasarkan nama')
       .setMaxLength(40)),
   async execute(interaction) {
-    await interaction.reply(buildShop(
+    await interaction.deferReply();
+    await interaction.editReply(buildShop(
       0,
       {
         tier: interaction.options.getString('tier') || '',
