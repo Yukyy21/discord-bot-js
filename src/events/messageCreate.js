@@ -15,6 +15,7 @@ const { CHAT, xpForLevel } = require('../config/constants');
 const { getRank, getLevelUpReward } = require('../lib/ranks');
 const { computeLevelUp } = require('../lib/leveling');
 const { e, tierEmoji } = require('../lib/emojis');
+const { getTier, weightedRandom } = require('../lib/tiers');
 const { shouldCountMessage } = require('../lib/antispam');
 const logger = require('../lib/logger');
 
@@ -83,10 +84,15 @@ async function handleLevelUp(message, stats, xpNeeded) {
   let rewardText = `${e('point')} +${reward.points} poin  ${e('coin')} +${reward.coins} coin`;
 
   if (reward.randomItem) {
-    const items = getShopItems();
-    const item = items[Math.floor(Math.random() * items.length)];
-    grantItem(userId, guildId, item.id);
-    rewardText += `  ${e('inventory')} +${item.name}`;
+    const items = getShopItems().map(item => ({
+      ...item,
+      tier: getTier(item.price, item.name),
+    }));
+    const [item] = weightedRandom(items, 1);
+    if (item) {
+      grantItem(userId, guildId, item.id);
+      rewardText += `  ${e('inventory')} +${item.name}`;
+    }
   }
 
   await message.channel.send(

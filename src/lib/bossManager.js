@@ -192,9 +192,26 @@ async function rampageBoss(client, row) {
   return hits;
 }
 
-/** Boss mati: bagi hadiah ke top 3 damager + last hit, lalu umumkan. */
+/** Boss mati: bagi hadiah ke semua peserta (proporsional) + top 3 + last hit, lalu umumkan. */
 async function finishBoss(client, row) {
   const contributions = getContributions(row.id);
+
+  // Minimal peserta harus terpenuhi sebelum hadiah dibagikan
+  if (contributions.length < BOSS.MIN_PARTICIPANTS) {
+    expireBoss(row.id);
+    const channel = await resolveBossChannel(client, row.channelId);
+    if (channel) {
+      await channel
+        .send({
+          embeds: [bossEscapedEmbed(row)],
+          files: bossIconFiles(row.bossKey),
+        })
+        .catch(() => {});
+    }
+    log.info(`Boss ${row.bossKey} (id ${row.id}) tumbang tapi kurang peserta (${contributions.length}/${BOSS.MIN_PARTICIPANTS}) — hadiah tidak dibagikan`);
+    return [];
+  }
+
   const rewards = distributeRewards(row.id);
   const totalHits = contributions.reduce((sum, c) => sum + c.hits, 0);
 

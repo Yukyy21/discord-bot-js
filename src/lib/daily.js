@@ -19,7 +19,7 @@ function computeDailyClaim(user, now = new Date(), config = DAILY) {
 
   const yesterdayKey = dateKey(new Date(new Date(now).getTime() - config.DAY_MS));
   const streak = lastKey === yesterdayKey ? (user.streak || 0) + 1 : 1;
-  const bonus = (streak - 1) * config.STREAK_BONUS;
+  const bonus = Math.min((streak - 1) * config.STREAK_BONUS, config.STREAK_MAX_BONUS);
 
   return {
     claimable: true,
@@ -27,7 +27,7 @@ function computeDailyClaim(user, now = new Date(), config = DAILY) {
     streak,
     bonus,
     reward: config.BASE_REWARD + bonus,
-    nextReward: config.BASE_REWARD + streak * config.STREAK_BONUS,
+    nextReward: config.BASE_REWARD + Math.min(streak * config.STREAK_BONUS, config.STREAK_MAX_BONUS),
   };
 }
 

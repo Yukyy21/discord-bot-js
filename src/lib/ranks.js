@@ -18,7 +18,7 @@ function getRank(level) {
 
 function getLevelUpReward(level) {
   const points = level * 10;
-  const coins = level * 50;
+  const coins = Math.min(level * 50, 2500);
   const itemChance = Math.min(0.1 + level * 0.01, 0.5);
   const randomItem = Math.random() < itemChance;
   return { points, coins, randomItem, itemChance };

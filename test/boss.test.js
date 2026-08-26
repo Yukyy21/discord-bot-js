@@ -33,7 +33,7 @@ test('cooldown serang dihitung dari serangan terakhir', () => {
   assert.strictEqual(attackCooldownLeft(now - 1000, now), BOSS.ATTACK_COOLDOWN_MS - 1000);
 });
 
-test('hadiah dibagi ke top 3 damager dan last hit', () => {
+test('hadiah dibagi proporsional ke semua peserta + bonus top 3 & last hit', () => {
   const boss = BOSS_CATALOG.pump_freakin;
   const rewards = computeRewards(
     boss,
@@ -47,11 +47,11 @@ test('hadiah dibagi ke top 3 damager dan last hit', () => {
   );
   assert.deepStrictEqual(
     rewards.map(r => r.userId),
-    ['a', 'b', 'd', 'c'],
+    ['a', 'b', 'c', 'd'],
   );
   assert.deepStrictEqual(rewards.find(r => r.userId === 'd').roles, ['last_hit']);
-  assert.strictEqual(rewards.find(r => r.userId === 'a').coin, Math.round(boss.reward.coin * 0.4));
-  // Damager ke-4 tanpa last hit tidak dapat apa pun.
+  assert.deepStrictEqual(rewards.find(r => r.userId === 'c').roles, ['top3']);
+  // Semua peserta dapat bagian proporsional (60% pool dibagi rata sesuai damage)
   assert.strictEqual(rewards.length, 4);
 });
 
@@ -60,7 +60,8 @@ test('top 1 yang sekaligus last hit dapat dua jatah dalam satu baris', () => {
   const rewards = computeRewards(boss, [{ userId: 'a', damage: 9000 }], 'a');
   assert.strictEqual(rewards.length, 1);
   assert.deepStrictEqual(rewards[0].roles, ['top1', 'last_hit']);
-  assert.ok(Math.abs(rewards[0].share - 0.6) < 1e-9);
+  // Proporsional 60% + top1 15% + last_hit 10% = 85%
+  assert.ok(Math.abs(rewards[0].share - 0.85) < 1e-9);
 });
 
 test('buff loot menaikkan peluang dan jumlah drop', () => {
@@ -78,10 +79,10 @@ test('semua item di tabel loot ada di katalog shop', () => {
   }
 });
 
-test('jadwal spawn hanya jam 00 dan 12 waktu lokal event', () => {
-  // Offset 7 (WIB): 17:00 UTC = 00:00 WIB hari berikutnya.
-  assert.strictEqual(dueSpawnSlot(new Date('2026-08-25T17:05:00Z'), 7), '2026-08-26T00');
-  assert.strictEqual(dueSpawnSlot(new Date('2026-08-25T05:30:00Z'), 7), '2026-08-25T12');
-  assert.strictEqual(dueSpawnSlot(new Date('2026-08-25T08:00:00Z'), 7), null);
+test('jadwal spawn hanya jam 12 dan 20 waktu lokal event', () => {
+  // Offset 7 (WIB): 05:00 UTC = 12:00 WIB, 13:00 UTC = 20:00 WIB
+  assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T05:05:00Z'), 7), '2026-08-26T12');
+  assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T13:30:00Z'), 7), '2026-08-26T20');
+  assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T08:00:00Z'), 7), null);
 });
 

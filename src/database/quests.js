@@ -66,7 +66,7 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
   `).all(userId, guildId, ...currentPeriodKeys());
 
   const update = db.prepare(
-    'UPDATE quests SET progress = ? WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?',
+    'UPDATE quests SET progress = ?, lockedMultiplier = ? WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?',
   );
   // Insight menggandakan progres, kecuali quest mode 'max' (streak) yang
   // nilainya sudah absolut.
@@ -82,7 +82,18 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
       const next = quest.mode === 'max'
         ? Math.min(Math.max(row.progress, amount), row.target)
         : Math.min(row.progress + Math.round(amount * questMult), row.target);
-      if (next !== row.progress) update.run(next, userId, guildId, row.period, row.questId);
+      if (next !== row.progress) {
+        // Kunci multiplier saat quest baru selesai (progress mencapai target)
+        const justCompleted = next >= row.target && row.progress < row.target;
+        const lockedMult = justCompleted
+          ? Math.max(getMultiplier(userId, guildId, 'coin'), getMultiplier(userId, guildId, 'quest_coin'))
+          : undefined;
+        if (lockedMult !== undefined) {
+          update.run(next, lockedMult, userId, guildId, row.period, row.questId);
+        } else {
+          update.run(next, undefined, userId, guildId, row.period, row.questId);
+        }
+      }
     }
   });
   bump();
@@ -94,7 +105,7 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
  */
 function claimQuest(userId, guildId, period, questId) {
   const row = db.prepare(`
-    SELECT target, reward, progress, claimed FROM quests
+    SELECT target, reward, progress, claimed, lockedMultiplier FROM quests
     WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?
   `).get(userId, guildId, period, questId);
 
@@ -104,11 +115,13 @@ function claimQuest(userId, guildId, period, questId) {
   if (row.claimed) return { ok: false, message: 'Quest ini sudah pernah diklaim.' };
   if (row.progress < row.target) return { ok: false, message: 'Quest belum selesai.' };
 
-  // Deep Current menaikkan coin dari quest; buff coin biasa juga berlaku.
-  const reward = Math.round(row.reward * Math.max(
+  // Gunakan lockedMultiplier jika ada (saat quest selesai),否则 pakai buff saat klaim
+  const lockedMult = row.lockedMultiplier || 1;
+  const currentMult = Math.max(
     getMultiplier(userId, guildId, 'coin'),
     getMultiplier(userId, guildId, 'quest_coin'),
-  ));
+  );
+  const reward = Math.round(row.reward * Math.max(lockedMult, currentMult));
 
   const claim = db.transaction(() => {
     db.prepare(`

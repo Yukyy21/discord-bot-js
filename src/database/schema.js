@@ -48,6 +48,7 @@ function createTables() {
       reward INTEGER NOT NULL DEFAULT 0,
       progress INTEGER DEFAULT 0,
       claimed INTEGER DEFAULT 0,
+      lockedMultiplier REAL DEFAULT 1,
       PRIMARY KEY (userId, guildId, period, questId)
     );
 
@@ -141,6 +142,8 @@ function runMigrations() {
   ensureColumn('shop_items', 'effect', 'TEXT');
   // Serangan balik boss: kapan terakhir boss mengamuk ke para penyerang.
   ensureColumn('boss_spawns', 'lastRampageAt', 'INTEGER DEFAULT 0');
+  // Kunci multiplier saat quest selesai supaya buff tidak bisa ditunda klaim.
+  ensureColumn('quests', 'lockedMultiplier', 'REAL DEFAULT 1');
 }
 
 module.exports = { createTables, runMigrations };

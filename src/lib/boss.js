@@ -40,7 +40,8 @@ function attackCooldownLeft(lastAttackAt, now = Date.now(), cooldownMult = 1) {
 }
 
 /**
- * Bagi hadiah boss: top 3 damager + player yang memberi last hit.
+ * Bagi hadiah boss: 60% pool dibagi proporsional damage ke semua peserta,
+ * sisanya bonus top 3 damager + player yang memberi last hit.
  * Satu orang bisa dapat dua jatah (mis. top 1 sekaligus last hit); jatahnya
  * dijumlahkan jadi satu baris supaya pemberian hadiah cukup sekali per user.
  *
@@ -49,10 +50,22 @@ function attackCooldownLeft(lastAttackAt, now = Date.now(), cooldownMult = 1) {
  *            coin, xp, points }] urut dari jatah terbesar.
  */
 function computeRewards(boss, contributions, lastHitUserId) {
-  const ranked = [...contributions].sort((a, b) => b.damage - a.damage).slice(0, 3);
+  const totalDamage = contributions.reduce((sum, c) => sum + c.damage, 0) || 1;
   const byUser = new Map();
 
-  const add = (userId, role, share) => {
+  // 60% pool dibagi proporsional ke semua peserta
+  for (const c of contributions) {
+    const propShare = (c.damage / totalDamage) * BOSS.PROPORTIONAL_SHARE;
+    const row = byUser.get(c.userId) ?? { userId: c.userId, roles: [], share: 0, damage: 0 };
+    row.share += propShare;
+    row.damage = c.damage;
+    byUser.set(c.userId, row);
+  }
+
+  // Sisa 40% untuk top 3 + last hit
+  const ranked = [...contributions].sort((a, b) => b.damage - a.damage).slice(0, 3);
+
+  const addBonus = (userId, role, share) => {
     if (!userId) return;
     const row = byUser.get(userId) ?? { userId, roles: [], share: 0, damage: 0 };
     row.roles.push(role);
@@ -61,8 +74,8 @@ function computeRewards(boss, contributions, lastHitUserId) {
     byUser.set(userId, row);
   };
 
-  ranked.forEach((entry, index) => add(entry.userId, BOSS.TOP_ROLES[index], BOSS.TOP_SHARES[index]));
-  add(lastHitUserId, 'last_hit', BOSS.LAST_HIT_SHARE);
+  ranked.forEach((entry, index) => addBonus(entry.userId, BOSS.TOP_ROLES[index], BOSS.TOP_SHARES[index]));
+  addBonus(lastHitUserId, 'last_hit', BOSS.LAST_HIT_SHARE);
 
   return [...byUser.values()]
     .map(row => ({
