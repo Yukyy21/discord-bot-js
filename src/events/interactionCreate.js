@@ -15,6 +15,7 @@ const { handleBossAttack } = require('../lib/bossManager');
 // daripada memancing error 10062 di log.
 const STALE_COMMAND_MS = 2500;
 const UNKNOWN_INTERACTION = 10062;
+const ALREADY_ACKNOWLEDGED = 40060;
 
 module.exports = {
   name: 'interactionCreate',
@@ -98,7 +99,7 @@ async function handleButton(interaction) {
         return;
     }
   } catch (error) {
-    if (error.code === UNKNOWN_INTERACTION) return;
+    if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Button "${interaction.customId}" gagal:`, error);
   }
 }
@@ -126,7 +127,7 @@ async function handleSelectMenu(interaction) {
       return await renderLeaderboardCard(interaction, interaction.values[0]);
     }
   } catch (error) {
-    if (error.code === UNKNOWN_INTERACTION) return;
+    if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Select menu "${interaction.customId}" gagal:`, error);
   }
 }
@@ -140,7 +141,7 @@ async function handleCommand(interaction) {
   try {
     await command.execute(interaction);
   } catch (error) {
-    if (error.code === UNKNOWN_INTERACTION) return;
+    if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Command /${interaction.commandName} gagal:`, error);
 
     const reply = {
@@ -151,7 +152,9 @@ async function handleCommand(interaction) {
       if (interaction.replied || interaction.deferred) await interaction.followUp(reply);
       else await interaction.reply(reply);
     } catch (replyError) {
-      logger.error('Gagal mengirim pesan error ke user:', replyError.message);
+      if (replyError.code !== ALREADY_ACKNOWLEDGED) {
+        logger.error('Gagal mengirim pesan error ke user:', replyError.message);
+      }
     }
   }
 }

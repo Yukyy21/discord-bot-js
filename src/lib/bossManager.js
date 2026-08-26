@@ -95,6 +95,7 @@ async function spawnBoss(client, { bossKey = null, slot = null, channel = null }
 
 /** Tombol serang. Player tidak punya HP — hanya boss yang berdarah. */
 async function handleBossAttack(interaction, bossId) {
+  if (interaction.replied || interaction.deferred) return;
   const row = getBossById(Number(bossId));
   if (!row || row.status !== 'active') {
     return interaction.reply({
