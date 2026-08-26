@@ -58,6 +58,11 @@ const REGISTRY = {
   back:       { name: 'Back',        id: '1541044840802820168', animated: false, fallback: '◀️' },
   cancel:     { name: 'cancel',      id: '1541044497540972625', animated: true,  fallback: '🚫' },
 
+  // — AI (/ai-ask) —
+  ai_answer:  { name: 'Aiask1',      id: '1541408696838398002', animated: true,  fallback: '🤖' },
+  ai_think:   { name: 'Aithink',     id: '1541408699241725973', animated: true,  fallback: '💭' },
+  ai_answer2: { name: 'aiask2',      id: '1541408702207234209', animated: true,  fallback: '✨' },
+
   // — Quest —
   quest:      { name: 'quest',       id: '1540598685853814834', animated: false, fallback: '📜' },
 
@@ -66,10 +71,12 @@ const REGISTRY = {
   buff:       { name: 'buff',        id: '1541044489622392965', animated: false, fallback: '🔺' },
   buff_active:{ name: 'Buffactive',  id: '1541076451154198618', animated: true,  fallback: '🌀' },
 
-  // — Boss (belum dipakai; menunggu sistem mini boss) —
+  // — Boss (sistem mini boss) —
   boss:       { name: 'boss',        id: '1541044491950231672', animated: false, fallback: '👹' },
   boss_hp:    { name: 'bosshp',      id: '1541044493850247208', animated: false, fallback: '❤️' },
   boss_loot:  { name: 'lootboss',    id: '1541044495502807180', animated: false, fallback: '🎁' },
+  // Belum di-upload; isi ID-nya di config.js kalau mau ikon serang khusus.
+  boss_hit:   { name: 'bosshit',     id: '', animated: false, fallback: '⚔️' },
 
   // — Credit & Info Bot —
   backend:    { name: 'Backend',      id: '1540378495320981564', animated: false, fallback: '🧠' },
@@ -133,3 +140,4 @@ function medal(index) {
 }
 
 module.exports = { e, eo, tierEmoji, medal, REGISTRY, EMOJI_NAMES: Object.keys(REGISTRY) };
+

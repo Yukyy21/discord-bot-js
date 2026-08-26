@@ -1,5 +1,132 @@
 # Changelog
 
+## Cooldown Serang 10 Detik & Boss Bisa Menyerang Player
+
+**Cooldown**
+- `BOSS.ATTACK_COOLDOWN_MS` **90 detik → 10 detik** (`src/config/constants.js`).
+  Embed boss ikut menampilkan angka baru karena memang membacanya dari konstanta.
+- `attackCooldownLeft(lastAttackAt, now, cooldownMult)` di `src/lib/boss.js`
+  sekarang menerima pengali cooldown. Nilai < 1 diabaikan (`Math.max(1, ...)`)
+  supaya debuff tidak bisa dipakai untuk mempercepat serangan.
+
+**Boss menyerang balik (fitur baru)**
+- Modul murni baru `src/lib/bossAttacks.js`: katalog 10 serangan boss
+  (Rantai Berat, Belenggu Kutukan, Aura Melemahkan, Kutukan Serakah, Debu
+  Kabur, Kutukan Bisu, Pukulan Linglung, Rampas Koin, Perampokan Makam, Tanda
+  Kutukan), metadata key debuff, `pickDebuff`, `pickBossAttack`, `rollCounter`,
+  `stealAmount`, dan `describeDebuff`.
+- Lapisan baru `src/database/debuffs.js`: `addDebuff`, `getDebuff`,
+  `getActiveDebuffs`, `consumeDebuffCharge`, `clearDebuffs`, `applyBossAttack`.
+  Diekspor lewat `src/database/index.js`.
+- `src/lib/bossCatalog.js`: tiap boss dapat field `counterChance` (25% / 30% /
+  40%) dan `attacks` (daftar id serangan yang bisa diundi).
+- `src/lib/bossManager.js`: serangan balik dijalankan saat player klik
+  **Serang!**, plus fungsi baru `rampageBoss()` — tiap 5 menit boss menyerang
+  maksimal 3 penyerang teraktif (window 15 menit) dan mengumumkannya di channel
+  boss. Penjaga jadwal boss yang lama sekalian memicunya.
+- `src/lib/boss.js`: helper baru `pickRampageTargets()`.
+- `src/ui/bossEmbeds.js`: `bossRampageEmbed()`, `counterLines()`, embed hasil
+  serangan menampilkan debuff yang baru menempel / coin yang dirampas / serangan
+  yang meleset, dan embed boss memperingatkan bahwa boss bisa membalas.
+- `src/commands/economy/buffs.js`: `/buffs` kini punya bagian **Debuff dari
+  Mini Boss** terpisah dari daftar buff item.
+- `src/database/schema.js`: kolom baru `boss_spawns.lastRampageAt` (lewat
+  `ensureColumn`, aman untuk database lama).
+
+**Aturan biar tidak bentrok dengan ability item**
+- Debuff disimpan di tabel `user_buffs` tapi selalu memakai key ber-prefix
+  `debuff:`, jadi tidak pernah tercampur dengan key buff item.
+  `getActiveBuffs()` sekarang menyaring baris debuff.
+- Buff item dihitung **lebih dulu** dan tidak pernah dibatalkan; debuff hanya
+  mengalikan hasil akhirnya. `applyBuff()` melakukannya otomatis lewat
+  `getDebuffMultiplier()`; `distributeRewards()` memakai aturan yang sama untuk
+  coin dan peluang loot.
+- Debuff sejenis tidak menumpuk (dipakai yang terparah), tidak kena bonus durasi
+  Endless Pulse, dan tidak ikut diperpanjang Rekindle.
+- Chrono Core (`cooldown_reset`) sekarang sekaligus membersihkan semua debuff.
+- Coin hanya dirampas dari dompet, tidak dari bank.
+
+**Dokumentasi & tes**
+- [ai.md](ai.md): bagian **6b** dapat sub-bab "Boss Menyerang Balik" (tabel
+  serangan + aturan debuff) dan 4 FAQ baru; angka cooldown diperbarui.
+  [Bot.md](Bot.md), [Balancing.md](Balancing.md), dan [ability.md](ability.md)
+  ikut disesuaikan.
+- `test/bossAttacks.test.js` baru (10 tes): cooldown 10 detik, pengali cooldown,
+  validitas katalog serangan tiap boss, debuff tidak menumpuk, debuff
+  kadaluarsa, key debuff tidak bentrok dengan key buff, batas rampasan coin,
+  sasaran amukan, dan format deskripsi. `npm test` hijau (76/76).
+
+## Ikon Gambar Mini Boss
+
+- Tiga ikon boss baru di `assets/boss/`: `pump_freakin.png`, `clown_orca.png`,
+  dan `ancient_mummy.jpeg`. Nama filenya didaftarkan di field baru `icon` pada
+  `src/lib/bossCatalog.js`.
+- Modul baru `src/lib/bossIcons.js` (`bossIcon`, `bossIconFiles`,
+  `bossIconPath`) membungkus file ikon jadi `AttachmentBuilder` + URL
+  `attachment://boss-<key>.<ext>`. Kalau filenya tidak ada, hasilnya `null`/`[]`
+  sehingga embed boss tetap terkirim tanpa gambar.
+- `src/ui/bossEmbeds.js`: embed boss hidup, hasil serangan, boss tumbang, dan
+  boss kabur sekarang memakai ikon boss sebagai **thumbnail**.
+- `src/lib/bossManager.js`: lampiran ikon dikirim di spawn, tiap `update` tombol
+  serang, hasil serangan ephemeral, embed hasil akhir, embed kabur, dan saat
+  embed boss dipulihkan setelah restart (attachment memang harus dikirim ulang
+  di setiap edit, kalau tidak thumbnail-nya hilang).
+- Dokumentasi: [ai.md](ai.md) dapat bagian **6b. Mini Boss** (jadwal, cara ikut,
+  pembagian hadiah, daftar boss + ikon) dan FAQ soal izin **Attach Files**;
+  status "[belum ada]" untuk mini boss & quest event dihapus.
+  [Emoji.md](Emoji.md) dapat bagian **Ikon Gambar Boss**.
+- `npm test` hijau (66/66).
+
+## Perbaikan Bug #1 & #2
+
+- `test/quests.test.js`: tipe quest `boss_join` dan `boss_kill` ditambahkan ke
+  daftar `TYPES`, jadi katalog quest boss lolos validasi. `npm test` hijau
+  kembali (66/66).
+- `src/database/abilities.js`: `daily_reset` dan `cooldown_reset` tidak lagi
+  mengeset `lastDaily = NULL` (yang membuang streak). Helper baru
+  `rewindDaily()` mengisi `lastDaily` dengan tanggal kemarin, sehingga `/daily`
+  bisa diklaim lagi dan streak tetap berjalan.
+- [Bugs.md](Bugs.md): temuan #1 dan #2 ditandai selesai.
+
+## Audit Dokumentasi & Balancing
+
+- Dokumen baru [Balancing.md](Balancing.md): peta tiga mata uang, tabel
+  pemasukan harian per sumber, perbandingan harga item versus manfaatnya, dan
+  usulan angka baru untuk boss, voice, streak daily, serta sink coin.
+- Dokumen baru [Bugs.md](Bugs.md): sepuluh temuan dari pembacaan kode dan
+  `npm test`, lengkap dengan lokasi file dan saran perbaikannya.
+- [ToDoV2.md](ToDoV2.md): mini boss ditandai selesai, ditambah gelombang tiga
+  berisi delapan pekerjaan balancing (coin, XP, poin) yang diurutkan
+  berdasarkan dampaknya.
+- [Bot.md](Bot.md) bagian "Aturan Angka" akhirnya punya bagian **Mini boss**
+  (jam spawn, HP, damage, cooldown, pembagian hadiah).
+- [Analisis.md](Analisis.md): dua bagian baru — "Ekonomi & Balancing" dan
+  "Bug yang Sedang Terbuka".
+
+## Sistem Mini Boss
+
+- Tiga boss baru: **Pump Freakin** (45%), **Clown Orca** (45%), dan
+  **Ancient Mummy** (10%, boss spesial). Satu boss diundi tiap **00:00** dan
+  **12:00** waktu lokal event (`BOSS_UTC_OFFSET`, default WIB) lalu dikirim ke
+  channel mini boss (`BOSS_CHANNEL_ID`).
+- Player tidak punya HP — hanya boss. Serangan lewat tombol **Serang!** dengan
+  cooldown 90 detik per orang; boss kabur kalau belum tumbang dalam 6 jam.
+- Hadiah dibagi ke **top 3 damager** (40% / 25% / 15%) dan **pemberi last hit**
+  (20%). Satu orang bisa kena dua jatah dan jatahnya dijumlahkan. Isi hadiah:
+  item acak dari loot table, coin, XP, dan poin.
+- Ability boss dari item (Sharpened Edge, Void Grip, Heavy Impact, Kingslayer,
+  Star Cleave) sekarang benar-benar dibaca: `boss_damage` menaikkan damage,
+  `boss_loot_rate` peluang drop, `boss_drop_amount` jumlah item, dan
+  `quest_coin`/Deep Current tetap kena ke coin hadiah boss.
+- Tabel baru `boss_spawns` dan `boss_damage`; boss aktif dipulihkan otomatis
+  saat bot restart supaya tombolnya tetap jalan.
+- Command admin baru `/admin-spawn-boss` untuk tes (perlu `npm run deploy`),
+  halaman **Mini Boss** di `/guide`, plus quest baru `boss_join` (harian) dan
+  `boss_kill` (mingguan).
+- Emoji `boss`, `boss_hp`, `boss_loot` akhirnya terpakai; ditambah `boss_hit`
+  untuk tombol serang.
+
+
 ## Emoji Baru: Pager, Guide, Quest, Ability & Boss
 
 - Pager (`/shop`, `/inventory`, `/leaderboard`) kini memakai emoji khusus:

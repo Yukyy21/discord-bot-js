@@ -44,9 +44,33 @@ const QUEST = {
   MONTHLY_COUNT: 1,
 };
 
+/**
+ * Mini boss. Boss spawn otomatis di jam 00 dan 12 waktu lokal event
+ * (BOSS_UTC_OFFSET, default WIB) di channel BOSS_CHANNEL_ID.
+ * Player tidak punya HP — yang berdarah hanya boss.
+ */
+const BOSS = {
+  SPAWN_HOURS: [0, 12],
+  UTC_OFFSET: Number(process.env.BOSS_UTC_OFFSET ?? 7), // 7 = WIB
+  CHECK_INTERVAL_MS: 60 * 1000, // penjaga jadwal & despawn
+  ATTACK_COOLDOWN_MS: 10 * 1000, // jeda tombol serang per user (dikali debuff `debuff:cooldown`)
+  DESPAWN_MS: 6 * 60 * 60 * 1000, // boss kabur kalau tidak dikalahkan
+  // Jatah hadiah: top 3 damager + pemberi last hit. Satu orang boleh kena dua
+  // jatah (top 1 sekaligus last hit) dan jatahnya dijumlahkan.
+  TOP_ROLES: ['top1', 'top2', 'top3'],
+  TOP_SHARES: [0.4, 0.25, 0.15],
+  LAST_HIT_SHARE: 0.2,
+  // Serangan balik boss. Boss tidak bisa membunuh player (player tetap tanpa
+  // HP) — yang dilakukannya adalah memasang debuff atau merampas coin.
+  RAMPAGE_INTERVAL_MS: 5 * 60 * 1000, // boss mengamuk berkala ke penyerang aktif
+  RAMPAGE_TARGETS: 3, // maksimal player yang kena satu amukan
+  RAMPAGE_WINDOW_MS: 15 * 60 * 1000, // hanya penyerang dalam window ini yang jadi sasaran
+};
+
 /** XP yang dibutuhkan untuk naik dari level tertentu. */
 function xpForLevel(level) {
   return level * 100;
 }
 
-module.exports = { CHAT, VOICE, DAILY, EXCHANGE_RATE, SHOP, QUEST, xpForLevel };
+module.exports = { CHAT, VOICE, DAILY, EXCHANGE_RATE, SHOP, QUEST, BOSS, xpForLevel };
+

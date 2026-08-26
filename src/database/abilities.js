@@ -3,19 +3,33 @@ const { ABILITIES } = require('../lib/abilities');
 const { xpForLevel } = require('../config/constants');
 const { getPoints } = require('./points');
 const { addBuff, addGuildBuff, extendBuffs } = require('./buffs');
+const { clearDebuffs } = require('./debuffs');
 const { resetUser } = require('../lib/antispam');
+const { DAILY } = require('../config/constants');
+const { dateKey } = require('../lib/daily');
+
+// Mundurkan lastDaily ke kemarin, bukan NULL: user bisa klaim lagi sekarang
+// tanpa kehilangan streak yang sudah dikumpulkan.
+function rewindDaily(userId, guildId) {
+  const yesterday = dateKey(new Date(Date.now() - DAILY.DAY_MS));
+  db.prepare('UPDATE users SET lastDaily = ? WHERE userId = ? AND guildId = ?').run(yesterday, userId, guildId);
+}
 
 // Ability instant: jalan sekali saat /use, tidak menyisakan buff.
 // Tiap handler mengembalikan potongan kalimat untuk pesan /use.
 const INSTANT = {
   daily_reset(userId, guildId) {
-    db.prepare('UPDATE users SET lastDaily = NULL WHERE userId = ? AND guildId = ?').run(userId, guildId);
+    rewindDaily(userId, guildId);
     return 'cooldown `/daily` direset, kamu bisa klaim lagi sekarang';
   },
   cooldown_reset(userId, guildId) {
-    db.prepare('UPDATE users SET lastDaily = NULL WHERE userId = ? AND guildId = ?').run(userId, guildId);
+    rewindDaily(userId, guildId);
     resetUser(userId, guildId);
-    return 'semua cooldown milikmu direset';
+    // Chrono Core sekaligus membersihkan kutukan dari serangan balik boss.
+    const cleared = clearDebuffs(userId, guildId);
+    return cleared
+      ? `semua cooldown milikmu direset dan ${cleared} debuff boss dibersihkan`
+      : 'semua cooldown milikmu direset';
   },
   extend_buffs(userId, guildId, effect) {
     const count = extendBuffs(userId, guildId, effect.durationMs);

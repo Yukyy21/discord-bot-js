@@ -53,12 +53,33 @@ Dipakai oleh `/credit` dan `/botinfo`:
 | `ability` | `<:ability:...>` | Ikon universal semua ability item (`/use`) |
 | `buff` | `<:buff:...>` | Judul embed `/buffs` |
 | `buff_active` | `<a:Buffactive:...>` (animated) | Tiap baris buff yang sedang aktif |
-| `boss` | `<:boss:...>` | Disiapkan untuk mini boss (belum dipakai) |
-| `boss_hp` | `<:bosshp:...>` | Disiapkan untuk mini boss (belum dipakai) |
-| `boss_loot` | `<:lootboss:...>` | Disiapkan untuk mini boss (belum dipakai) |
+| `boss` | `<:boss:...>` | Judul embed boss, tombol serang (fallback), hasil serangan |
+| `boss_hp` | `<:bosshp:...>` | Baris HP boss |
+| `boss_loot` | `<:lootboss:...>` | Bagian hadiah & loot boss |
+| `boss_hit` | `<:bosshit:...>` | Ikon tombol **Serang!** (ID opsional) |
 
-Tiga key boss sengaja hanya terdaftar di registry — sistem mini boss belum ada,
-jadi belum dipasang di command mana pun.
+## Ikon Gambar Boss
+
+Selain emoji, tiap mini boss punya **gambar** sendiri di `assets/boss/`
+(`pump_freakin.png`, `clown_orca.png`, `ancient_mummy.jpeg`). Nama filenya
+didaftarkan di field `icon` pada `src/lib/bossCatalog.js`.
+
+```js
+const { bossIconFiles } = require('../ui/bossEmbeds');
+
+channel.send({ embeds: [bossEmbed(row)], files: bossIconFiles(row.bossKey) });
+```
+
+| Fungsi (`src/lib/bossIcons.js`) | Kegunaan |
+|---|---|
+| `bossIcon(key)` | `{ file, name, url }` — `url` berupa `attachment://boss-<key>.png` |
+| `bossIconFiles(key)` | Array `files` siap dipakai di `send` / `update` / `edit` |
+| `bossIconPath(key)` | Path absolut file ikon, `null` kalau tidak ada |
+
+Discord tidak bisa memuat file lokal lewat URL, jadi lampirannya **wajib
+dikirim ulang setiap kali embed boss di-edit** — kalau tidak, thumbnail-nya
+hilang. Kalau file ikon tidak ditemukan, helper mengembalikan `null`/`[]` dan
+embed tetap terkirim tanpa gambar.
 
 ## Emoji Item Shop
 

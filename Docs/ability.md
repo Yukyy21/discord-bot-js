@@ -42,7 +42,7 @@ efeknya jalan. Buff aktif dicek dengan `/buffs`.
 | Genesis Scepter | Genesis | Coin, XP, dan Poin ×1.5, 1 jam |
 | Astral Fragment | Astral Rift | XP seluruh member server ×1.25, 15 menit |
 | Heart of the Primordial | Endless Pulse | Buff yang dipasang setelahnya bertahan 25% lebih lama, 3 jam |
-| Chrono Core | Time Skip | Reset semua cooldown milikmu |
+| Chrono Core | Time Skip | Reset semua cooldown milikmu + bersihkan semua debuff mini boss |
 
 ## Untuk yang menyentuh kode
 

@@ -12,6 +12,8 @@ const admin = require('./admin');
 const weekly = require('./weekly');
 const voiceSessions = require('./voiceSessions');
 const buffs = require('./buffs');
+const debuffs = require('./debuffs');
+const boss = require('./boss');
 
 createTables();
 runMigrations();
@@ -42,4 +44,7 @@ module.exports = {
   ...weekly,
   ...voiceSessions,
   ...buffs,
+  ...debuffs,
+  ...boss,
 };
+

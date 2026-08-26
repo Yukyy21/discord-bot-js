@@ -63,3 +63,4 @@ test('undian melebihi pool berhenti di isi pool', () => {
     assert.strictEqual(drawQuests(`${scope}:x`, 99).length, size);
   }
 });
+

@@ -8,6 +8,7 @@ const { buildInventory } = require('../commands/economy/inventory');
 const { buildQuest } = require('../commands/economy/quest');
 const { buildLeaderboard } = require('../commands/general/leaderboard');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
+const { handleBossAttack } = require('../lib/bossManager');
 
 // Discord membatalkan token interaksi setelah beberapa detik. Slash command
 // dari sebelum bot restart pasti sudah lewat batas ini, jadi dilewati saja
@@ -87,6 +88,9 @@ async function handleButton(interaction) {
         return await interaction.update(buildQuest(interaction.user, interaction.guildId));
       }
 
+      case 'boss_attack': // a = id boss di tabel boss_spawns
+        return await handleBossAttack(interaction, a);
+
       case 'lb_page': // a = kategori, b = halaman
         return await interaction.update(buildLeaderboard(a, interaction.guildId, Number(b) || 0));
 
@@ -151,3 +155,4 @@ async function handleCommand(interaction) {
     }
   }
 }
+

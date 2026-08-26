@@ -8,6 +8,8 @@
  * - voice       : detik (biar tidak hilang pembulatan menit)
  * - spend       : total coin yang dibelanjakan lewat /buy
  * - daily_streak: angka streak saat /daily diklaim
+ * - boss_join   : ikut menyerang satu mini boss (dihitung sekali per boss)
+ * - boss_kill   : masuk daftar penerima hadiah saat mini boss tumbang
  * - lainnya     : sekali kejadian (klaim daily, pakai/beli item, give, naik level)
  *
  * Field opsional per quest:
@@ -26,6 +28,7 @@ const QUEST_CATALOG = {
   buy_1:       { scope: 'daily',  type: 'buy_item', target: 1,    reward: 300,  emoji: 'buy',   label: 'Beli satu item di shop' },
   spend_2000:  { scope: 'daily',  type: 'spend',    target: 2000, reward: 400,  emoji: 'shop',  label: 'Belanja 2.000 coin di /shop' },
   streak_1:    { scope: 'daily',  type: 'daily_streak', mode: 'max', target: 1, reward: 300, emoji: 'streak', label: 'Klaim /daily hari ini' },
+  boss_join_1: { scope: 'daily',  type: 'boss_join', target: 1,    reward: 450,  emoji: 'boss',  label: 'Ikut menyerang mini boss' },
 
   // — Mingguan —
   chat_100:      { scope: 'weekly', type: 'chat',  target: 100,   reward: 3000, emoji: 'chat',  label: 'Rajin mengobrol 100 pesan' },
@@ -35,6 +38,7 @@ const QUEST_CATALOG = {
   spend_15000:   { scope: 'weekly', type: 'spend', target: 15000, reward: 2500, emoji: 'shop',  label: 'Belanja total 15.000 coin' },
   use_epic:      { scope: 'weekly', type: 'use_tier', meta: 'Epic', target: 1,  reward: 2200, emoji: 'xp',    label: 'Pakai satu item Epic' },
   use_legendary: { scope: 'weekly', type: 'use_tier', meta: 'Legendary', target: 1, reward: 4000, emoji: 'xp', label: 'Pakai satu item Legendary' },
+  boss_kill_2:   { scope: 'weekly', type: 'boss_kill', target: 2,  reward: 4500, emoji: 'boss',  label: 'Dapat hadiah dari 2 mini boss' },
 
   // — Bulanan —
   chat_500:    { scope: 'monthly', type: 'chat',  target: 500,   reward: 10000, emoji: 'chat',  label: 'Ngobrol 500 pesan sebulan' },
@@ -90,3 +94,4 @@ function drawQuests(periodKey, count, rng = Math.random) {
 }
 
 module.exports = { QUEST_CATALOG, dailyKey, weeklyKey, monthlyKey, currentPeriodKeys, drawQuests };
+

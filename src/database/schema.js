@@ -84,6 +84,40 @@ function createTables() {
       eligible INTEGER DEFAULT 0,
       PRIMARY KEY (userId, guildId)
     );
+
+    -- Mini boss yang pernah spawn. Baris 'active' dipakai untuk melanjutkan
+    -- pertarungan setelah bot restart; baris lama disimpan sebagai riwayat.
+    -- Kolom slot = kunci jadwal spawn (YYYY-MM-DDTHH waktu lokal event) supaya satu
+    -- jadwal tidak pernah menghasilkan dua boss.
+    CREATE TABLE IF NOT EXISTS boss_spawns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guildId TEXT NOT NULL,
+      channelId TEXT NOT NULL,
+      messageId TEXT,
+      bossKey TEXT NOT NULL,
+      maxHp INTEGER NOT NULL,
+      hp INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active',
+      slot TEXT,
+      spawnedAt INTEGER NOT NULL,
+      endsAt INTEGER NOT NULL,
+      endedAt INTEGER,
+      lastHitUserId TEXT
+    );
+
+    -- Kontribusi damage per user pada satu boss. Kolom lastAttackAt sekaligus
+    -- menjadi penyimpan cooldown tombol serang (tahan restart).
+    CREATE TABLE IF NOT EXISTS boss_damage (
+      bossId INTEGER,
+      userId TEXT,
+      damage INTEGER DEFAULT 0,
+      hits INTEGER DEFAULT 0,
+      lastAttackAt INTEGER DEFAULT 0,
+      PRIMARY KEY (bossId, userId)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);
+    CREATE INDEX IF NOT EXISTS idx_boss_slot ON boss_spawns (guildId, slot);
   `);
 }
 
@@ -105,6 +139,9 @@ function runMigrations() {
   ensureColumn('points', 'level', 'INTEGER DEFAULT 1');
   ensureColumn('points', 'voice_seconds', 'INTEGER DEFAULT 0');
   ensureColumn('shop_items', 'effect', 'TEXT');
+  // Serangan balik boss: kapan terakhir boss mengamuk ke para penyerang.
+  ensureColumn('boss_spawns', 'lastRampageAt', 'INTEGER DEFAULT 0');
 }
 
 module.exports = { createTables, runMigrations };
+
