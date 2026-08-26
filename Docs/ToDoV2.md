@@ -98,9 +98,11 @@ terasa.
   `src/database/quests.js`.
   Selesai: multiplier dikunci saat quest selesai via lockedMultiplier.
 
-- [ ] **Samakan zona waktu periode.** `/daily`, quest harian & bulanan memakai
+- [x] **Samakan zona waktu periode.** `/daily`, quest harian & bulanan memakai
   tanggal UTC (hari baru jam 07:00 WIB), sementara boss sudah pakai
   `BOSS.UTC_OFFSET`. Satukan ke satu helper offset.
+  Selesai: `localDateKey()` di `src/lib/boss.js` dipakai `daily.js` dan
+  `quests.js`; periode sekarang berganti di tengah malam waktu server.
 
 ## Catatan Urutan
 

@@ -61,6 +61,16 @@ Semua angka diambil dari rekomendasi [Balancing.md](Balancing.md). 12 file berub
 - `test/boss.test.js`: 3 tes disesuaikan — proporsional reward, share 0.85
   untuk top1+lasthit, spawn slot 12/20.
 
+**Samakan Zona Waktu Periode**
+- Tambah `localDateKey(date, offset)` di `src/lib/boss.js` — mengembalikan
+  YYYY-MM-DD dalam zona waktu lokal server (`BOSS.UTC_OFFSET`, default WIB).
+- `src/lib/daily.js`: `dateKey()` sekarang memakai `localDateKey()` alih-alih
+  `toISOString()` mentah. Hari baru berganti tengah malam WIB, bukan 07:00 WIB.
+- `src/lib/quests.js`: `dailyKey()`, `weeklyKey()`, dan `monthlyKey()` ikut
+  memakai `localDateKey()`. Quest harian/mingguan/bulanan sekarang selaras
+  dengan `/daily` dan boss.
+- `test/daily.test.js`: waktu test disesuaikan supaya cocok dengan zona lokal.
+
 ## Cooldown Serang 10 Detik & Boss Bisa Menyerang Player
 
 **Cooldown**

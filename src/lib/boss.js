@@ -117,6 +117,16 @@ function localParts(date = new Date(), offsetHours = BOSS.UTC_OFFSET) {
 }
 
 /**
+ * Kunci tanggal (YYYY-MM-DD) dalam zona waktu lokal server event.
+ * Dipakai oleh daily, quest, dan weekly supaya periode berganti di tengah
+ * malam waktu server, bukan tengah malam UTC.
+ */
+function localDateKey(date = new Date(), offsetHours = BOSS.UTC_OFFSET) {
+  const shifted = new Date(date.getTime() + offsetHours * 3600 * 1000);
+  return shifted.toISOString().slice(0, 10);
+}
+
+/**
  * Kunci jadwal spawn kalau sekarang berada di dalam jam spawn (00 & 12),
  * null kalau bukan waktunya. Kunci disimpan di database supaya satu jadwal
  * hanya menghasilkan satu boss walau bot restart atau interval jalan berkali.
@@ -133,6 +143,7 @@ module.exports = {
   computeRewards,
   rollLoot,
   localParts,
+  localDateKey,
   dueSpawnSlot,
   pickRampageTargets,
   getBoss,

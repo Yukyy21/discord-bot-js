@@ -101,8 +101,9 @@ Champion (36), Hero (51), Demigod (71). Diatur di `src/lib/ranks.js`.
 
 **Daily.** Klaim pertama 500 coin, tiap hari berturut-turut menambah 100 coin.
 Bonus streak dibatasi maksimum 3.000 (setara 30 hari). Perbandingan hari
-memakai tanggal kalender, bukan selisih 24 jam — klaim jam 23.00 lalu jam
-07.00 besoknya tetap dihitung streak. Bolong sehari, streak kembali ke 1.
+memakai tanggal kalender dalam zona waktu server (`BOSS_UTC_OFFSET`, default
+WIB) — klaim jam 23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong
+sehari, streak kembali ke 1.
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
@@ -129,8 +130,8 @@ mengikuti pola event `messageCreate`.
 
 **Quest.** Tiap user dapat 2 quest harian + 1 mingguan + 1 bulanan yang
 diundi dari katalog (`src/lib/quests.js`) saat pertama kali disentuh di
-periode itu. Periode harian memakai tanggal UTC, mingguan nomor pekan ISO,
-bulanan `YYYY-MM`. Progres terisi otomatis dari aktivitas: pesan chat yang
+periode itu. Periode harian memakai tanggal lokal server (sama dengan
+`/daily`), mingguan nomor pekan ISO, bulanan `YYYY-MM`. Progres terisi otomatis dari aktivitas: pesan chat yang
 lolos anti-spam, detik voice saat sesi berakhir, klaim `/daily` (quest streak
 mencatat nilai terbesar yang pernah tercapai, bukan penjumlahan), total
 belanja `/buy`, pakai item lewat `/use` (ada varian per rarity), `/give`, dan

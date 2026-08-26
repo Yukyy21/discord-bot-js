@@ -1,5 +1,6 @@
 // Katalog & logika murni quest. Tanpa SQL dan tanpa Discord — dipakai oleh
 // database/quests.js (penyimpanan) dan commands/economy/quest.js (tampilan).
+const { localDateKey } = require('./boss');
 
 /**
  * Tipe `type` di sini harus sama dengan yang dikirim pemanggil lewat
@@ -48,17 +49,20 @@ const QUEST_CATALOG = {
   streak_14:   { scope: 'monthly', type: 'daily_streak', mode: 'max', target: 14, reward: 8000, emoji: 'streak', label: 'Capai streak daily 14 hari' },
 };
 
-/** Kunci periode harian, sinkron dengan format lastDaily (YYYY-MM-DD UTC). */
+/** Kunci periode harian, sinkron dengan format lastDaily (YYYY-MM-DD lokal). */
 function dailyKey(date = new Date()) {
-  return `daily:${date.toISOString().slice(0, 10)}`;
+  return `daily:${localDateKey(date)}`;
 }
 
 /**
  * Kunci periode mingguan memakai nomor pekan ISO (Senin awal pekan, aturan
  * Kamis). Dua user di hari yang sama pasti dapat kunci yang sama.
+ * Menggunakan tanggal lokal server (bukan UTC).
  */
 function weeklyKey(date = new Date()) {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const dateStr = localDateKey(date);
+  const parts = dateStr.split('-');
+  const d = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
   const dayNum = d.getUTCDay() || 7; // Minggu = 7
   d.setUTCDate(d.getUTCDate() + 4 - dayNum); // geser ke Kamis pekan ini
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -66,9 +70,9 @@ function weeklyKey(date = new Date()) {
   return `weekly:${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
 }
 
-/** Kunci periode bulanan: YYYY-MM UTC, ganti bulan = mulai dari nol. */
+/** Kunci periode bulanan: YYYY-MM lokal, ganti bulan = mulai dari nol. */
 function monthlyKey(date = new Date()) {
-  return `monthly:${date.toISOString().slice(0, 7)}`;
+  return `monthly:${localDateKey(date).slice(0, 7)}`;
 }
 
 /** Semua kunci periode yang sedang berjalan. */

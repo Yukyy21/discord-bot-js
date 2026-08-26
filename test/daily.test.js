@@ -14,7 +14,8 @@ test('klaim pertama: streak 1, tanpa bonus', () => {
 });
 
 test('klaim kedua di hari yang sama ditolak', () => {
-  const r = computeDailyClaim({ lastDaily: '2026-01-10', streak: 3 }, at('2026-01-10T23:00:00Z'));
+  // 12:00 UTC = 19:00 WIB, masih hari yang sama
+  const r = computeDailyClaim({ lastDaily: '2026-01-10', streak: 3 }, at('2026-01-10T12:00:00Z'));
   assert.strictEqual(r.claimable, false);
 });
 

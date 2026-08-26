@@ -1,7 +1,8 @@
 const { DAILY } = require('../config/constants');
+const { localDateKey } = require('./boss');
 
 function dateKey(date) {
-  return new Date(date).toISOString().slice(0, 10);
+  return localDateKey(date);
 }
 
 /**
