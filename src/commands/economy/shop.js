@@ -12,8 +12,7 @@ const TIER_ORDER = Object.keys(TIER_CONFIG);
 /** Saring stok berdasarkan tier dan/atau potongan nama. Fungsi murni. */
 function filterStock(items, { tier = '', query = '' } = {}) {
   const q = query.trim().toLowerCase();
-  return items.filter(i =>
-    (!tier || i.tier === tier) && (!q || i.name.toLowerCase().includes(q)));
+  return items.filter(i => (!tier || i.tier === tier) && (!q || i.name.toLowerCase().includes(q)));
 }
 
 /** Urutkan dari tier tertinggi lalu harga termahal supaya etalase enak dibaca. */
@@ -85,23 +84,29 @@ function buildShop(page = 0, filter = {}, viewer = null) {
   if (tier) filterBits.push(`tier **${tier}**`);
   if (query) filterBits.push(`cari **"${query}"**`);
 
-  const embed = themedEmbed('shop', 'Toko Petualang', tier ? hexToInt(TIER_CONFIG[tier].color) : COLORS.economy);
+  const embed = themedEmbed(
+    'shop',
+    'Toko Petualang',
+    tier ? hexToInt(TIER_CONFIG[tier].color) : COLORS.economy,
+  );
 
   const lines = [header.join(' · ')];
   if (filterBits.length) lines.push(`${filterBits.join(' · ')} — **${items.length}** item`);
   lines.push(DIVIDER);
 
   if (!items.length) {
-    lines.push(filterBits.length
-      ? `${e('warn')} Tidak ada item yang cocok dengan filter.`
-      : `${e('warn')} Stok sedang di-refresh, coba sebentar lagi.`);
+    lines.push(
+      filterBits.length
+        ? `${e('warn')} Tidak ada item yang cocok dengan filter.`
+        : `${e('warn')} Stok sedang di-refresh, coba sebentar lagi.`,
+    );
   } else {
     for (const i of slice) {
       const info = describeEffect(parseEffect(i.effect));
       lines.push(
         `${itemEmoji(i.name)} **${i.name}** · \`ID ${i.id}\`\n` +
-        `-# ${i.price.toLocaleString()} coin${affordability(i.price, balance)} · ${i.tier}` +
-        `${info ? ` · ${info.text}` : ''}`,
+          `-# ${i.price.toLocaleString()} coin${affordability(i.price, balance)} · ${i.tier}` +
+          `${info ? ` · ${info.text}` : ''}`,
       );
     }
     lines.push(DIVIDER, `-# Beli dengan \`/buy <id>\``);
@@ -113,10 +118,7 @@ function buildShop(page = 0, filter = {}, viewer = null) {
 
   return {
     embeds: [embed],
-    components: [
-      tierSelectRow(tier, query),
-      ...pagerRow(`shop_page:${tier}:${query}`, current, totalPages),
-    ],
+    components: [tierSelectRow(tier, query), ...pagerRow(`shop_page:${tier}:${query}`, current, totalPages)],
   };
 }
 
@@ -128,20 +130,24 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('shop')
     .setDescription('Lihat item yang tersedia di toko')
-    .addStringOption(o => o.setName('tier')
-      .setDescription('Saring berdasarkan tier item')
-      .addChoices(...TIER_ORDER.map(t => ({ name: t, value: t }))))
-    .addStringOption(o => o.setName('cari')
-      .setDescription('Cari item berdasarkan nama')
-      .setMaxLength(40)),
+    .addStringOption(o =>
+      o
+        .setName('tier')
+        .setDescription('Saring berdasarkan tier item')
+        .addChoices(...TIER_ORDER.map(t => ({ name: t, value: t }))),
+    )
+    .addStringOption(o => o.setName('cari').setDescription('Cari item berdasarkan nama').setMaxLength(40)),
   async execute(interaction) {
-    await interaction.reply(buildShop(
-      0,
-      {
-        tier: interaction.options.getString('tier') || '',
-        query: interaction.options.getString('cari') || '',
-      },
-      { userId: interaction.user.id, guildId: interaction.guildId },
-    ));
+    await interaction.deferReply();
+    await interaction.editReply(
+      buildShop(
+        0,
+        {
+          tier: interaction.options.getString('tier') || '',
+          query: interaction.options.getString('cari') || '',
+        },
+        { userId: interaction.user.id, guildId: interaction.guildId },
+      ),
+    );
   },
 };

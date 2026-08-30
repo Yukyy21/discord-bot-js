@@ -19,7 +19,9 @@ function seedShop() {
   const count = db.prepare('SELECT COUNT(*) AS c FROM shop_items').get().c;
   if (count > 0) return;
 
-  const insert = db.prepare('INSERT INTO shop_items (id, name, price, description, effect) VALUES (?, ?, ?, ?, ?)');
+  const insert = db.prepare(
+    'INSERT INTO shop_items (id, name, price, description, effect) VALUES (?, ?, ?, ?, ?)',
+  );
   const seed = db.transaction(() => {
     for (const [id, name, price, description, effect] of SHOP_CATALOG) {
       insert.run(id, name, price, description, effectToDb(effect));
@@ -34,7 +36,9 @@ function seedShop() {
  * deskripsi yang mungkin sudah diubah admin tidak disentuh.
  */
 function syncEffects() {
-  const update = db.prepare('UPDATE shop_items SET effect = ? WHERE id = ? AND (effect IS NOT ? OR effect IS NULL)');
+  const update = db.prepare(
+    'UPDATE shop_items SET effect = ? WHERE id = ? AND (effect IS NOT ? OR effect IS NULL)',
+  );
   const sync = db.transaction(() => {
     for (const [id, , , , effect] of SHOP_CATALOG) {
       const json = effectToDb(effect);
@@ -46,10 +50,12 @@ function syncEffects() {
 
 /** Tambah satu item ke inventori, atau naikkan jumlahnya kalau sudah punya. */
 function grantItem(userId, guildId, itemId) {
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO user_items (userId, guildId, itemId, quantity) VALUES (?, ?, ?, 1)
     ON CONFLICT(userId, guildId, itemId) DO UPDATE SET quantity = quantity + 1
-  `).run(userId, guildId, itemId);
+  `,
+  ).run(userId, guildId, itemId);
 }
 
 /**
@@ -75,17 +81,26 @@ function buyItem(userId, guildId, itemId) {
   buy();
 
   // price & name dipakai quest spend (nominal belanja) dan UI.
-  return { ok: true, price: item.price, name: item.name, message: `Berhasil membeli **${item.name}** seharga ${item.price.toLocaleString()} coin!` };
+  return {
+    ok: true,
+    price: item.price,
+    name: item.name,
+    message: `Berhasil membeli **${item.name}** seharga ${item.price.toLocaleString()} coin!`,
+  };
 }
 
 function getInventory(userId, guildId) {
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT si.id, si.name, si.price, si.description, si.effect, ui.quantity
     FROM user_items ui
     JOIN shop_items si ON si.id = ui.itemId
     WHERE ui.userId = ? AND ui.guildId = ?
     ORDER BY si.name
-  `).all(userId, guildId);
+  `,
+    )
+    .all(userId, guildId);
 }
 
 /**
@@ -101,9 +116,9 @@ function useItem(userId, guildId, itemId) {
   const effect = parseEffect(item.effect);
   if (!effect) return { ok: false, message: `**${item.name}** tidak bisa dipakai. Item ini hanya koleksi.` };
 
-  const entry = db.prepare(
-    'SELECT quantity FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?',
-  ).get(userId, guildId, itemId);
+  const entry = db
+    .prepare('SELECT quantity FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?')
+    .get(userId, guildId, itemId);
   if (!entry || entry.quantity < 1) {
     return { ok: false, message: `Kamu tidak punya **${item.name}**. Beli dulu di \`/shop\`.` };
   }
@@ -114,11 +129,15 @@ function useItem(userId, guildId, itemId) {
 
   const consume = db.transaction(() => {
     if (!kept && entry.quantity <= 1) {
-      db.prepare('DELETE FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?')
-        .run(userId, guildId, itemId);
+      db.prepare('DELETE FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?').run(
+        userId,
+        guildId,
+        itemId,
+      );
     } else if (!kept) {
-      db.prepare('UPDATE user_items SET quantity = quantity - 1 WHERE userId = ? AND guildId = ? AND itemId = ?')
-        .run(userId, guildId, itemId);
+      db.prepare(
+        'UPDATE user_items SET quantity = quantity - 1 WHERE userId = ? AND guildId = ? AND itemId = ?',
+      ).run(userId, guildId, itemId);
     }
 
     if (effect.type === 'xp') addXp(userId, guildId, effect.value);
@@ -136,7 +155,13 @@ function useItem(userId, guildId, itemId) {
   const detail = abilityNote ? `${info.text} — ${abilityNote}` : info.text;
   const keptNote = kept ? ' Item tidak berkurang berkat **Sturdy**.' : '';
   // price ikut dikembalikan supaya /use bisa menghitung rarity untuk quest.
-  return { ok: true, effect, name: item.name, price: item.price, message: `Kamu memakai **${item.name}**. Efek: ${detail}.${keptNote}` };
+  return {
+    ok: true,
+    effect,
+    name: item.name,
+    price: item.price,
+    message: `Kamu memakai **${item.name}**. Efek: ${detail}.${keptNote}`,
+  };
 }
 
 module.exports = { getShopItems, seedShop, syncEffects, grantItem, buyItem, getInventory, useItem };

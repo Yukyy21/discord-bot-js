@@ -5,7 +5,9 @@ const { themedEmbed, infoEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 
 module.exports = {
-  data: new SlashCommandBuilder().setName('daily').setDescription('Klaim reward harian, makin rajin makin besar'),
+  data: new SlashCommandBuilder()
+    .setName('daily')
+    .setDescription('Klaim reward harian, makin rajin makin besar'),
   async execute(interaction) {
     const user = getUser(interaction.user.id, interaction.guildId);
     const claim = computeDailyClaim(user, new Date());

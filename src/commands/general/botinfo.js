@@ -35,9 +35,7 @@ function dbSize() {
 
 module.exports = {
   formatUptime,
-  data: new SlashCommandBuilder()
-    .setName('botinfo')
-    .setDescription('Informasi teknis dan statistik bot'),
+  data: new SlashCommandBuilder().setName('botinfo').setDescription('Informasi teknis dan statistik bot'),
   async execute(interaction) {
     const { client } = interaction;
     const memory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1);
@@ -45,11 +43,13 @@ module.exports = {
 
     const embed = themedEmbed('info', 'Informasi Bot', COLORS.info)
       .setThumbnail(client.user?.displayAvatarURL({ size: 256 }) ?? null)
-      .setDescription([
-        `${e('developer')} **${client.user?.username ?? pkg.name}** \`v${pkg.version}\``,
-        `-# ${pkg.description}`,
-        DIVIDER,
-      ].join('\n'))
+      .setDescription(
+        [
+          `${e('developer')} **${client.user?.username ?? pkg.name}** \`v${pkg.version}\``,
+          `-# ${pkg.description}`,
+          DIVIDER,
+        ].join('\n'),
+      )
       .addFields(
         {
           name: `${e('nodejs')} Runtime`,

@@ -9,13 +9,17 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('buy')
     .setDescription('Beli item dari toko')
-    .addIntegerOption(o => o.setName('id').setDescription('ID item (lihat /shop)').setRequired(true).setMinValue(1)),
+    .addIntegerOption(o =>
+      o.setName('id').setDescription('ID item (lihat /shop)').setRequired(true).setMinValue(1),
+    ),
   async execute(interaction) {
     const id = interaction.options.getInteger('id');
     const stock = getShopItemById(id);
     if (!stock) {
       return interaction.reply({
-        embeds: [errorEmbed(`Item ini tidak ada di shop saat ini. Cek ${e('shop')} \`/shop\` untuk lihat stok.`)],
+        embeds: [
+          errorEmbed(`Item ini tidak ada di shop saat ini. Cek ${e('shop')} \`/shop\` untuk lihat stok.`),
+        ],
         flags: MessageFlags.Ephemeral,
       });
     }

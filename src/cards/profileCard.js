@@ -3,7 +3,20 @@ const fs = require('node:fs');
 const { roundRect, loadAvatar, fitText, drawRankLogo } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 
-async function buildProfileCard({ avatar, username, level, rank, xp, xpNeeded, balance, bank, streak, points, rankName, rankLogo }) {
+async function buildProfileCard({
+  avatar,
+  username,
+  level,
+  rank,
+  xp,
+  xpNeeded,
+  balance,
+  bank,
+  streak,
+  points,
+  rankName,
+  rankLogo,
+}) {
   const canvas = createCanvas(600, 340);
   const ctx = canvas.getContext('2d');
 

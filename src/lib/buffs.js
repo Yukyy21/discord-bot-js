@@ -26,9 +26,7 @@ function isActive(buff, now = Date.now()) {
 
 /** Buff dengan key sama tidak menumpuk: yang dipakai pengali terbesar. */
 function pickMultiplier(buffs, key, now = Date.now()) {
-  return buffs
-    .filter(b => b.key === key && isActive(b, now))
-    .reduce((max, b) => Math.max(max, b.value), 1);
+  return buffs.filter(b => b.key === key && isActive(b, now)).reduce((max, b) => Math.max(max, b.value), 1);
 }
 
 function applyMultiplier(amount, multiplier) {
@@ -53,9 +51,10 @@ function formatRemaining(ms) {
 function describeBuff(buff, now = Date.now()) {
   const label = BUFF_LABELS[buff.key] ?? buff.key;
   const value = buff.key === 'no_consume' ? `${buff.charges}x pakai` : `×${buff.value}`;
-  const left = buff.charges != null && buff.expiresAt == null
-    ? `sisa ${buff.charges}x`
-    : `sisa ${formatRemaining(buff.expiresAt == null ? null : buff.expiresAt - now)}`;
+  const left =
+    buff.charges != null && buff.expiresAt == null
+      ? `sisa ${buff.charges}x`
+      : `sisa ${formatRemaining(buff.expiresAt == null ? null : buff.expiresAt - now)}`;
   return `${label} ${value} — ${left}`;
 }
 

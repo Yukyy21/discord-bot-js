@@ -4,9 +4,7 @@ const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('balance')
-    .setDescription('Cek saldo kamu (dompet & bank)'),
+  data: new SlashCommandBuilder().setName('balance').setDescription('Cek saldo kamu (dompet & bank)'),
   async execute(interaction) {
     const user = getUser(interaction.user.id, interaction.guildId);
     const total = user.balance + user.bank;

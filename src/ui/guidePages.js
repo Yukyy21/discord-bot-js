@@ -9,6 +9,7 @@ const {
 } = require('discord.js');
 const { baseEmbed, COLORS } = require('./embeds');
 const { e, eo } = require('../lib/emojis');
+const { BOSS } = require('../config/constants');
 
 const line = '─────────────────────────────';
 
@@ -31,6 +32,7 @@ const PAGES = {
             `${e('point')} **Poin & Level** — profil, rank, leaderboard`,
             `${e('voice')} **Aktivitas** — cara dapat poin dari chat & voice`,
             `${e('quest')} **Quest** — misi harian, mingguan & bulanan berhadiah coin`,
+            `${e('boss')} **Mini Boss** — boss muncul tiap 12 malam & 12 siang, serang bareng`,
             `${e('leaderboard')} **Rank Tier** — daftar tier dan syarat levelnya`,
             `${e('inventory')} **Item & Rarity** — tier item dan efek yang bisa dipakai`,
             `${e('streak')} **Reward** — hadiah tiap naik level & daily streak`,
@@ -183,6 +185,46 @@ const PAGES = {
               `${e('chat')} 100 pesan — **3.000 coin**`,
               `${e('voice')} 3 jam di voice — **3.500 coin**`,
               `${e('give')} Berbagi ke teman 5 kali — **2.500 coin**`,
+            ].join('\n'),
+          },
+        ),
+  },
+
+  boss: {
+    label: 'Mini Boss',
+    emoji: 'boss',
+    description: 'Jadwal spawn, tombol serang, dan pembagian hadiah',
+    build: () =>
+      baseEmbed()
+        .setColor(COLORS.error)
+        .setTitle(`${e('boss')} Mini Boss`)
+        .setDescription(
+          [
+            `${e('clock')} Satu boss muncul acak tiap **00:00** dan **12:00** di channel mini boss`,
+            `${e('boss_hit')} Klik tombol **Serang!** di pesan boss — jeda **${Math.round(BOSS.ATTACK_COOLDOWN_MS / 1000)} detik** tiap serangan`,
+            `${e('boss_hp')} Cuma boss yang punya HP, kamu tidak bisa mati`,
+            `${e('warn')} Tapi boss bisa **membalas**: cooldown molor, damage turun, serangan meleset, atau coin dompet dirampas`,
+            `${e('buff')} Debuff tampil di \`/buffs\`; **Chrono Core** membersihkan semuanya`,
+            `${e('warn')} Kalau HP-nya belum habis dalam 6 jam, boss kabur tanpa hadiah`,
+            line,
+          ].join('\n'),
+        )
+        .addFields(
+          {
+            name: 'Boss & Peluang Muncul',
+            value: [
+              `${e('boss')} **Pump Freakin** — 45%`,
+              `${e('boss')} **Clown Orca** — 45%`,
+              `${e('boss_loot')} **Ancient Mummy** — 10% (boss spesial, hadiah terbesar)`,
+            ].join('\n'),
+          },
+          {
+            name: 'Siapa yang Dapat Hadiah',
+            value: [
+              `${e('leaderboard')} **Top 3 damager**: 40% / 25% / 15% dari total hadiah`,
+              `${e('boss_hit')} **Last hit**: 20% — bisa ditumpuk kalau kamu juga masuk top 3`,
+              `${e('boss_loot')} Hadiahnya: item acak, coin, XP, dan poin`,
+              `${e('ability')} Item ability boss (Sharpened Edge, Kingslayer, dll) menaikkan damage & loot`,
             ].join('\n'),
           },
         ),

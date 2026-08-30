@@ -49,4 +49,3 @@ function reloadContext() {
 }
 
 module.exports = { getContext, reloadContext };
-

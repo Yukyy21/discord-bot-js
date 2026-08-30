@@ -7,8 +7,11 @@ const { progressLine } = require('../../ui/embeds');
 /** Dipakai juga oleh handler tombol klaim di interactionCreate.js. */
 function buildQuest(user, guildId) {
   const quests = getQuests(user.id, guildId);
-  const embed = themedEmbed('quest', `Quest ${user.displayName ?? user.username}`, COLORS.economy)
-    .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 128 }));
+  const embed = themedEmbed(
+    'quest',
+    `Quest ${user.displayName ?? user.username}`,
+    COLORS.economy,
+  ).setThumbnail(user.displayAvatarURL({ extension: 'png', size: 128 }));
 
   if (!quests.length) {
     embed.setDescription('Tidak ada quest. Coba lagi nanti.');
@@ -20,7 +23,11 @@ function buildQuest(user, guildId) {
 
   const fields = [];
   const buttons = [];
-  for (const [scope, title, icon] of [['daily', 'Harian', 'clock'], ['weekly', 'Mingguan', 'leaderboard'], ['monthly', 'Bulanan', 'bank']]) {
+  for (const [scope, title, icon] of [
+    ['daily', 'Harian', 'clock'],
+    ['weekly', 'Mingguan', 'leaderboard'],
+    ['monthly', 'Bulanan', 'bank'],
+  ]) {
     fields.push({
       name: `${e(icon)} Quest ${title}`,
       value: DIVIDER,
@@ -38,11 +45,13 @@ function buildQuest(user, guildId) {
       // Tombol klaim hanya untuk yang selesai tapi belum diambil. State
       // (pemilik + periode + quest) masuk customId, bukan memori.
       if (done && !row.claimed) {
-        buttons.push(new ButtonBuilder()
-          .setCustomId(`quest_claim:${user.id}:${row.period}:${row.questId}`)
-          .setLabel(`Klaim: ${row.quest.label}`)
-          .setStyle(ButtonStyle.Success)
-          .setEmoji(eo('coin')));
+        buttons.push(
+          new ButtonBuilder()
+            .setCustomId(`quest_claim:${user.id}:${row.period}:${row.questId}`)
+            .setLabel(`Klaim: ${row.quest.label}`)
+            .setStyle(ButtonStyle.Success)
+            .setEmoji(eo('coin')),
+        );
       }
     }
   }
@@ -58,7 +67,9 @@ function buildQuest(user, guildId) {
 
 module.exports = {
   buildQuest,
-  data: new SlashCommandBuilder().setName('quest').setDescription('Lihat quest harian, mingguan & bulanan kamu'),
+  data: new SlashCommandBuilder()
+    .setName('quest')
+    .setDescription('Lihat quest harian, mingguan & bulanan kamu'),
   async execute(interaction) {
     await interaction.reply(buildQuest(interaction.user, interaction.guildId));
   },

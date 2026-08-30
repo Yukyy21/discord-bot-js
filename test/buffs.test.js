@@ -52,7 +52,10 @@ test('sisa waktu ditulis dalam menit dan jam', () => {
 
 test('deskripsi buff menyebut efek dan sisanya', () => {
   assert.strictEqual(describeBuff(buff('coin', 1.25, NOW + 600000), NOW), 'Coin ×1.25 — sisa 10 menit');
-  assert.strictEqual(describeBuff(buff('no_consume', 1, null, 3), NOW), 'Item tidak habis 3x pakai — sisa 3x');
+  assert.strictEqual(
+    describeBuff(buff('no_consume', 1, null, 3), NOW),
+    'Item tidak habis 3x pakai — sisa 3x',
+  );
 });
 
 test('semua efek katalog valid dan punya deskripsi', () => {

@@ -94,13 +94,12 @@ async function callProvider(provider, question) {
     const data = await response.json();
     const answer = data?.choices?.[0]?.message?.content?.trim();
     // Jawaban kosong: mungkin cuma provider ini rewel, coba yang lain.
-    if (!answer) return { ok: false, retry: true, message: 'AI tidak mengembalikan jawaban. Coba tanya ulang.' };
+    if (!answer)
+      return { ok: false, retry: true, message: 'AI tidak mengembalikan jawaban. Coba tanya ulang.' };
 
     return {
       ok: true,
-      answer: answer.length > AI.MAX_ANSWER_CHARS
-        ? `${answer.slice(0, AI.MAX_ANSWER_CHARS)}…`
-        : answer,
+      answer: answer.length > AI.MAX_ANSWER_CHARS ? `${answer.slice(0, AI.MAX_ANSWER_CHARS)}…` : answer,
       model: data.model || provider.model,
       provider: provider.label,
     };
@@ -126,7 +125,10 @@ async function ask(question) {
   const providers = activeProviders();
   if (providers.length === 0) {
     const names = AI.PROVIDERS.map(p => `\`${p.apiKeyEnv}\``).join(' / ');
-    return { ok: false, message: `Kunci AI belum diisi. Tambahkan salah satu dari ${names} di file \`.env\`.` };
+    return {
+      ok: false,
+      message: `Kunci AI belum diisi. Tambahkan salah satu dari ${names} di file \`.env\`.`,
+    };
   }
 
   let lastMessage = 'Semua layanan AI sedang tidak bisa dipakai. Coba lagi nanti.';
@@ -146,7 +148,8 @@ async function ask(question) {
 
 /** Pesan yang layak dibaca user untuk tiap status error provider. */
 function providerMessage(status, provider) {
-  if (status === 401 || status === 403) return `Kunci ${provider.label} ditolak. Periksa \`${provider.apiKeyEnv}\` di \`.env\`.`;
+  if (status === 401 || status === 403)
+    return `Kunci ${provider.label} ditolak. Periksa \`${provider.apiKeyEnv}\` di \`.env\`.`;
   if (status === 402) return `Kuota ${provider.label} habis.`;
   if (status === 404) return `Model \`${provider.model}\` tidak dikenali ${provider.label}.`;
   if (status === 429) return `${provider.label} kena rate limit.`;
@@ -155,4 +158,3 @@ function providerMessage(status, provider) {
 }
 
 module.exports = { ask, isConfigured, cooldownLeft, markAsked, buildSystemPrompt, activeProviders };
-                                                 

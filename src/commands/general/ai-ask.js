@@ -11,10 +11,13 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('ai-ask')
     .setDescription('Tanya apa saja soal bot ini, dijawab AI berdasarkan dokumentasi')
-    .addStringOption(o => o.setName('input')
-      .setDescription('Pertanyaanmu, contoh: gimana cara dapat coin?')
-      .setRequired(true)
-      .setMaxLength(AI.MAX_QUESTION_CHARS)),
+    .addStringOption(o =>
+      o
+        .setName('input')
+        .setDescription('Pertanyaanmu, contoh: gimana cara dapat coin?')
+        .setRequired(true)
+        .setMaxLength(AI.MAX_QUESTION_CHARS),
+    ),
 
   async execute(interaction) {
     const question = interaction.options.getString('input').trim();
@@ -37,13 +40,14 @@ module.exports = {
     await interaction.deferReply(AI.EPHEMERAL ? { flags: MessageFlags.Ephemeral } : {});
 
     // Placeholder "sedang mikir" — emoji animasi ai_think.
-    const thinking = themedEmbed('ai_think', `${AI.PERSONA.NAME} sedang mikir`, COLORS.info)
-      .setDescription([
+    const thinking = themedEmbed('ai_think', `${AI.PERSONA.NAME} sedang mikir`, COLORS.info).setDescription(
+      [
         `${e('ai_think')} **Pertanyaan diterima**`,
         `> ${question.replace(/\n/g, '\n> ')}`,
         DIVIDER,
         `${e('loading')} Nyusun jawaban dari dokumentasi bot...`,
-      ].join('\n'));
+      ].join('\n'),
+    );
     await interaction.editReply({ embeds: [thinking] }).catch(() => {});
 
     const result = await ask(question);
@@ -53,23 +57,25 @@ module.exports = {
 
     markAsked(interaction.user.id);
 
-    const footer = AI.SHOW_PROVIDER && result.provider
-      ? `Dijawab AI dari dokumentasi bot • ${result.provider} • ${result.model}`
-      : 'Dijawab AI dari dokumentasi bot';
+    const footer =
+      AI.SHOW_PROVIDER && result.provider
+        ? `Dijawab AI dari dokumentasi bot • ${result.provider} • ${result.model}`
+        : 'Dijawab AI dari dokumentasi bot';
 
     const embed = themedEmbed('ai_answer', `Tanya ${AI.PERSONA.NAME}`, COLORS.info)
-      .setDescription([
-        `${e('ai_think')} **Pertanyaan**`,
-        `> ${question.replace(/\n/g, '\n> ')}`,
-        DIVIDER,
-        `${e('ai_answer')} **Jawaban**`,
-        result.answer,
-        DIVIDER,
-        `${e('ai_answer2')} Butuh detail lain? Tanya lagi pakai \`/ai-ask input:<pertanyaan>\``,
-      ].join('\n'))
+      .setDescription(
+        [
+          `${e('ai_think')} **Pertanyaan**`,
+          `> ${question.replace(/\n/g, '\n> ')}`,
+          DIVIDER,
+          `${e('ai_answer')} **Jawaban**`,
+          result.answer,
+          DIVIDER,
+          `${e('ai_answer2')} Butuh detail lain? Tanya lagi pakai \`/ai-ask input:<pertanyaan>\``,
+        ].join('\n'),
+      )
       .setFooter({ text: footer });
 
     return interaction.editReply({ embeds: [embed] });
   },
 };
-

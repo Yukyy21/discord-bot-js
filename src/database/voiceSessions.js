@@ -6,18 +6,22 @@ const { db } = require('./connection');
  * waktu voice yang sudah berjalan. Satu baris per user per guild.
  */
 function saveVoiceSession(userId, guildId, { joinedAt, lastGrant, eligible }) {
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO voice_sessions (userId, guildId, joinedAt, lastGrant, eligible)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT (userId, guildId)
     DO UPDATE SET joinedAt = excluded.joinedAt,
                   lastGrant = excluded.lastGrant,
                   eligible = excluded.eligible
-  `).run(userId, guildId, joinedAt, lastGrant, eligible ? 1 : 0);
+  `,
+  ).run(userId, guildId, joinedAt, lastGrant, eligible ? 1 : 0);
 }
 
 function getVoiceSession(userId, guildId) {
-  return db.prepare('SELECT * FROM voice_sessions WHERE userId = ? AND guildId = ?').get(userId, guildId) || null;
+  return (
+    db.prepare('SELECT * FROM voice_sessions WHERE userId = ? AND guildId = ?').get(userId, guildId) || null
+  );
 }
 
 function deleteVoiceSession(userId, guildId) {

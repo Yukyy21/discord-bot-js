@@ -10,7 +10,9 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('use')
     .setDescription('Pakai item dari inventori')
-    .addIntegerOption(o => o.setName('id').setDescription('ID item (lihat /inventory)').setRequired(true).setMinValue(1)),
+    .addIntegerOption(o =>
+      o.setName('id').setDescription('ID item (lihat /inventory)').setRequired(true).setMinValue(1),
+    ),
   async execute(interaction) {
     const id = interaction.options.getInteger('id');
     const result = useItem(interaction.user.id, interaction.guildId, id);
@@ -20,7 +22,13 @@ module.exports = {
 
     const info = describeEffect(result.effect);
     addQuestProgress(interaction.user.id, interaction.guildId, 'use_item', 1);
-    addQuestProgress(interaction.user.id, interaction.guildId, 'use_tier', 1, getTier(result.price, result.name));
+    addQuestProgress(
+      interaction.user.id,
+      interaction.guildId,
+      'use_tier',
+      1,
+      getTier(result.price, result.name),
+    );
     const embed = themedEmbed(info.emoji, 'Item Digunakan', COLORS.economy)
       .setDescription(`${result.name ? `${itemEmoji(result.name)} ` : ''}${e(info.emoji)} ${result.message}`)
       .setFooter({ text: 'Sisa itemmu bisa dilihat di /inventory' });

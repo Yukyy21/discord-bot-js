@@ -185,8 +185,9 @@ Cek yang sedang aktif dengan `/buffs`.
 | Heart of the Primordial | Endless Pulse | Buff yang dipasang setelahnya bertahan 25% lebih lama, 3 jam |
 | Chrono Core | Time Skip | Reset semua cooldown milikmu |
 
-Ability bertanda **[boss]** buff-nya sudah tersimpan sekarang, tapi baru terasa
-setelah sistem mini boss ada — **[belum ada]**.
+Ability bertanda **[boss]** sudah benar-benar terasa di sistem mini boss:
+`boss_damage` menaikkan damage per klik, `boss_loot_rate` peluang drop, dan
+`boss_drop_amount` jumlah item yang jatuh.
 
 ---
 
@@ -210,7 +211,74 @@ setelah sistem mini boss ada — **[belum ada]**.
 
 **Bulanan:** 500 pesan (10.000), Voice 12 jam (12.000), Belanja 60.000 coin (9.000), Naik 8 level (15.000), Streak daily 14 hari (8.000).
 
-Quest tipe "ikut/menang event" **[belum ada]** — menunggu sistem event/boss.
+Quest event sudah ada: `boss_join` (harian, ikut serang mini boss) dan
+`boss_kill` (mingguan, ikut menumbangkan mini boss).
+
+---
+
+## 6b. Mini Boss
+
+- Boss diundi otomatis tiap **12:00** dan **20:00** waktu lokal event
+  (offset `BOSS_UTC_OFFSET`, default WIB) lalu dikirim ke channel mini boss.
+  Admin bisa memaksa lewat `/admin-spawn-boss`.
+- Cara ikut: klik tombol **Serang!** di pesan boss. Player tidak punya HP, jadi
+  tidak ada risiko mati. Jeda antar serangan **10 detik** per orang (bisa molor
+  kalau kena debuff cooldown dari boss).
+- Boss kabur kalau belum tumbang dalam **6 jam** — hadiah tidak dibagikan.
+- Hadiah: **60% pool** dibagi proporsional damage ke semua peserta, sisa 40% jadi
+  bonus **top 3 damager** (15% / 10% / 5%) dan **pemberi last hit** (10%) — satu
+  orang boleh kena dua jatah. Minimal **3 peserta**; kalau kurang, hadiah tidak
+  dibagikan. Hadiah berupa coin, XP, poin, plus peluang item dari loot table.
+
+### Daftar boss
+
+| Boss | Peluang muncul | HP | Ikon |
+|---|---|---|---|
+| **Pump Freakin** | 45% | 24.000 | labu raksasa berkepala jahitan |
+| **Clown Orca** | 45% | 30.000 | badut merah bertopi lonceng |
+| **Ancient Mummy** | 10% (boss spesial) | 60.000 | mumi kuno |
+
+### Boss Menyerang Balik
+
+Boss **tidak bisa membunuh** player — player tetap tanpa HP. Yang dilakukan
+boss adalah memasang **debuff** atau merampas coin di dompet (bank aman).
+
+Dua cara boss menyerang:
+1. **Serangan balik** — tiap kali kamu klik **Serang!**, ada peluang boss
+   membalas: Pump Freakin **25%**, Clown Orca **30%**, Ancient Mummy **40%**.
+2. **Amukan** — tiap **5 menit** boss menyerang sampai **3 penyerang teraktif**
+   (yang menyerang dalam 15 menit terakhir) sekaligus, diumumkan di channel boss.
+
+#### Daftar serangan boss
+| Serangan | Efek | Dipakai boss |
+|---|---|---|
+| Rantai Berat | Cooldown serang ×2, 5 menit | Pump Freakin, Clown Orca |
+| Belenggu Kutukan | Cooldown serang ×3, 5 menit | Ancient Mummy |
+| Aura Melemahkan | Damage ke boss ×0.65, 5 menit | Pump Freakin |
+| Kutukan Serakah | Peluang loot boss ×0.5, 15 menit | Clown Orca, Ancient Mummy |
+| Debu Kabur | XP didapat ×0.75, 15 menit | Clown Orca |
+| Kutukan Bisu | Poin didapat ×0.8, 10 menit | Ancient Mummy |
+| Pukulan Linglung | 1 serangan berikutnya meleset (0 damage) | Pump Freakin, Clown Orca |
+| Rampas Koin | 3% coin dompet hilang (maks 1.500) | Pump Freakin, Clown Orca |
+| Perampokan Makam | 6% coin dompet hilang (maks 5.000) | Ancient Mummy |
+| Tanda Kutukan | Cooldown ×2.5 **dan** damage ×0.7, 10 menit | Ancient Mummy |
+
+#### Aturan debuff (biar tidak bentrok dengan item)
+- Debuff **tidak pernah membatalkan ability item**. Buff item dihitung dulu,
+  debuff mengalikan hasil akhirnya. Contoh: Kingslayer ×1.6 lalu Aura
+  Melemahkan ×0.65 = ×1.04.
+- **Debuff sejenis tidak menumpuk** — dipakai yang paling parah (sama seperti
+  buff yang memakai pengali terbesar).
+- Debuff **tidak** diperpanjang Endless Pulse dan **tidak** ikut Rekindle;
+  kedua ability itu hanya menyentuh buff milikmu.
+- **Chrono Core (Time Skip)** membersihkan semua debuff boss sekaligus mereset
+  cooldown. Ini satu-satunya cara instan lepas dari kutukan.
+- Debuff yang sedang aktif tampil di `/buffs` di bagian **Debuff dari Mini Boss**.
+- Coin yang dirampas hanya diambil dari **dompet**, tidak dari **bank**.
+
+Tiap boss punya **gambar ikon sendiri** yang tampil sebagai thumbnail di embed
+boss: saat muncul, tiap serangan, saat tumbang, dan saat kabur. Kalau file
+ikonnya hilang, embed tetap terkirim — hanya tanpa gambar.
 
 ---
 
@@ -240,7 +308,8 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 - `/quest` punya ikon quest sendiri.
 - Ability pakai ikon ability universal; buff pakai ikon buff, dan baris buff
   yang sedang aktif pakai ikon animasi.
-- Emoji boss sudah terdaftar tapi **belum dipakai** — menunggu sistem boss.
+- Mini boss punya emoji sendiri (`boss`, `boss_hp`, `boss_loot`, `boss_hit`) dan
+  **gambar ikon per boss** yang jadi thumbnail embed (file di `assets/boss/`).
 - Kalau muncul teks mentah seperti `<:coin:123>`, artinya ID emoji salah atau
   emoji sudah dihapus dari aplikasi. Bot punya fallback unicode kalau ID kosong.
 
@@ -248,9 +317,9 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 
 ## 10. Sistem yang Belum Ada
 
-- **Mini boss** — [belum ada]. Semua ability bertanda [boss] belum terasa efeknya.
-- **Quest event** — [belum ada].
-- Jangan menjanjikan tanggal rilis.
+- Mini boss dan quest event **sudah rilis** (lihat bagian 6b).
+- Kalau user menanyakan fitur yang tidak ada di dokumen ini, bilang belum
+  tersedia dan jangan menjanjikan tanggal rilis.
 
 ---
 
@@ -273,6 +342,16 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 **"Gimana cara naik tier?"** → Tier ditentukan level: Novice 1, Apprentice 6, Adept 11, Veteran 21, Champion 36, Hero 51, Demigod 71. Cek `/rank` atau `/points`.
 
 **"Data-ku hilang pas pindah server?"** → Data dipisah per server, memang tidak terbawa.
+
+**"Kenapa tombol serang boss-ku lama banget?"** → Cooldown normalnya 10 detik. Kalau lebih lama, kamu kena debuff cooldown dari serangan balik boss (×2, ×2.5, atau ×3). Cek `/buffs`, atau pakai Chrono Core untuk membersihkannya.
+
+**"Boss bisa bunuh aku nggak?"** → Tidak. Player tidak punya HP. Boss cuma memasang debuff atau merampas sebagian coin di dompet (bank aman).
+
+**"Coin-ku tiba-tiba berkurang pas lawan boss."** → Itu serangan Rampas Koin / Perampokan Makam. Simpan coin di `/bank` sebelum ikut boss kalau tidak mau kena.
+
+**"Debuff-ku numpuk nggak?"** → Tidak. Debuff sejenis memakai efek terparah saja, dan buff item tidak pernah dibatalkan — hanya dikalikan setelahnya.
+
+**"Ikon/gambar boss-nya kok nggak muncul?"** → Gambar boss dikirim sebagai lampiran pesan. Kalau tidak muncul, biasanya bot tidak punya izin **Attach Files** di channel mini boss.
 
 **"Command bot nggak muncul."** → Itu urusan admin: command harus dideploy ulang; command global butuh waktu menyebar.
 

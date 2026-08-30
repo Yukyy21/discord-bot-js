@@ -1,11 +1,11 @@
 // Tier item + bobot undian shop. Modul murni (tanpa database) supaya bisa dites.
 const TIER_CONFIG = {
-  Common:    { weight: 30, color: '#95a5a6' },
-  Uncommon:  { weight: 25, color: '#2ecc71' },
-  Rare:      { weight: 20, color: '#3498db' },
-  Epic:      { weight: 12, color: '#9b59b6' },
-  Legendary: { weight: 8,  color: '#e67e22' },
-  Mythic:    { weight: 5,  color: '#e74c3c' },
+  Common: { weight: 30, color: '#95a5a6' },
+  Uncommon: { weight: 25, color: '#2ecc71' },
+  Rare: { weight: 20, color: '#3498db' },
+  Epic: { weight: 12, color: '#9b59b6' },
+  Legendary: { weight: 8, color: '#e67e22' },
+  Mythic: { weight: 5, color: '#e74c3c' },
 };
 
 // Rarity resmi tiap item bawaan (assets/items/ListItem.md). Item di luar daftar

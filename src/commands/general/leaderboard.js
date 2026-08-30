@@ -44,7 +44,11 @@ function buildLeaderboard(sub, guildId, page = 0) {
 
   if (rows.length === 0) {
     return {
-      embeds: [baseEmbed().setColor(COLORS.neutral).setDescription(`${e('info')} Belum ada data di server ini.`)],
+      embeds: [
+        baseEmbed()
+          .setColor(COLORS.neutral)
+          .setDescription(`${e('info')} Belum ada data di server ini.`),
+      ],
       components: [],
     };
   }
@@ -57,13 +61,17 @@ function buildLeaderboard(sub, guildId, page = 0) {
   }
 
   const embed = themedEmbed('leaderboard', `Leaderboard ${cat.label}`, COLORS.leaderboard)
-    .setDescription([
-      ...headLines,
-      DIVIDER,
-      slice
-        .map((row, i) => `${medal(offset + i)} <@${row.userId}>\n${e(cat.emoji)} **${formatValue(sub, row)}**`)
-        .join('\n'),
-    ].join('\n'))
+    .setDescription(
+      [
+        ...headLines,
+        DIVIDER,
+        slice
+          .map(
+            (row, i) => `${medal(offset + i)} <@${row.userId}>\n${e(cat.emoji)} **${formatValue(sub, row)}**`,
+          )
+          .join('\n'),
+      ].join('\n'),
+    )
     .setFooter({ text: `Halaman ${current + 1}/${totalPages} • coba /leaderboard card untuk versi gambar` });
 
   return { embeds: [embed], components: pagerRow(`lb_page:${sub}`, current, totalPages) };
@@ -80,10 +88,12 @@ module.exports = {
     .addSubcommand(s => s.setName('rank').setDescription('Top level/rank tertinggi'))
     .addSubcommand(s => s.setName('mingguan').setDescription('Top poin yang didapat pekan ini'))
     .addSubcommand(s =>
-      s.setName('card')
+      s
+        .setName('card')
         .setDescription('Leaderboard versi gambar')
         .addStringOption(o =>
-          o.setName('kategori')
+          o
+            .setName('kategori')
             .setDescription('Kategori leaderboard')
             .addChoices(
               { name: 'Coin', value: 'balance' },

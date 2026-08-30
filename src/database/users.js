@@ -13,16 +13,23 @@ function getUser(userId, guildId) {
 /** Tambah (atau kurangi, kalau amount negatif) saldo dompet. */
 function updateBalance(userId, guildId, amount) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET balance = balance + ? WHERE userId = ? AND guildId = ?')
-    .run(amount, userId, guildId);
+  db.prepare('UPDATE users SET balance = balance + ? WHERE userId = ? AND guildId = ?').run(
+    amount,
+    userId,
+    guildId,
+  );
 }
 
 /** Catat klaim daily: saldo, streak, dan tanggal klaim dalam satu transaksi. */
 function claimDaily(userId, guildId, { reward, streak, dateKey }) {
   const apply = db.transaction(() => {
     updateBalance(userId, guildId, reward);
-    db.prepare('UPDATE users SET streak = ?, lastDaily = ? WHERE userId = ? AND guildId = ?')
-      .run(streak, dateKey, userId, guildId);
+    db.prepare('UPDATE users SET streak = ?, lastDaily = ? WHERE userId = ? AND guildId = ?').run(
+      streak,
+      dateKey,
+      userId,
+      guildId,
+    );
   });
   apply();
 }
@@ -31,8 +38,16 @@ function claimDaily(userId, guildId, { reward, streak, dateKey }) {
 function transferCoins(fromId, toId, guildId, amount) {
   const transfer = db.transaction(() => {
     getUser(toId, guildId);
-    db.prepare('UPDATE users SET balance = balance - ? WHERE userId = ? AND guildId = ?').run(amount, fromId, guildId);
-    db.prepare('UPDATE users SET balance = balance + ? WHERE userId = ? AND guildId = ?').run(amount, toId, guildId);
+    db.prepare('UPDATE users SET balance = balance - ? WHERE userId = ? AND guildId = ?').run(
+      amount,
+      fromId,
+      guildId,
+    );
+    db.prepare('UPDATE users SET balance = balance + ? WHERE userId = ? AND guildId = ?').run(
+      amount,
+      toId,
+      guildId,
+    );
   });
   transfer();
 }
@@ -40,19 +55,29 @@ function transferCoins(fromId, toId, guildId, amount) {
 /** Dompet -> bank. Isi dompet wajib dicek lebih dulu oleh pemanggil. */
 function depositToBank(userId, guildId, amount) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET balance = balance - ?, bank = bank + ? WHERE userId = ? AND guildId = ?')
-    .run(amount, amount, userId, guildId);
+  db.prepare('UPDATE users SET balance = balance - ?, bank = bank + ? WHERE userId = ? AND guildId = ?').run(
+    amount,
+    amount,
+    userId,
+    guildId,
+  );
 }
 
 /** Bank -> dompet. Isi bank wajib dicek lebih dulu oleh pemanggil. */
 function withdrawFromBank(userId, guildId, amount) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET bank = bank - ?, balance = balance + ? WHERE userId = ? AND guildId = ?')
-    .run(amount, amount, userId, guildId);
+  db.prepare('UPDATE users SET bank = bank - ?, balance = balance + ? WHERE userId = ? AND guildId = ?').run(
+    amount,
+    amount,
+    userId,
+    guildId,
+  );
 }
 
 function getBalanceLeaderboard(guildId, limit = 10) {
-  return db.prepare('SELECT * FROM users WHERE guildId = ? ORDER BY balance DESC LIMIT ?').all(guildId, limit);
+  return db
+    .prepare('SELECT * FROM users WHERE guildId = ? ORDER BY balance DESC LIMIT ?')
+    .all(guildId, limit);
 }
 
 module.exports = {

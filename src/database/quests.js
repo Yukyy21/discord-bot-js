@@ -21,9 +21,9 @@ function ensureQuests(userId, guildId) {
   `);
   const assign = db.transaction(() => {
     for (const period of currentPeriodKeys()) {
-      const existing = db.prepare(
-        'SELECT COUNT(*) AS c FROM quests WHERE userId = ? AND guildId = ? AND period = ?',
-      ).get(userId, guildId, period).c;
+      const existing = db
+        .prepare('SELECT COUNT(*) AS c FROM quests WHERE userId = ? AND guildId = ? AND period = ?')
+        .get(userId, guildId, period).c;
       if (existing > 0) continue;
       for (const quest of drawQuests(period, counts[period.split(':')[0]])) {
         insert.run(userId, guildId, period, quest.id, quest.target, quest.reward);
@@ -36,19 +36,23 @@ function ensureQuests(userId, guildId) {
 /** Quest milik user untuk periode berjalan, sudah digabung metadata katalog. */
 function getQuests(userId, guildId) {
   ensureQuests(userId, guildId);
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT period, questId, target, reward, progress, claimed
     FROM quests
     WHERE userId = ? AND guildId = ?
-      AND period IN (${currentPeriodKeys().map(() => '?').join(', ')})
+      AND period IN (${currentPeriodKeys()
+        .map(() => '?')
+        .join(', ')})
     ORDER BY period, questId
-  `).all(userId, guildId, ...currentPeriodKeys());
+  `,
+    )
+    .all(userId, guildId, ...currentPeriodKeys());
 
   // Quest yang sudah dihapus dari katalog tetap ada datanya; lewati saja
   // saat render supaya tidak crash.
-  return rows
-    .map(row => ({ ...row, quest: QUEST_CATALOG[row.questId] }))
-    .filter(row => row.quest);
+  return rows.map(row => ({ ...row, quest: QUEST_CATALOG[row.questId] })).filter(row => row.quest);
 }
 
 /**
@@ -59,14 +63,20 @@ function getQuests(userId, guildId) {
  */
 function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
   ensureQuests(userId, guildId);
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT period, questId, progress, target FROM quests
     WHERE userId = ? AND guildId = ? AND claimed = 0
-      AND period IN (${currentPeriodKeys().map(() => '?').join(', ')})
-  `).all(userId, guildId, ...currentPeriodKeys());
+      AND period IN (${currentPeriodKeys()
+        .map(() => '?')
+        .join(', ')})
+  `,
+    )
+    .all(userId, guildId, ...currentPeriodKeys());
 
   const update = db.prepare(
-    'UPDATE quests SET progress = ? WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?',
+    'UPDATE quests SET progress = ?, lockedMultiplier = ? WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?',
   );
   // Insight menggandakan progres, kecuali quest mode 'max' (streak) yang
   // nilainya sudah absolut.
@@ -79,10 +89,22 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
       if (quest.meta && quest.meta !== meta) continue;
       // mode 'max' dipakai daily_streak: streak naik-turun, yang dihitung
       // nilai terbesar yang pernah tercapai, bukan hasil penjumlahan.
-      const next = quest.mode === 'max'
-        ? Math.min(Math.max(row.progress, amount), row.target)
-        : Math.min(row.progress + Math.round(amount * questMult), row.target);
-      if (next !== row.progress) update.run(next, userId, guildId, row.period, row.questId);
+      const next =
+        quest.mode === 'max'
+          ? Math.min(Math.max(row.progress, amount), row.target)
+          : Math.min(row.progress + Math.round(amount * questMult), row.target);
+      if (next !== row.progress) {
+        // Kunci multiplier saat quest baru selesai (progress mencapai target)
+        const justCompleted = next >= row.target && row.progress < row.target;
+        const lockedMult = justCompleted
+          ? Math.max(getMultiplier(userId, guildId, 'coin'), getMultiplier(userId, guildId, 'quest_coin'))
+          : undefined;
+        if (lockedMult !== undefined) {
+          update.run(next, lockedMult, userId, guildId, row.period, row.questId);
+        } else {
+          update.run(next, undefined, userId, guildId, row.period, row.questId);
+        }
+      }
     }
   });
   bump();
@@ -93,10 +115,14 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
  * buyItem/useItem supaya command tinggal menampilkan pesannya.
  */
 function claimQuest(userId, guildId, period, questId) {
-  const row = db.prepare(`
-    SELECT target, reward, progress, claimed FROM quests
+  const row = db
+    .prepare(
+      `
+    SELECT target, reward, progress, claimed, lockedMultiplier FROM quests
     WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?
-  `).get(userId, guildId, period, questId);
+  `,
+    )
+    .get(userId, guildId, period, questId);
 
   if (!row || !QUEST_CATALOG[questId]) {
     return { ok: false, message: 'Quest tidak ditemukan.' };
@@ -104,16 +130,20 @@ function claimQuest(userId, guildId, period, questId) {
   if (row.claimed) return { ok: false, message: 'Quest ini sudah pernah diklaim.' };
   if (row.progress < row.target) return { ok: false, message: 'Quest belum selesai.' };
 
-  // Deep Current menaikkan coin dari quest; buff coin biasa juga berlaku.
-  const reward = Math.round(row.reward * Math.max(
+  // Gunakan lockedMultiplier jika ada (saat quest selesai),否则 pakai buff saat klaim
+  const lockedMult = row.lockedMultiplier || 1;
+  const currentMult = Math.max(
     getMultiplier(userId, guildId, 'coin'),
     getMultiplier(userId, guildId, 'quest_coin'),
-  ));
+  );
+  const reward = Math.round(row.reward * Math.max(lockedMult, currentMult));
 
   const claim = db.transaction(() => {
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE quests SET claimed = 1 WHERE userId = ? AND guildId = ? AND period = ? AND questId = ?
-    `).run(userId, guildId, period, questId);
+    `,
+    ).run(userId, guildId, period, questId);
     updateBalance(userId, guildId, reward);
   });
   claim();

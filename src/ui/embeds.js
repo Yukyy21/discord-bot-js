@@ -8,24 +8,23 @@ const COLORS = {
   error: 0xed4245,
   warn: 0xfee75c,
   info: 0x00a8fc,
-  economy: 0xf1c40f,   // /balance /daily /shop /buy /give /exchange
-  points: 0xa78bfa,    // /points /profile /rank
+  economy: 0xf1c40f, // /balance /daily /shop /buy /give /exchange
+  points: 0xa78bfa, // /points /profile /rank
   leaderboard: 0xffb020,
-  neutral: 0x2b2d31,   // menyatu dengan background Discord
+  neutral: 0x2b2d31, // menyatu dengan background Discord
 };
 
 const DIVIDER = '━━━━━━━━━━━━━━━━━━━━━━';
 
 function baseEmbed() {
-  return new EmbedBuilder()
-    .setColor(COLORS.primary)
-    .setFooter({ text: 'Bot Ekonomi & Poin' })
-    .setTimestamp();
+  return new EmbedBuilder().setColor(COLORS.primary).setFooter({ text: 'Bot Ekonomi & Poin' }).setTimestamp();
 }
 
 /** Embed dengan warna kategori + judul ber-emoji custom. */
 function themedEmbed(emojiKey, title, color = COLORS.primary) {
-  return baseEmbed().setColor(color).setTitle(`${e(emojiKey)} ${title}`);
+  return baseEmbed()
+    .setColor(color)
+    .setTitle(`${e(emojiKey)} ${title}`);
 }
 
 function successEmbed(title, description) {

@@ -28,17 +28,14 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
   kesulitan. Varian "menang/ikut event" menunggu sistem boss/event
   (@Nekoomaruu).
 
-- [ ] **Mini boss spawn jam 00:00 dan 12:00.** Boss muncul otomatis dua kali
-  sehari di channel yang ditentukan, member ikut menyerang lewat tombol, dan
-  hadiah (coin/poin/item) dibagi ke yang berpartisipasi. Perlu:
-  - penjadwal harian yang tahan restart (hitung target waktu berikutnya saat
-    boot, bukan `setInterval` polos),
-  - konfigurasi `BOSS_CHANNEL_ID` di `.env` dan angka balancing di
-    `src/config/constants.js`,
-  - tabel baru untuk boss aktif + kontribusi damage per user supaya event
-    tidak hilang saat bot mati,
-  - katalog boss (nama, HP, gambar, tabel loot) terpisah di `src/lib/`,
-  - pembacaan buff ability yang sudah ada — lihat [bossplan.md](bossplan.md).
+- [x] **Mini boss spawn jam 00:00 dan 12:00.** Boss muncul otomatis dua kali
+  sehari di channel `BOSS_CHANNEL_ID`, member menyerang lewat tombol, hadiah
+  dibagi ke top 3 damager + last hit.
+  Selesai: penjadwal tahan restart (`dueSpawnSlot()` + `slotUsed()` di
+  `src/lib/boss.js` / `src/database/boss.js`), tabel `boss_spawns` dan
+  `boss_damage`, katalog di `src/lib/bossCatalog.js`, angka di `BOSS`
+  (`src/config/constants.js`), dan buff ability boss sudah terbaca. Sisa
+  catatan balancing-nya pindah ke gelombang tiga di bawah.
 
 - [x] **Ability/stat per item.** Setiap item punya stat (ATK, DEF, HP, LUCK)
   dan/atau ability yang berlaku saat dipakai atau saat ikut event boss.
@@ -47,8 +44,74 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
   kolom baru, tampilan stat di `/shop`, `/inventory`, dan `/use`, plus
   keputusan apakah item bisa "dipasang" (equip) atau habis sekali pakai.
 
+## Gelombang Tiga — Balancing Coin, XP & Poin
+
+Semua fitur besar sudah jalan; yang belum pernah disetel adalah **angkanya**.
+Hitungan lengkap, tabel pemasukan harian, dan usulan angka ada di
+[Balancing.md](Balancing.md). Urutan di bawah dari yang dampaknya paling
+terasa.
+
+- [x] **Rombak hadiah boss.** Sekarang 80–90% coin yang masuk ke server datang
+  dari boss dan hanya ke maksimal 4 orang; peserta lain dapat nol. Rencana:
+  bagi sebagian pool (mis. 60%) proporsional ke damage semua peserta, sisanya
+  bonus top 3 + last hit; turunkan `reward.coin` di
+  `src/lib/bossCatalog.js`; tambah `MIN_PARTICIPANTS` supaya satu orang tidak
+  bisa solo-farm selama 6 jam despawn; pertimbangkan geser slot 00:00 ke jam
+  yang servernya hidup.
+  Selesai: 60% proporsional + top3 (15%/10%/5%) + last hit (10%); coin pool
+  8k/10k/25k; MIN_PARTICIPANTS = 3; spawn 12/20 WIB.
+
+- [x] **Timbang item acak saat level up.** `src/events/messageCreate.js` masih
+  mengundi uniform dari seluruh katalog, jadi Mythic bisa jatuh gratis dengan
+  peluang sampai 50% per level. Pakai `weightedRandom()` yang sudah ada di
+  `src/lib/tiers.js`, dan beri plafon pada `level × 50` coin di
+  `src/lib/ranks.js`.
+  Selesai: weightedRandom berbasis tier + coin cap 2.500.
+
+- [x] **Batasi streak `/daily`.** Bonus +100/hari tanpa batas: hari ke-100 =
+  10.400 coin sehari. Tambah `DAILY.STREAK_MAX_BONUS` di
+  `src/config/constants.js`.
+  Selesai: STREAK_MAX_BONUS = 3.000.
+
+- [x] **Naikkan nilai voice + XP dari voice.** 1 jam voice = 20 poin (±70 kata
+  chat) dan voice tidak memberi XP sama sekali, jadi member voice-only tidak
+  pernah naik level. Usulan: `VOICE.POINTS_PER_INTERVAL` 5 → 8 dan
+  `VOICE.XP_PER_INTERVAL` baru, dipakai di `src/events/voiceStateUpdate.js`.
+  Selesai: poin 5→8, XP_PER_INTERVAL = 10.
+
+- [x] **Tutup jalur beli-leaderboard.** `/give` tanpa pajak/limit +
+  `/exchange` 500:1 tanpa batas = poin bisa disuplai akun kedua. Rencana: pajak
+  transfer, limit harian `/exchange`, atau kurs yang naik seiring jumlah poin
+  yang sudah ditukar.
+  Selesai: /give biaya 5%, exchange kurs 1.000:1.
+
+- [x] **Sink coin permanen.** Sekarang coin cuma keluar lewat `/shop` dan
+  `/exchange`; `/bank` netral. Ide: biaya tarik bank, ongkos `/give`, harga
+  shop dinamis, atau item konsumtif yang wajib untuk boss.
+  Selesai: /give biaya 5% (sink baru).
+
+- [x] **Harga item vs manfaatnya.** Multiplier coin praktis hanya berguna
+  sebagai alat timing (coin tidak pernah masuk dari chat/voice), dan buff XP
+  kena plafon 20 XP/pesan sehingga Plasma Blaster 18.000 tidak sepadan. Perlu
+  penyetelan ulang harga/nilai di `src/database/shopCatalog.js`, plus kunci
+  multiplier saat quest **selesai** (bukan saat diklaim) di
+  `src/database/quests.js`.
+  Selesai: multiplier dikunci saat quest selesai via lockedMultiplier.
+
+- [x] **Samakan zona waktu periode.** `/daily`, quest harian & bulanan memakai
+  tanggal UTC (hari baru jam 07:00 WIB), sementara boss sudah pakai
+  `BOSS.UTC_OFFSET`. Satukan ke satu helper offset.
+  Selesai: `localDateKey()` di `src/lib/boss.js` dipakai `daily.js` dan
+  `quests.js`; periode sekarang berganti di tengah malam waktu server.
+
 ## Catatan Urutan
 
-Ability/stat item sebaiknya digarap sebelum mini boss, karena sistem boss
-paling masuk akal kalau item sudah punya angka yang bisa dipakai bertarung.
-Ganti asset rank dan tambah quest berdiri sendiri, bisa dikerjakan kapan saja.
+Balancing boss dikerjakan duluan karena dia sumber coin terbesar — mengubah
+yang lain sebelum boss disetel hasilnya akan berubah lagi. Item acak level-up
+dan cap streak daily berdiri sendiri, aman dikerjakan kapan saja. Sink coin
+baru dilakukan terakhir, setelah kelihatan berapa coin yang benar-benar
+beredar.
+
+Sebelum menggarap ini, baca juga [Bugs.md](Bugs.md) — beberapa temuan di sana
+(item acak level-up, `daily_reset` yang menghapus streak) adalah bug sekaligus
+isu balancing.
