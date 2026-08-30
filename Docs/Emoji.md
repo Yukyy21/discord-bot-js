@@ -42,6 +42,14 @@ Dipakai oleh `/credit` dan `/botinfo`:
 | `discordjs` | `<:Discordjs:...>` |
 | `database` | `<:Sql_database:...>` |
 
+## Emoji AI (`/ai-ask`)
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `ai_think` | `<a:Aithink:...>` (animated) | Embed "sedang mikir" saat pertanyaan diproses |
+| `ai_answer` | `<a:Aiask1:...>` (animated) | Judul & blok jawaban `/ai-ask` |
+| `ai_answer2` | `<a:aiask2:...>` (animated) | Baris penutup jawaban |
+
 ## Emoji Navigasi, Quest, Ability & Boss
 
 | Key | Emoji | Dipakai di |

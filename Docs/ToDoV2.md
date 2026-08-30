@@ -28,14 +28,16 @@ riwayat — yang di bawah ini yang belum digarap sama sekali. (asset rank akan d
   kesulitan. Varian "menang/ikut event" menunggu sistem boss/event
   (@Nekoomaruu).
 
-- [x] **Mini boss spawn jam 00:00 dan 12:00.** Boss muncul otomatis dua kali
+- [x] **Mini boss spawn jam 12:00 dan 20:00.** Boss muncul otomatis dua kali
   sehari di channel `BOSS_CHANNEL_ID`, member menyerang lewat tombol, hadiah
   dibagi ke top 3 damager + last hit.
   Selesai: penjadwal tahan restart (`dueSpawnSlot()` + `slotUsed()` di
   `src/lib/boss.js` / `src/database/boss.js`), tabel `boss_spawns` dan
   `boss_damage`, katalog di `src/lib/bossCatalog.js`, angka di `BOSS`
-  (`src/config/constants.js`), dan buff ability boss sudah terbaca. Sisa
-  catatan balancing-nya pindah ke gelombang tiga di bawah.
+  (`src/config/constants.js`), dan buff ability boss sudah terbaca. Slot
+  semula 00:00 & 12:00 digeser jadi 12:00 & 20:00 pada gelombang tiga
+  (jam tengah malam sepi). Sisa catatan balancing-nya pindah ke gelombang
+  tiga di bawah.
 
 - [x] **Ability/stat per item.** Setiap item punya stat (ATK, DEF, HP, LUCK)
   dan/atau ability yang berlaku saat dipakai atau saat ikut event boss.

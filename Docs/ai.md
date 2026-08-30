@@ -63,6 +63,7 @@ server B.
 ### Umum
 | Command | Fungsi |
 |---|---|
+| `/ai-ask <input>` | Tanya apa saja soal bot; jawaban bersumber dari dokumen ini |
 | `/guide` | Panduan interaktif, dropdown 11 kategori, tombol halaman & tombol tutup |
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim pembuat bot |
@@ -74,6 +75,7 @@ server B.
 | `/admin give-coin <user> <jumlah>` | Beri coin (event/hadiah) |
 | `/admin reset-user <user> <konfirmasi>` | Hapus semua data user (saldo, poin, level, inventori, quest) |
 | `/admin set-level <user> <level>` | Set level manual, XP direset ke 0 |
+| `/admin-spawn-boss` | Paksa boss diundi sekarang (buat tes) |
 
 `/admin` dikunci `setDefaultMemberPermissions(Administrator)` jadi tidak muncul
 untuk member biasa. `reset-user` wajib `konfirmasi: true`.

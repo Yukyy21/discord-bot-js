@@ -56,8 +56,9 @@ level yang terpisah.
 | `/ai-ask <input>` | Tanya apa saja soal bot; dijawab AI berdasarkan `Docs/ai.md` |
 
 | `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
-| `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user — saldo, poin, level, inventori, quest |
+| `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, poin, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
+| `/admin-spawn-boss` | **Admin:** paksa undian boss sekarang (untuk tes) |
 
 ## Aturan Angka
 

@@ -1,5 +1,37 @@
 # Changelog
 
+## Merge `nekol-path1` → `neko-path1` + Fitur AI (`/ai-ask`)
+
+- Merge resmi branch `nekol-path1` (sistem mini boss, balancing ekonomi,
+  fix interaksi `/shop`) ke `neko-path1` yang sudah memuat fitur AI. Konflik
+  `Docs/ai.md` diselesaikan dengan mengambil versi boss (sistemnya sudah
+  benar-benar ada), lalu angka yang tersisa disinkronkan dengan kode:
+  spawn boss 12:00 & 20:00 WIB, dan pembagian hadiah 60%/15%/10%/5%/10%.
+- Command baru `/ai-ask <input>` — member bisa tanya apa saja soal bot, dan
+  dijawab berdasarkan basis pengetahuan `Docs/ai.md` (bukan query database).
+- Provider & fallback ditata berurutan di `src/config/ai.js`: Groq (utama,
+  `GROQ_API_KEY`) → Google AI Studio kunci pertama (`GOOGLE_AI_API_KEY`) →
+  kunci kedua (`GOOGLE_AI_API_KEY_2`). Status 402/429/5xx dan timeout memicu
+  fallback; error konfigurasi (401/403/404) langsung dilaporkan. Provider
+  yang kuncinya kosong dilewati otomatis, jadi cukup isi satu kunci.
+- Alur: `deferReply()` → embed "mikir" (`ai_think`) → `src/lib/aiContext.js`
+  membaca `Docs/ai.md` (cache 5 menit) → `src/lib/ai.js` menyusun system
+  prompt dari persona + aturan di `src/config/ai.js` → jawaban diganti embed
+  final dengan footer provider + model. Semua error diterjemahkan ke Bahasa
+  Indonesia, tidak pernah dilempar sebagai exception.
+- Emoji AI baru di registry: `ai_think` (`Aithink`), `ai_answer` (`Aiask1`),
+  `ai_answer2` (`aiask2`) — semuanya animated, detail di
+  [Emoji.md](Emoji.md).
+- `.env.example` dilengkapi kunci AI (`GROQ_API_KEY`, `GOOGLE_AI_API_KEY`,
+  `GOOGLE_AI_API_KEY_2`, `GROQ_MODEL`, `GOOGLE_AI_MODEL`). Kalau semua kunci
+  kosong, `/ai-ask` membalas error jelas dan bot lain tetap jalan.
+- Dokumentasi ikut di-rapikan: bagian AI di [Bot.md](Bot.md), emoji AI di
+  [Emoji.md](Emoji.md), dan angka boss yang menyusut di `ai.md` dikoreksi
+  sesuai `src/lib/bossCatalog.js` (Pump 8.000, Clown 10.000, Mummy 25.000
+  coin).
+- Karena ada command baru, jalankan `npm run deploy` sekali. `npm test`
+  hijau (76/76), `npm run lint` bersih.
+
 ## Balancing Ekonomi (Coin, XP & Poin)
 
 Semua angka diambil dari rekomendasi [Balancing.md](Balancing.md). 12 file berubah, 76/76 test pass.
