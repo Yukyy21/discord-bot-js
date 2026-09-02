@@ -32,6 +32,7 @@ level yang terpisah.
 | `/buy <id>` | Beli item yang sedang ada di stok |
 | `/inventory` | Item yang kamu punya, 5 per halaman |
 | `/use <id>` | Pakai satu buah item yang punya efek |
+| `/equip equip\|unequip <id>` | Pasang / lepas item ke slot equip (maks 5) |
 | `/give <user> <jumlah>` | Transfer coin ke member lain |
 
 ### Poruv & Progres
@@ -154,6 +155,14 @@ jadi bot restart = undian baru. Stok diundi **per-guild**: setiap server punya
 etalase acak dan jam rotasi 10 menit sendiri (`Map<guildId, ...>` di
 `src/lib/shopRotation.js`), jadi server yang sibuk tidak menghabiskan stok
 server lain dan `/buy` selalu memvalidasi ke stok guild pemain.
+
+**Equip.** Item yang kamu punya bisa ditandai ke **slot equip** lewat
+`/equip equip <id>` (maks **5** item sekaligus; `/equip unequip <id>` untuk
+melepas). Equip bersifat penanda build untuk kini — efek item **tetap aktif
+lewat `/use`**, bukan pasif — sehingga kolom `equipped` di `user_items`
+adalah label/organisasi. Daya tampung 5 slot sengaja kecil supaya pilihan
+build berarti, dan kolomnya sudah siap dipakai kalau kelak equip dibuat
+memengaruhi buff secara pasif.
 
 Tampilan `/shop`: tiap item punya ikon emoji sendiri, badge warna rarity,
 harga dengan penanda centang/silang apakah saldomu cukup, efek item, deskripsi

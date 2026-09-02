@@ -4,6 +4,7 @@ const { getUser, updateBalance } = require('./users');
 const { addPoints, addXp } = require('./points');
 const { addBuff, consumeCharge } = require('./buffs');
 const { runAbility } = require('./abilities');
+const { EQUIP_SLOTS } = require('../config/constants');
 
 function getShopItems() {
   return db.prepare('SELECT * FROM shop_items ORDER BY id').all();
@@ -108,7 +109,7 @@ function getInventory(userId, guildId) {
   return db
     .prepare(
       `
-    SELECT si.id, si.name, si.price, si.description, si.effect, ui.quantity
+    SELECT si.id, si.name, si.price, si.description, si.effect, ui.quantity, ui.equipped
     FROM user_items ui
     JOIN shop_items si ON si.id = ui.itemId
     WHERE ui.userId = ? AND ui.guildId = ?
@@ -116,6 +117,44 @@ function getInventory(userId, guildId) {
   `,
     )
     .all(userId, guildId);
+}
+
+/** Jumlah item yang sedang di-equip user. */
+function getEquipCount(userId, guildId) {
+  return db
+    .prepare('SELECT COUNT(*) AS c FROM user_items WHERE userId = ? AND guildId = ? AND equipped = 1')
+    .get(userId, guildId).c;
+}
+
+/**
+ * Tandai item milik user sebagai terpasang/lepas. Equip hanya label/carpool
+ * untuk kini — efek item tetap aktif lewat /use — jadi tidak ada penalti
+ * gameplay. Mengembalikan `{ ok, message }` mengikuti pola command lain.
+ */
+function setEquipped(userId, guildId, itemId, equipped) {
+  const entry = db
+    .prepare('SELECT quantity, equipped FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?')
+    .get(userId, guildId, itemId);
+  if (!entry || entry.quantity < 1) {
+    return { ok: false, message: 'Kamu tidak punya item itu.' };
+  }
+  if (equipped) {
+    const count = getEquipCount(userId, guildId);
+    if (entry.equipped) return { ok: false, message: 'Item itu sudah terpasang.' };
+    if (count >= EQUIP_SLOTS) {
+      return {
+        ok: false,
+        message: `Slot equip penuh (**${EQUIP_SLOTS}**). Lepas dulu salah satu dengan /unequip.`,
+      };
+    }
+  }
+  db.prepare('UPDATE user_items SET equipped = ? WHERE userId = ? AND guildId = ? AND itemId = ?').run(
+    equipped ? 1 : 0,
+    userId,
+    guildId,
+    itemId,
+  );
+  return { ok: true, equipped };
 }
 
 /**
@@ -186,4 +225,15 @@ function useItem(userId, guildId, itemId) {
   };
 }
 
-module.exports = { getShopItems, seedShop, syncEffects, rebalancePrices, grantItem, buyItem, getInventory, useItem };
+module.exports = {
+  getShopItems,
+  seedShop,
+  syncEffects,
+  rebalancePrices,
+  grantItem,
+  buyItem,
+  getInventory,
+  getEquipCount,
+  setEquipped,
+  useItem,
+};

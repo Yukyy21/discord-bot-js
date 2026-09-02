@@ -169,6 +169,10 @@ function runMigrations() {
   ensureColumn('points', 'level', 'INTEGER DEFAULT 1');
   ensureColumn('points', 'voice_seconds', 'INTEGER DEFAULT 0');
   ensureColumn('shop_items', 'effect', 'TEXT');
+  // Status equip per item milik user (0/1). Equip bersifat label/carpool untuk
+  // kini — efek tetap aktif lewat /use — tapi kolom ini siap untuk mekanik
+  // passive bila build equip dibuat benar-benar memengaruhi buff suatu saat.
+  ensureColumn('user_items', 'equipped', 'INTEGER DEFAULT 0');
   // Serangan balik boss: kapan terakhir boss mengamuk ke para penyerang.
   ensureColumn('boss_spawns', 'lastRampageAt', 'INTEGER DEFAULT 0');
   // Kunci multiplier saat quest selesai supaya buff tidak bisa ditunda klaim.

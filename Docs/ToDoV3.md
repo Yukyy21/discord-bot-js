@@ -49,7 +49,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   saat spawn selesai (partisipasi) dan saat hadiah dibagikan (kemenangan),
   lalu tambah entri `boss_kill`/`boss_join` ke `QUEST_CATALOG`.
 
-- [ ] **Equip item.** Sekarang ability/stat item berlaku pasif begitu
+- [x] **Equip item.** Sekarang ability/stat item berlaku pasif begitu
   dibeli. Pertimbangkan sistem pasang/lepas (slot equip terbatas) supaya
   pilihan build terasa — butuh kolom equipped per user dan tampilan di
   `/inventory`.

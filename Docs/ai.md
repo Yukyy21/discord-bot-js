@@ -46,6 +46,7 @@ server B.
 | `/buy <id>` | Beli item yang sedang ada di stok |
 | `/inventory` | Item milikmu, 5 per halaman |
 | `/use <id>` | Pakai satu item (efek/buff/ability jalan) |
+| `/equip equip\|unequip <id>` | Pasang / lepas item ke slot equip (maks 5); penanda build, efek tetap via /use |
 | `/buffs` | Daftar buff & ability yang sedang aktif beserta sisa waktu |
 | `/give <user> <jumlah>` | Transfer coin ke member lain |
 

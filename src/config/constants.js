@@ -36,6 +36,9 @@ const DAILY = {
 
 /** Kurs Poruv Shop dihapus — Poruv sekarang dipakai langsung lewat /poruv-shop. */
 
+/** Jumlah item yang bisa di-equip sekaligus per user (/equip). */
+const EQUIP_SLOTS = 5;
+
 /**
  * Biaya /give, dipotong dari saldo pengirim dan DIBAKAR (sink coin permanen).
  * Penerima tetap menerima jumlah penuh; biaya tidak dipindah ke siapa pun.
@@ -131,4 +134,15 @@ function xpForLevel(level) {
   return level * 100;
 }
 
-module.exports = { CHAT, VOICE, DAILY, SHOP, PORUV_SHOP, QUEST, BOSS, GIVE_FEE_RATE, xpForLevel };
+module.exports = {
+  CHAT,
+  VOICE,
+  DAILY,
+  SHOP,
+  PORUV_SHOP,
+  QUEST,
+  BOSS,
+  GIVE_FEE_RATE,
+  EQUIP_SLOTS,
+  xpForLevel,
+};
