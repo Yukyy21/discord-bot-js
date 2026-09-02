@@ -52,6 +52,28 @@ function transferCoins(fromId, toId, guildId, amount) {
   transfer();
 }
 
+/**
+ * Pindah coin antar user dengan biaya transfer yang DIBAKAR (sink coin):
+ * pengirim kehilangan `amount + fee`, penerima mendapat `amount`. Saldo
+ * pengirim wajib dicek lebih dulu oleh pemanggil.
+ */
+function transferCoinsWithFee(fromId, toId, guildId, amount, fee) {
+  const transfer = db.transaction(() => {
+    getUser(toId, guildId);
+    db.prepare('UPDATE users SET balance = balance - ? WHERE userId = ? AND guildId = ?').run(
+      amount + fee,
+      fromId,
+      guildId,
+    );
+    db.prepare('UPDATE users SET balance = balance + ? WHERE userId = ? AND guildId = ?').run(
+      amount,
+      toId,
+      guildId,
+    );
+  });
+  transfer();
+}
+
 /** Dompet -> bank. Isi dompet wajib dicek lebih dulu oleh pemanggil. */
 function depositToBank(userId, guildId, amount) {
   getUser(userId, guildId);
@@ -85,6 +107,7 @@ module.exports = {
   updateBalance,
   claimDaily,
   transferCoins,
+  transferCoinsWithFee,
   depositToBank,
   withdrawFromBank,
   getBalanceLeaderboard,

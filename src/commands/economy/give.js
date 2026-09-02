@@ -1,9 +1,8 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getUser, transferCoins, addQuestProgress } = require('../../database');
+const { getUser, transferCoinsWithFee, addQuestProgress } = require('../../database');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
-
-const GIVE_FEE_RATE = 0.05; // 5% biaya transfer
+const { GIVE_FEE_RATE } = require('../../config/constants');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -46,14 +45,16 @@ module.exports = {
       });
     }
 
-    transferCoins(senderId, target.id, guildId, amount);
+    transferCoinsWithFee(senderId, target.id, guildId, amount, fee);
     addQuestProgress(senderId, guildId, 'give', 1);
+
+    const feePercent = Math.round(GIVE_FEE_RATE * 100);
 
     const embed = themedEmbed('give', 'Transfer Berhasil', COLORS.economy)
       .setDescription(`${interaction.user} ${e('arrow')} ${target}`)
       .addFields(
         { name: `${e('coin')} Jumlah`, value: `**${amount.toLocaleString()}**`, inline: true },
-        { name: `${e('coin')} Biaya (5%)`, value: `**${fee.toLocaleString()}**`, inline: true },
+        { name: `${e('coin')} Biaya (${feePercent}%)`, value: `**${fee.toLocaleString()}**`, inline: true },
         {
           name: `${e('bank')} Sisa Saldomu`,
           value: `**${(sender.balance - totalCost).toLocaleString()}**`,

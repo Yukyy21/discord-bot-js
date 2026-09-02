@@ -112,6 +112,11 @@ memakai tanggal kalender dalam zona waktu server (`BOSS_UTC_OFFSET`, default
 WIB) — klaim jam 23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong
 sehari, streak kembali ke 1.
 
+**Transfer `/give`.** Biaya **5%** (`GIVE_FEE_RATE` di `src/config/constants.js`)
+dipotong dari saldo pengirim dan **dibakar** — penerima menerima jumlah penuh.
+Kalau nominal 100, pengirim keluar 105 dan penerima masuk 100; biayanya tidak
+berpindah ke siapa pun. Ini salah satu sink coin permanen bot.
+
 **Poruv Shop.** `/poruv-shop` (`src/config/constants.js`, array `PORUV_SHOP`;
 logic di `src/database/poruvShop.js`) adalah tempat membelanjakan Poruv untuk
 barang bernilai di luar bot — bukan item dalam game seperti `/shop` biasa:

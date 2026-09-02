@@ -31,7 +31,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   per user di `src/events/messageCreate.js` (atau kurangi XP setelah N pesan
   per menit) supaya chat aktif tetap dihargai tanpa membuka jalan spam.
 
-- [ ] **Coin sink tambahan.** Sink permanen baru satu: biaya `/give` 5%.
+- [x] **Coin sink tambahan.** Sink permanen baru satu: biaya `/give` 5%.
   Kandidat berikutnya dari [Balancing.md](Balancing.md): biaya tarik
   `/bank withdraw` (mis. 1–2%), item konsumtif wajib untuk boss (elixir),
   atau harga shop yang naik mengikuti jumlah coin beredar.

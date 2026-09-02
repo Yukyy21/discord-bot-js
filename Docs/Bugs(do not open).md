@@ -104,9 +104,10 @@ menjanjikan "chat sekali" karena naik level sudah terjadi seketika di `/use`.
 
 ## 9. `/give` dan `/exchange` tanpa batas
 
-Tidak ada pajak, tidak ada limit harian, tidak ada minimum umur akun. Coin dari
-akun lain bisa langsung jadi poin leaderboard. Detail dan usulan angkanya ada
-di [Balancing.md](Balancing.md).
+Tidak ada limit harian, tidak ada minimum umur akun (pajak `/give` 5% sudah
+aktif dan benar-benar dipotong—lihat catatan sink coin). Coin dari akun lain
+bisa langsung jadi poin leaderboard. Detail dan usulan angkanya ada di
+[Balancing.md](Balancing.md).
 
 ## 10. Dokumentasi tertinggal
 

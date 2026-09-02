@@ -83,8 +83,9 @@ aktif:
   justru pada pemukul paling rajin karena amukan menyasar penyerang teraktif.
 - **Jam spawn 00:00 dan 12:00 WIB.** Slot tengah malam nyaris tidak ada yang
   ikut, jadi boss kabur atau dipanen satu orang.
-- **`/give` tanpa pajak dan tanpa batas** + `/exchange` tanpa batas = poin
-  leaderboard bisa disuplai akun kedua.
+- **`/give` makan biaya 5%** (dibakar, sink coin berjalan) tapi masih **tanpa
+  limit harian dan tanpa minimum umur akun** — ditambah `/exchange` tanpa batas,
+  poin leaderboard masih bisa disuplai akun kedua dalam volume besar.
 
 ## Target Angka yang Disarankan
 
@@ -100,8 +101,9 @@ Bukan keputusan final — ini titik awal untuk dicoba di server:
   lagi jadi sumber tunggal coin.
 - Level up: `level × 50` coin diberi plafon (mis. maksimum 2.500) dan item acak
   diundi lewat `weightedRandom()` dengan bobot tier, bukan uniform.
-- Sink baru: biaya `/give` (mis. 5%), biaya administrasi `/bank withdraw`, atau
-  harga shop yang naik saat inflasi.
+- Sink baru: **biaya `/give` 5% sudah jalan** (`GIVE_FEE_RATE`, dibakar dari saldo
+  pengirim). Kandidat berikutnya: biaya administrasi `/bank withdraw` (mis.
+  1–2%), atau harga shop yang naik saat inflasi.
 - `/exchange`: naikkan kurs (mis. 1.000 coin = 1 poin) atau beri jatah harian,
   supaya leaderboard tetap soal aktivitas.
 - Buff: kunci multiplier pada saat quest **selesai**, bukan saat diklaim.

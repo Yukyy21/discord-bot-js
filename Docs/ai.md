@@ -212,6 +212,7 @@ Cek yang sedang aktif dengan `/buffs`.
 - **Epic – Mythic**: punya **ability bernama**; ada yang memasang buff, ada yang instan.
 - **Buff tidak menumpuk.** Efek yang sama memakai **pengali terbesar**; buff lain tetap berjalan waktunya tapi tidak dijumlahkan.
 - **Multiplier coin tidak berlaku di `/give` dan `/exchange`.** Hanya `/daily`, reward quest, reward naik level, dan (nanti) loot boss.
+- **`/give` kena biaya 5%** (`GIVE_FEE_RATE`). Biaya dipotong dari saldo pengirim dan **dibakar** (penerima dapat penuh) — inilah sink coin utama bot.
 
 ### Tabel ability Epic–Mythic
 | Item | Ability | Efek |

@@ -36,6 +36,12 @@ const DAILY = {
 
 /** Kurs Poruv Shop dihapus — Poruv sekarang dipakai langsung lewat /poruv-shop. */
 
+/**
+ * Biaya /give, dipotong dari saldo pengirim dan DIBAKAR (sink coin permanen).
+ * Penerima tetap menerima jumlah penuh; biaya tidak dipindah ke siapa pun.
+ */
+const GIVE_FEE_RATE = 0.05; // 5%
+
 /** Stok /shop diacak ulang tiap 10 menit. */
 const SHOP = {
   REFRESH_INTERVAL_MS: 10 * 60 * 1000,
@@ -125,4 +131,4 @@ function xpForLevel(level) {
   return level * 100;
 }
 
-module.exports = { CHAT, VOICE, DAILY, SHOP, PORUV_SHOP, QUEST, BOSS, xpForLevel };
+module.exports = { CHAT, VOICE, DAILY, SHOP, PORUV_SHOP, QUEST, BOSS, GIVE_FEE_RATE, xpForLevel };
