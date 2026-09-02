@@ -9,6 +9,10 @@ const CHAT = {
   MAX_XP_PER_MESSAGE: 20, // batas biar spam pesan panjang tidak dieksploitasi
   ANTISPAM_COOLDOWN_MS: 3000, // jarak minimum antar pesan yang dihitung
   DUPLICATE_WINDOW_MS: 30000, // pesan dengan isi sama persis diabaikan selama window ini
+  XP_CAP_PER_MINUTE: 200, // plafon XP chat per menit — spam <3 detik (20 pesan × 20 XP)
+  // bisa sampai ~400 XP/menit; member normal jarang lewat separuhnya. Jendela
+  // bergulir, jadi yang habis duluan kena plafon sampai jendelanya lewat.
+  XP_CAP_WINDOW_MS: 60 * 1000,
 };
 
 /** Poin & XP dari nongkrong di voice channel. */

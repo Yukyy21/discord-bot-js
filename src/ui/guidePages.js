@@ -140,6 +140,7 @@ const PAGES = {
             value: [
               `${e('chat')} Tiap **7 kata** = **+2 Poruv** (sisa kata disimpan, tidak hangus)`,
               `${e('xp')} **1 XP per kata**, maksimal **20 XP** per pesan`,
+              `${e('xp')} Plafon **200 XP per menit** per user (anti-spam kedua)`,
               `${e('clock')} Anti-spam: pesan dihitung paling cepat tiap **3 detik**`,
               `${e('warn')} Pesan dengan isi sama persis diabaikan selama **30 detik**`,
             ].join('\n'),

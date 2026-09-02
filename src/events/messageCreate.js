@@ -9,6 +9,7 @@ const {
 const { CHAT, xpForLevel } = require('../config/constants');
 const { reconcileLevels } = require('../lib/levelingManager');
 const { shouldCountMessage } = require('../lib/antispam');
+const { capChatXp } = require('../lib/xpCap');
 
 const POINT_CHANNEL_ID = process.env.POINT_CHANNEL_ID;
 
@@ -38,8 +39,10 @@ module.exports = {
       addPoints(userId, guildId, applyBuff(userId, guildId, 'points', chunks * CHAT.POINTS_PER_CHUNK));
     setPendingWords(userId, guildId, totalWords % CHAT.WORDS_PER_POINT);
 
+    // XP per pesan dibatasi per pesan (MAX_XP_PER_MESSAGE) dan per menit
+    // (XP_CAP_PER_MINUTE, jendela bergulir) supaya spam tidak lebih untung.
     const xpGain = Math.min(words * CHAT.XP_PER_WORD, CHAT.MAX_XP_PER_MESSAGE);
-    addXp(userId, guildId, applyBuff(userId, guildId, 'xp', xpGain));
+    addXp(userId, guildId, capChatXp(userId, guildId, applyBuff(userId, guildId, 'xp', xpGain)));
 
     const after = getPoints(userId, guildId);
     const xpNeeded = xpForLevel(after.level);

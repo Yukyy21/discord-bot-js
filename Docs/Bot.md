@@ -70,7 +70,11 @@ yang perlu diubah kalau mau balancing ulang.
 **Chat.** Tiap 7 kata bernilai 2 Poruv. Sisa kata yang belum genap disimpan di
 kolom `pendingWords`, jadi chat pendek tetap terakumulasi dan tidak hangus.
 XP-nya 1 per kata dengan batas 20 XP per pesan, supaya menempel satu paragraf
-panjang tidak lebih untung daripada ngobrol normal.
+panjang tidak lebih untung daripada ngobrol normal. Ada juga plafon **200 XP
+per menit** (jendela bergulir 60 detik) per user: spam dengan jeda minimum
+3 detik bisa mereka sampai ±400 XP/menit, jadi plafon ini memotong setengah
+langit-langit itu sambil chat aktif normal yang jarang lewat 200 XP/menit
+tidak tersentuh.
 
 Kalau `POINT_CHANNEL_ID` diisi di `.env`, semua ini hanya berlaku di channel itu.
 

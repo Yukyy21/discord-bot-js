@@ -87,6 +87,9 @@ untuk member biasa. `reset-user` wajib `konfirmasi: true`.
 ### Chat
 - Tiap **7 kata = 2 Poruv**. Sisa kata disimpan (`pendingWords`), tidak hangus.
 - **1 XP per kata**, maksimum **20 XP per pesan**.
+- Maksimum **200 XP per menit** per user (jendela bergulir 60 detik). Chat
+  aktif normal hampir tidak pernah menyentuhnya; spam yang rajin justru cepat
+  kena plafon.
 - Kalau admin mengisi `POINT_CHANNEL_ID`, hanya channel itu yang menghasilkan Poruv.
 
 ### Anti-spam

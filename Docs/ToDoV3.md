@@ -26,7 +26,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
 
 ## Balancing
 
-- [ ] **Batasi XP chat per menit.** Spam chat bisa memompa puluhan ribu
+- [x] **Batasi XP chat per menit.** Spam chat bisa memompa puluhan ribu
   XP/jam sementara member normal hanya ratusan. Tambah plafon XP per menit
   per user di `src/events/messageCreate.js` (atau kurangi XP setelah N pesan
   per menit) supaya chat aktif tetap dihargai tanpa membuka jalan spam.

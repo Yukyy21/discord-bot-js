@@ -5,6 +5,7 @@ const { getPoints } = require('./points');
 const { addBuff, addGuildBuff, extendBuffs } = require('./buffs');
 const { clearDebuffs } = require('./debuffs');
 const { resetUser } = require('../lib/antispam');
+const { resetXpCap } = require('../lib/xpCap');
 const { DAILY } = require('../config/constants');
 const { dateKey } = require('../lib/daily');
 
@@ -29,6 +30,7 @@ const INSTANT = {
   cooldown_reset(userId, guildId) {
     rewindDaily(userId, guildId);
     resetUser(userId, guildId);
+    resetXpCap(userId, guildId);
     // Chrono Core sekaligus membersihkan kutukan dari serangan balik boss.
     const cleared = clearDebuffs(userId, guildId);
     return cleared
