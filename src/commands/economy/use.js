@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { useItem, addQuestProgress } = require('../../database');
 const { describeEffect } = require('../../database/shopCatalog');
+const { reconcileLevels } = require('../../lib/levelingManager');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 const { itemEmoji } = require('../../lib/itemEmojis');
@@ -29,6 +30,13 @@ module.exports = {
       1,
       getTier(result.price, result.name),
     );
+
+    // Item XP (atau xp_fill) bisa langsung melewati batas level — rekonciliasi
+    // di sini, tidak perlu menunggu chat lagi di channel poin.
+    await reconcileLevels(interaction.client, interaction.guildId, [
+      { userId: interaction.user.id, channelId: interaction.channelId },
+    ]);
+
     const embed = themedEmbed(info.emoji, 'Item Digunakan', COLORS.economy)
       .setDescription(`${result.name ? `${itemEmoji(result.name)} ` : ''}${e(info.emoji)} ${result.message}`)
       .setFooter({ text: 'Sisa itemmu bisa dilihat di /inventory' });

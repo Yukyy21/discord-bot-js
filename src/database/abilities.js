@@ -47,7 +47,7 @@ const INSTANT = {
       userId,
       guildId,
     );
-    return `XP terisi penuh (+${needed} XP), tinggal chat sekali untuk naik level`;
+    return `XP terisi penuh (+${needed} XP)`;
   },
 };
 

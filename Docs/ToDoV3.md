@@ -20,7 +20,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   bisa menimpa update embed satu sama lain. Antrekan update embed boss
   (mutex per spawn) atau debounce dengan edit terjadwal.
 
-- [ ] **`xp_fill` menggantung kalau `POINT_CHANNEL_ID` diisi.** (Bugs.md #8)
+- [x] **`xp_fill` menggantung kalau `POINT_CHANNEL_ID` diisi.** (Bugs.md #8)
   Embed progres XP tidak pernah terkirim ketika channel poin di-set.
   Perbaiki jalur pengiriman notifikasi level-up.
 

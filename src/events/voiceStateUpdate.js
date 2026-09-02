@@ -10,6 +10,7 @@ const {
   getAllVoiceSessions,
 } = require('../database');
 const { VOICE } = require('../config/constants');
+const { reconcileLevels } = require('../lib/levelingManager');
 const logger = require('../lib/logger');
 
 const log = logger.scope('Voice');
@@ -60,6 +61,11 @@ function startSession(guildId, userId) {
   saveVoiceSession(userId, guildId, session);
 }
 
+/** Rekonsiliasi level setelah XP voice masuk. */
+function reconcileSession(guildId, userId) {
+  reconcileLevels(clientRef, guildId, [{ userId }]);
+}
+
 /** Bayar sisa poin yang belum sempat dibagi, lalu catat total durasinya. */
 function endSession(guildId, userId) {
   const key = `${guildId}:${userId}`;
@@ -94,6 +100,7 @@ function endSession(guildId, userId) {
         session.guildId,
         applyBuff(userId, session.guildId, 'xp', chunks * VOICE.XP_PER_INTERVAL),
       );
+      reconcileSession(session.guildId, userId);
     }
   }
 
@@ -134,6 +141,7 @@ function syncEligibility(guildId, userId) {
         guildId,
         applyBuff(session.userId, guildId, 'xp', chunks * VOICE.XP_PER_INTERVAL),
       );
+      reconcileSession(guildId, session.userId);
     }
   }
   session.lastGrant = now;
@@ -163,6 +171,7 @@ setInterval(() => {
       session.guildId,
       applyBuff(session.userId, session.guildId, 'xp', VOICE.XP_PER_INTERVAL),
     );
+    reconcileSession(session.guildId, session.userId);
     session.lastGrant = now;
     saveVoiceSession(session.userId, session.guildId, session);
   }

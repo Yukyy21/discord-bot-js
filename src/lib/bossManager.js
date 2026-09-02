@@ -44,6 +44,7 @@ const {
 } = require('../ui/bossEmbeds');
 const { warnEmbed } = require('../ui/embeds');
 const { e } = require('./emojis');
+const { reconcileLevels } = require('./levelingManager');
 const log = require('./logger').scope('Boss');
 
 const BOSS_CHANNEL_ID = process.env.BOSS_CHANNEL_ID;
@@ -291,6 +292,10 @@ async function finishBoss(client, row) {
       })
       .catch(err => log.error('Gagal mengirim hasil boss:', err.message));
   }
+
+  // XP dari hadiah boss juga harus memicu level-up seketika, tidak menunggu
+  // chat di channel poin berikutnya.
+  reconcileLevels(client, row.guildId, rewards.map(r => ({ userId: r.userId })));
   log.info(`Boss ${row.bossKey} (id ${row.id}) tumbang — ${rewards.length} penerima hadiah`);
   return rewards;
 }

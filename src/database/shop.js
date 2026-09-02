@@ -106,8 +106,8 @@ function getInventory(userId, guildId) {
 /**
  * Pakai satu buah item: kurangi inventori dan terapkan efeknya dalam satu
  * transaksi, jadi kegagalan di tengah jalan tidak menghanguskan item.
- * XP dari item sengaja tidak langsung memicu naik level — rekonsiliasi level
- * tetap terjadi di event chat seperti pola yang sudah ada.
+ * Level dibaca setelah pemakaian oleh /use (lewat reconcileLevels), jadi XP
+ * dari item langsung menaikkan level tanpa menunggu chat di channel poin.
  */
 function useItem(userId, guildId, itemId) {
   const item = db.prepare('SELECT * FROM shop_items WHERE id = ?').get(itemId);

@@ -1,7 +1,7 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, #5, #6, dan #7 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, #5, #6, #7, dan #8 sudah diperbaiki**, sisanya masih terbuka.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -92,11 +92,15 @@ sebelum menulis, jadi embed yang tampil selalu mengikuti kondisi terkini.
 `handleBossAttack()` kini `deferUpdate()` (biar tidak timeout) lalu edit
 diantre, jadi dua penyerang nyaris bersamaan tidak saling menimpa lagi.
 
-## 8. `xp_fill` menggantung kalau `POINT_CHANNEL_ID` diisi
+## 8. (fixed) `xp_fill` menggantung kalau `POINT_CHANNEL_ID` diisi — SUDAH DIPERBAIKI
 
-`xp_fill` mengisi XP sampai batas level, tapi kenaikan level baru diproses di
-`messageCreate`. Kalau poin dibatasi ke satu channel, user harus chat di
-channel itu dulu; di channel lain XP-nya diam saja tanpa penjelasan.
+Rekonsiliasi level dipindah dari `messageCreate` ke satu jalur bersama di
+`src/lib/levelingManager.js` (`reconcileLevels()`). Semua sumber XP — chat,
+`/use` item (termasuk `xp_fill`), voice, dan hadiah boss — kini langsung
+mereka level begitu XP melewati batas, tanpa menunggu chat di channel poin.
+Level-up diumumkan ke `POINT_CHANNEL_ID` bila terisi, kalau tidak ke channel
+konteks event atau channel teks pertama guild. Pesan `xp_fill` juga tidak lagi
+menjanjikan "chat sekali" karena naik level sudah terjadi seketika di `/use`.
 
 ## 9. `/give` dan `/exchange` tanpa batas
 

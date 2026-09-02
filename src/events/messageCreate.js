@@ -3,21 +3,12 @@ const {
   addPoints,
   addXp,
   setPendingWords,
-  setLevel,
-  updateBalance,
-  getShopItems,
-  grantItem,
-  addQuestProgress,
   applyBuff,
+  addQuestProgress,
 } = require('../database');
-const { LEVEL_ROLES } = require('../config');
 const { CHAT, xpForLevel } = require('../config/constants');
-const { getRank, getLevelUpReward } = require('../lib/ranks');
-const { computeLevelUp } = require('../lib/leveling');
-const { e, tierEmoji } = require('../lib/emojis');
-const { getTier, weightedRandom } = require('../lib/tiers');
+const { reconcileLevels } = require('../lib/levelingManager');
 const { shouldCountMessage } = require('../lib/antispam');
-const logger = require('../lib/logger');
 
 const POINT_CHANNEL_ID = process.env.POINT_CHANNEL_ID;
 
@@ -54,50 +45,6 @@ module.exports = {
     const xpNeeded = xpForLevel(after.level);
     if (after.xp < xpNeeded) return;
 
-    await handleLevelUp(message, after, xpNeeded);
+    await reconcileLevels(message.client, guildId, [{ userId, channelId: message.channelId }]);
   },
 };
-
-/** Naikkan level, kasih role & hadiah, lalu umumkan di channel yang sama. */
-async function handleLevelUp(message, stats, xpNeeded) {
-  const userId = message.author.id;
-  const guildId = message.guildId;
-
-  // Bisa lompat lebih dari satu level kalau XP-nya menumpuk banyak.
-  const { level: newLevel, xp: remainingXp, gained } = computeLevelUp(stats, xpNeeded);
-  setLevel(userId, guildId, newLevel, remainingXp);
-  addQuestProgress(userId, guildId, 'level_up', gained);
-
-  const roleId = LEVEL_ROLES[newLevel];
-  if (roleId && message.member) {
-    try {
-      await message.member.roles.add(roleId);
-    } catch (error) {
-      logger.error(`Gagal memberi role level ${newLevel}:`, error.message);
-    }
-  }
-
-  const rankInfo = getRank(newLevel);
-  const reward = getLevelUpReward(newLevel);
-  addPoints(userId, guildId, applyBuff(userId, guildId, 'points', reward.points));
-  updateBalance(userId, guildId, applyBuff(userId, guildId, 'coin', reward.coins));
-
-  let rewardText = `${e('point')} +${reward.points} poin  ${e('coin')} +${reward.coins} coin`;
-
-  if (reward.randomItem) {
-    const items = getShopItems().map(item => ({
-      ...item,
-      tier: getTier(item.price, item.name),
-    }));
-    const [item] = weightedRandom(items, 1);
-    if (item) {
-      grantItem(userId, guildId, item.id);
-      rewardText += `  ${e('inventory')} +${item.name}`;
-    }
-  }
-
-  await message.channel.send(
-    `${e('level')} ${message.author} naik ke level **${newLevel}** ${tierEmoji(rankInfo.name)} **${rankInfo.name}**\n` +
-      `${e('daily')} Hadiah: ${rewardText}`,
-  );
-}
