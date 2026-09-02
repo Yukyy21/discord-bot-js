@@ -7,7 +7,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
 
 ## Bug
 
-- [ ] **Stok shop global untuk semua guild.** (Bugs.md #5) Stok item di
+- [x] **Stok shop global untuk semua guild.** (Bugs.md #5) Stok item di
   `/shop` dipakai bersama lintas server — server rame bisa menghabiskan stok
   server lain. Pisahkan stok per guild atau jadikan stok tidak terbatas.
 

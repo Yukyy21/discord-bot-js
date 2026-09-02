@@ -60,10 +60,11 @@ function affordability(price, balance) {
  * tombol tetap jalan walau bot restart.
  */
 function buildShop(page = 0, filter = {}, viewer = null) {
+  const guildId = viewer?.guildId || '';
   const tier = TIER_ORDER.includes(filter.tier) ? filter.tier : '';
   const query = sanitizeQuery(filter.query);
-  const items = sortStock(filterStock(getShopStock(), { tier, query }));
-  const { minutes, seconds } = getShopTimers();
+  const items = sortStock(filterStock(getShopStock(guildId), { tier, query }));
+  const { minutes, seconds } = getShopTimers(guildId);
   const { slice, page: current, totalPages } = paginate(items, page);
 
   let balance = null;
@@ -76,7 +77,7 @@ function buildShop(page = 0, filter = {}, viewer = null) {
   }
 
   const header = [
-    `${e('clock')} Refresh <t:${Math.floor(getShopRefreshAt() / 1000)}:R> · \`${minutes}m ${seconds}s\``,
+    `${e('clock')} Refresh <t:${Math.floor(getShopRefreshAt(guildId) / 1000)}:R> · \`${minutes}m ${seconds}s\``,
   ];
   if (balance !== null) header.push(`${e('coin')} Saldo **${balance.toLocaleString()}**`);
 

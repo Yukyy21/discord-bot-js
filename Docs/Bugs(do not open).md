@@ -1,7 +1,7 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1 dan #2 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, dan #5 sudah diperbaiki**, sisanya masih terbuka.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -43,13 +43,20 @@ dipakai di jalur ini. Dampaknya ke ekonomi besar (lihat [Balancing.md](Balancing
 mulai pukul **07:00 pagi**, bukan tengah malam. Sistem boss sudah punya
 `BOSS.UTC_OFFSET`; daily, quest harian, dan bulanan belum ikut offset yang sama.
 
-## 5. Stok shop global untuk semua guild
+## 5. (fixed) Stok shop global untuk semua guild â€" SUDAH DIPERBAIKI
 
 `src/lib/shopRotation.js` menyimpan `currentStock` di satu variabel modul dan
 menjalankan `setInterval` saat file di-`require`. Konsekuensinya: semua guild
 melihat stok yang sama, dan `/buy` bisa gagal ("item tidak ada di shop") kalau
 rotasi 10 menit kebetulan lewat antara user membuka `/shop` dan menekan
 `/buy`.
+
+Perbaikan (selesai): stok sekarang disimpan per-guild di `Map<guildId, ...>`.
+`getShopStock(guildId)`, `getShopItemById(guildId, id)`, `getShopRefreshAt(guildId)`,
+dan `getShopTimers(guildId)` menerima `guildId`, sehingga `/shop` dan `/buy`
+memakai etalase server-nya masing-masing. Setiap guild punya undian acak dan
+jam rotasi 10 menit sendiri; interval global tetap mengundi ulang semua guild
+yang pernah membuka shop.
 
 ## 6. Mini boss hanya bisa satu guild
 

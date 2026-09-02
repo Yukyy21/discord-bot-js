@@ -140,7 +140,10 @@ ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
 Mythic 5. Rarity tiap item bawaan mengikuti daftar resmi di
 `assets/items/ListItem.md` (peta `ITEM_TIERS` di `src/lib/tiers.js`); item di
 luar daftar itu jatuh ke penentuan lewat rentang harga. Stok hidup di memori,
-jadi bot restart = undian baru.
+jadi bot restart = undian baru. Stok diundi **per-guild**: setiap server punya
+etalase acak dan jam rotasi 10 menit sendiri (`Map<guildId, ...>` di
+`src/lib/shopRotation.js`), jadi server yang sibuk tidak menghabiskan stok
+server lain dan `/buy` selalu memvalidasi ke stok guild pemain.
 
 Tampilan `/shop`: tiap item punya ikon emoji sendiri, badge warna rarity,
 harga dengan penanda centang/silang apakah saldomu cukup, efek item, deskripsi

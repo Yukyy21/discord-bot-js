@@ -14,7 +14,7 @@ module.exports = {
     ),
   async execute(interaction) {
     const id = interaction.options.getInteger('id');
-    const stock = getShopItemById(id);
+    const stock = getShopItemById(interaction.guildId, id);
     if (!stock) {
       return interaction.reply({
         embeds: [
