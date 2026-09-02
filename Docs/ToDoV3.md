@@ -43,7 +43,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
 
 ## Fitur
 
-- [ ] **Quest "menang/ikut event".** Sisa dari ToDoV2: tipe quest yang
+- [x] **Quest "menang/ikut event".** Sisa dari ToDoV2: tipe quest yang
   menghitung partisipasi dan kemenangan boss/event. Sistem boss sudah jalan,
   jadi tinggal panggil `addQuestProgress()` dari `src/lib/bossManager.js`
   saat spawn selesai (partisipasi) dan saat hadiah dibagikan (kemenangan),
