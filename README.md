@@ -28,6 +28,7 @@ Butuh Node.js 18+ (bot memakai `fetch` bawaan Node).
 | `BOSS_UTC_OFFSET` | tidak | Offset UTC buat jadwal boss & reset harian (default 7 / WIB, tidak perlu diisi kalau sudah pas) |
 | `LOG_LEVEL` | tidak | Level log konsol (default `info`) |
 | `ADMIN_ROLE_IDS` | tidak | Comma-separated role ID; membernya di-DM tiap ada klaim manual baru di `/poruv-shop` |
+| `ANNOUNCEMENT_CHANNEL_IDS` | tidak | Comma-separated channel ID; pesan staff di channel ini dihitung sebagai "announcement" di `/best-staff-of-the-month` |
 | `GROQ_API_KEY` / `GROQ_MODEL` | tidak | Provider utama `/ai-ask` |
 | `GOOGLE_AI_API_KEY` / `GOOGLE_AI_API_KEY_2` / `GOOGLE_AI_MODEL` | tidak | Provider cadangan `/ai-ask`, dicoba berurutan kalau Groq limit/gagal |
 

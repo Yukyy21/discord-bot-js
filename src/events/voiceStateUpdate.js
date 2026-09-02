@@ -9,6 +9,7 @@ const {
   deleteVoiceSession,
   getAllVoiceSessions,
 } = require('../database');
+const { isStaff, addVoiceMinutes } = require('../database');
 const { VOICE } = require('../config/constants');
 const { reconcileLevels } = require('../lib/levelingManager');
 const logger = require('../lib/logger');
@@ -108,6 +109,11 @@ function endSession(guildId, userId) {
   if (seconds > 0) {
     addVoiceSeconds(userId, session.guildId, seconds);
     addQuestProgress(userId, session.guildId, 'voice', seconds);
+  }
+  // Aktivitas voice staff: dihitung dari durasi layak (minimal 2 orang tidak
+  // deaf) seperti syarat Poruv, untuk leaderboard bulanan.
+  if (session.eligible && isStaff(session.userId, session.guildId)) {
+    addVoiceMinutes(session.userId, session.guildId, Math.floor(seconds / 60));
   }
 
   sessions.delete(key);

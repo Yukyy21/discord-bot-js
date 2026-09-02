@@ -142,6 +142,44 @@ function createTables() {
       updatedAt INTEGER
     );
 
+    -- Daftar staff per-guild, diisi manual lewat /staff-set (bukan dari role
+    -- Discord). Divisi bebas teks; deskripsi opsional.
+    CREATE TABLE IF NOT EXISTS staff (
+      userId TEXT,
+      guildId TEXT,
+      divisi TEXT NOT NULL,
+      deskripsi TEXT,
+      addedAt INTEGER NOT NULL,
+      addedBy TEXT NOT NULL,
+      PRIMARY KEY (userId, guildId)
+    );
+
+    -- Rating user ke staff. 1 user cuma boleh memberi 1 rating per staff, jadi
+    -- rating ulang = update (INSERT OR REPLACE), bukan baris baru.
+    CREATE TABLE IF NOT EXISTS staff_ratings (
+      staffUserId TEXT,
+      raterUserId TEXT,
+      guildId TEXT,
+      stars INTEGER NOT NULL,
+      comment TEXT,
+      createdAt INTEGER NOT NULL,
+      updatedAt INTEGER NOT NULL,
+      PRIMARY KEY (staffUserId, raterUserId, guildId)
+    );
+
+    -- Aktivitas per staff per bulan (kunci yearMonth YYYY-MM waktu lokal event).
+    -- Baris baru per bulan = reset alami tiap ganti bulan, histori tetap ada.
+    CREATE TABLE IF NOT EXISTS staff_activity (
+      userId TEXT,
+      guildId TEXT,
+      yearMonth TEXT,
+      messageCount INTEGER DEFAULT 0,
+      voiceMinutes INTEGER DEFAULT 0,
+      tagCount INTEGER DEFAULT 0,
+      announcementCount INTEGER DEFAULT 0,
+      PRIMARY KEY (userId, guildId, yearMonth)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);
     CREATE INDEX IF NOT EXISTS idx_boss_slot ON boss_spawns (guildId, slot);
     CREATE INDEX IF NOT EXISTS idx_poruv_status ON poruv_redemptions (guildId, status);

@@ -54,23 +54,23 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   pilihan build terasa — butuh kolom equipped per user dan tampilan di
   `/inventory`.
 
-## Fitur: Sistem Staff (planning sudah fix, tinggal eksekusi)
+## Fitur: Sistem Staff (SELESAI — diimplementasikan di branch ferr-path2)
 
 Tiga command baru: `/staff`, `/staff-rating`, `/best-staff-of-the-month`.
 Staff ditentukan **manual** lewat command admin, bukan berdasar role Discord.
 
-### `/staff-set` (admin) — kelola daftar staff
+### `/staff-set` (admin) — kelola daftar staff (SELESAI)
 - Parameter: `type:(add/remove)`, `user`, `divisi` (wajib saat add),
   `deskripsi` (opsional).
 - Tabel baru `staff`: `userId, guildId, divisi, deskripsi, addedAt, addedBy`.
 
-### `/staff` — daftar staff aktif
+### `/staff` — daftar staff aktif (SELESAI)
 - Mirip `/credit`: embed dikelompokkan per divisi, pagination kalau lebih
   dari satu halaman (pola `pagerRow` yang sudah ada di `src/ui/pager.js`).
 - Tiap entri nampilin nama, divisi, deskripsi, dan rata-rata bintang rating
   (kalau staff itu punya rating).
 
-### `/staff-rating` — rating dari user ke staff
+### `/staff-rating` — rating dari user ke staff (SELESAI)
 - Parameter: `user`, `stars:(1-5)`, `comment` (opsional).
 - Tabel baru `staff_ratings`: `staffUserId, raterUserId, guildId, stars,
   comment, createdAt, updatedAt`.
@@ -80,7 +80,7 @@ Staff ditentukan **manual** lewat command admin, bukan berdasar role Discord.
 - Rating **tidak** ikut jadi metrik skor `/best-staff-of-the-month` — cuma
   ditampilkan di `/staff` sebagai info tambahan.
 
-### `/best-staff-of-the-month` — leaderboard bulanan
+### `/best-staff-of-the-month` — leaderboard bulanan (SELESAI)
 - Tabel baru `staff_activity`: `userId, guildId, yearMonth, messageCount,
   voiceMinutes, tagCount, announcementCount`. Baris baru otomatis per
   `yearMonth` → reset alami tiap bulan, histori bulan lalu tetap tersimpan
@@ -102,7 +102,7 @@ Staff ditentukan **manual** lewat command admin, bukan berdasar role Discord.
   proporsinya sepadan.
 - 1 leaderboard gabungan buat semua staff, **tidak** dipisah per divisi.
 
-### Yang perlu disentuh buat tracking
+### Yang perlu disentuh buat tracking (SELESAI)
 - `src/events/messageCreate.js` — tambah cabang: kalau pengirim ada di
   tabel `staff` untuk guild ini, increment `messageCount`; kalau
   `message.mentions.everyone` atau `message.mentions.roles.size > 0`,
@@ -113,12 +113,12 @@ Staff ditentukan **manual** lewat command admin, bukan berdasar role Discord.
   kalau user staff dan syarat "minimal 2 orang tidak deaf" terpenuhi,
   akumulasi `voiceMinutes` ke baris `staff_activity` bulan berjalan.
 
-### File baru yang diperkirakan
+### File baru yang diperkirakan (SELESAI)
 - `src/database/staff.js` — CRUD staff, rating, activity, hitung skor.
 - `src/commands/staff/staffSet.js`, `staff.js`, `staffRating.js`,
   `bestStaffOfTheMonth.js`.
 
-### Env baru
+### Env baru (SELESAI)
 - `ANNOUNCEMENT_CHANNEL_IDS` — comma-separated channel ID, ditambah ke
   `.env.example` dan tabel env di `README.md`.
 

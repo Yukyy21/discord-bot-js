@@ -10,18 +10,40 @@ const { CHAT, xpForLevel } = require('../config/constants');
 const { reconcileLevels } = require('../lib/levelingManager');
 const { shouldCountMessage } = require('../lib/antispam');
 const { capChatXp } = require('../lib/xpCap');
+const { isStaff, bumpActivity } = require('../database');
 
 const POINT_CHANNEL_ID = process.env.POINT_CHANNEL_ID;
+// Channel tempat pesan staff dihitung sebagai "announcement" untuk leaderboard
+// bulanan. Comma-separated, pola sama seperti ADMIN_ROLE_IDS.
+const ANNOUNCEMENT_CHANNEL_IDS = new Set(
+  (process.env.ANNOUNCEMENT_CHANNEL_IDS || '').split(',').map(s => s.trim()).filter(Boolean),
+);
 
 module.exports = {
   name: 'messageCreate',
   async execute(message) {
     if (message.author.bot || !message.guild) return;
+
+    // Tracking aktivitas staff berdiri sendiri — jalan di semua channel, tak
+    // terikat POINT_CHANNEL_ID. Pakai anti-spam yang sama supaya spam tidak
+    // menggelembungkan skor pesan/tag/announcement.
+    const userId = message.author.id;
+    const guildId = message.guildId;
+    if (shouldCountMessage(userId, guildId, message.content)) {
+      if (isStaff(userId, guildId)) {
+        bumpActivity(userId, guildId, 'messageCount');
+        if (message.mentions.everyone || message.mentions.roles.size > 0) {
+          bumpActivity(userId, guildId, 'tagCount');
+        }
+        if (ANNOUNCEMENT_CHANNEL_IDS.has(message.channelId)) {
+          bumpActivity(userId, guildId, 'announcementCount');
+        }
+      }
+    }
+
     // Kalau POINT_CHANNEL_ID diisi, poin hanya jalan di channel itu.
     if (POINT_CHANNEL_ID && message.channel.id !== POINT_CHANNEL_ID) return;
 
-    const userId = message.author.id;
-    const guildId = message.guildId;
     if (!shouldCountMessage(userId, guildId, message.content)) return;
 
     const words = message.content.trim().split(/\s+/).filter(Boolean).length;
