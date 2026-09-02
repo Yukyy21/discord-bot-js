@@ -1,0 +1,85 @@
+# What I do
+
+Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
+jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
+perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
+
+## Gelombang Lima — `/credit` Jadi 3 Halaman
+
+Permintaan owner: `/credit` yang tadinya satu embed panjang dipecah jadi
+3 halaman dengan tombol navigasi, plus role baru (Server Manager, Idea
+Master, Boss Artwork) yang sebelumnya belum ada tempatnya.
+
+**Struktur 3 halaman**
+- `src/commands/general/credit.js` dibongkar total: dari satu array `CREDITS`
+  datar jadi `PAGES` (3 objek: Developer, Executive, Beta Tester), masing-
+  masing berisi beberapa `groups` (role + daftar member).
+  - Halaman 1 — **Developer**: Backend (2 orang), Frontend (1 orang).
+  - Halaman 2 — **Executive**: Server Manager (2), Idea Master (1),
+    Boss Artwork (1), UI/UX & Aset Emoji (1).
+  - Halaman 3 — **Beta Tester**: 8 orang.
+- Navigasi pakai `pagerRow()` yang sama dengan `/shop` dan `/leaderboard`
+  (`src/ui/pager.js`) — state tersimpan di customId (`credit_page:<halaman>`),
+  jadi tombol tetap jalan walau bot restart.
+- Handler tombol `credit_page` ditambahkan di `src/events/interactionCreate.js`,
+  memanggil `buildCredit(page)` yang diekspor dari `credit.js`.
+
+**4 emoji role baru**
+- `src/lib/emojis.js`: tambah `idea`, `betatester`, `artwork`,
+  `servermanager` ke `REGISTRY`, ID sesuai upload owner. Fallback unicode
+  disiapkan (`💡` `🧪` `🖌️` `🛡️`) kalau ID kosong/salah.
+
+**Baris "dibangun oleh" dipangkas**
+- Awalnya menampilkan seluruh 14 orang unik di semua halaman — kepanjangan
+  dan bikin peran lain (Server Manager, Idea Master, dst) numpuk di baris
+  yang sama padahal sudah ada field sendiri.
+- Diganti ke `CORE_IDS`: hanya role **Backend, Frontend, dan Boss Artwork**
+  yang dirangkum di baris ini, diambil langsung dari `PAGES` biar tetap
+  sinkron kalau member role tersebut diganti. Role lain tetap muncul,
+  hanya lewat field masing-masing, bukan diulang di baris pembuka.
+
+**Belum otomatis**: `members` di `credit.js` masih diisi manual (Discord
+User ID per orang). Kalau ada pergantian tim, edit array-nya langsung —
+lihat [Contributor.md](Contributor.md#credit-3-halaman).
+
+## Gelombang Empat — Jadwal Spawn & Tampilan Boss
+
+Permintaan langsung dari owner: jadwal spawn boss dikembalikan sesuai teks
+yang sudah tertulis di bot, dan gambar boss diperbesar.
+
+**Spawn boss jam 12 malam & 12 siang**
+- `BOSS.SPAWN_HOURS` di `src/config/constants.js` diubah
+  **[12, 20] → [0, 12]**. Boss sekarang muncul pukul **00:00 dan 12:00**
+  waktu lokal event (`BOSS.UTC_OFFSET`), sesuai teks "12 malam & 12 siang"
+  yang memang sudah tertulis di `src/events/ready.js`,
+  `src/lib/bossManager.js`, dan `src/ui/guidePages.js` — teksnya tidak perlu
+  diubah sama sekali karena kode yang sebelumnya melenceng.
+- Komentar di `src/config/constants.js` dan tes jadwal di
+  `test/boss.test.js` disinkronkan (slot `…T00` dan `…T12`, verifikasi lewat
+  waktu UTC 17:00 = 00:00 WIB dan 05:00 = 12:00 WIB).
+- Karena penjadwal tahan restart (`dueSpawnSlot()` + `slotUsed()` di
+  `src/lib/boss.js`), perubahan langsung berlaku begitu bot dinyalakan ulang;
+  spawn lama di jam 20:00 tidak akan "menyusul".
+
+**Gambar boss besar, bukan thumbnail**
+- Kelima embed di `src/ui/bossEmbeds.js` (spawn, damage update, selesai,
+  dan dua embed status) yang sebelumnya `embed.setThumbnail(icon.url)`
+  diganti ke `embed.setImage(icon.url)`. Gambar boss sekarang tampil lebar
+  di dalam embed, bukan ikon kecil di pojok kanan atas.
+- Tidak ada perubahan ukuran aset — Discord yang mengatur rendering; file
+  di `assets/` dipakai apa adanya.
+
+Verifikasi: `npm test` hijau **76/76**.
+
+## Perbaikan — Dupe Buff Sturdy
+
+- **Bug**: Adamantine Ingot (`no_consume` / Sturdy) melindungi dirinya sendiri.
+  Ingot kedua dipakai saat Sturdy aktif tidak ikut berkurang, tapi tetap
+  menambah 3 charge baru — satu ingot bisa jadi buff tak terbatas.
+- **Fix**: `useItem()` melewati `consumeCharge` kalau item yang dipakai justru
+  pemberi `no_consume`, jadi ingot selalu terpakai saat dipakai.
+- **Fix**: `consumeCharge` dipindah ke dalam transaksi `/use` supaya charge
+  tidak hangus kalau pemakaian gagal di tengah jalan.
+- **Fix**: `addBuff` menggabungkan buff berbasis charge tanpa durasi ke baris
+  yang sudah ada (3 + 3 = 6 sisa jatah), bukan bikin baris menumpuk.
+

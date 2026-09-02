@@ -17,10 +17,10 @@ const MAX_ROWS = 50;
 
 const CATEGORIES = {
   balance: { label: 'Coin', emoji: 'coin', fetch: g => getBalanceLeaderboard(g, MAX_ROWS) },
-  points: { label: 'Poin', emoji: 'point', fetch: g => getPointsLeaderboard(g, MAX_ROWS) },
+  points: { label: 'Poruv', emoji: 'point', fetch: g => getPointsLeaderboard(g, MAX_ROWS) },
   voice: { label: 'Jam Voice', emoji: 'voice', fetch: g => getVoiceHoursLeaderboard(g, MAX_ROWS) },
   rank: { label: 'Rank', emoji: 'rank', fetch: g => getLevelLeaderboard(g, MAX_ROWS) },
-  mingguan: { label: 'Poin Mingguan', emoji: 'clock', fetch: g => getWeeklyLeaderboard(g, MAX_ROWS) },
+  mingguan: { label: 'Poruv Mingguan', emoji: 'clock', fetch: g => getWeeklyLeaderboard(g, MAX_ROWS) },
 };
 
 function formatValue(sub, row) {
@@ -83,10 +83,10 @@ module.exports = {
     .setName('leaderboard')
     .setDescription('Lihat top user di server ini')
     .addSubcommand(s => s.setName('balance').setDescription('Top balance terbesar'))
-    .addSubcommand(s => s.setName('points').setDescription('Top poin terbanyak'))
+    .addSubcommand(s => s.setName('points').setDescription('Top Poruv terbanyak'))
     .addSubcommand(s => s.setName('voice').setDescription('Top jam voice terbanyak'))
     .addSubcommand(s => s.setName('rank').setDescription('Top level/rank tertinggi'))
-    .addSubcommand(s => s.setName('mingguan').setDescription('Top poin yang didapat pekan ini'))
+    .addSubcommand(s => s.setName('mingguan').setDescription('Top Poruv yang didapat pekan ini'))
     .addSubcommand(s =>
       s
         .setName('card')
@@ -97,7 +97,7 @@ module.exports = {
             .setDescription('Kategori leaderboard')
             .addChoices(
               { name: 'Coin', value: 'balance' },
-              { name: 'Poin', value: 'points' },
+              { name: 'Poruv', value: 'points' },
               { name: 'Jam Voice', value: 'voice' },
               { name: 'Rank', value: 'rank' },
             ),

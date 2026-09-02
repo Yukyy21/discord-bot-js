@@ -95,9 +95,9 @@ test('semua item di tabel loot ada di katalog shop', () => {
   }
 });
 
-test('jadwal spawn hanya jam 12 dan 20 waktu lokal event', () => {
-  // Offset 7 (WIB): 05:00 UTC = 12:00 WIB, 13:00 UTC = 20:00 WIB
+test('jadwal spawn hanya jam 00 dan 12 waktu lokal event', () => {
+  // Offset 7 (WIB): 17:00 UTC = 00:00 WIB, 05:00 UTC = 12:00 WIB
   assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T05:05:00Z'), 7), '2026-08-26T12');
-  assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T13:30:00Z'), 7), '2026-08-26T20');
+  assert.strictEqual(dueSpawnSlot(new Date('2026-08-25T17:30:00Z'), 7), '2026-08-26T00');
   assert.strictEqual(dueSpawnSlot(new Date('2026-08-26T08:00:00Z'), 7), null);
 });

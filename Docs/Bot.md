@@ -7,10 +7,11 @@ kodenya disusun. Untuk cara menjalankan, lihat [README](../README.md).
 
 Ada dua mata uang yang sengaja dipisah:
 
-- **Poin** — nilai "kontribusi". Didapat dari aktivitas: ngobrol dan duduk di
-  voice channel. Tidak bisa ditransfer antar user.
+- **Poruv** — nilai "kontribusi". Didapat dari aktivitas: ngobrol, duduk di
+  voice channel, naik level, quest, dan mini boss. Tidak bisa ditransfer
+  antar user, tapi bisa dibelanjakan di `/poruv-shop`.
 - **Coin** — mata uang belanja. Didapat dari `/daily`, hadiah naik level, atau
-  tukar poin. Bisa ditransfer lewat `/give` dan dipakai di `/shop`.
+  reward quest. Bisa ditransfer lewat `/give` dan dipakai di `/shop`.
 
 Selain itu ada **XP** yang menentukan level, dan level menentukan **tier rank**
 (Novice sampai Demigod).
@@ -32,31 +33,31 @@ level yang terpisah.
 | `/inventory` | Item yang kamu punya, 5 per halaman |
 | `/use <id>` | Pakai satu buah item yang punya efek |
 | `/give <user> <jumlah>` | Transfer coin ke member lain |
-| `/exchange <jumlah>` | Tukar coin jadi poin (1000 coin = 1 poin) |
 
-### Poin & Progres
+### Poruv & Progres
 
 | Command | Fungsi |
 |---|---|
-| `/points` | Total poin, level, tier, dan progress bar XP |
+| `/points` | Total Poruv, level, tier, dan progress bar XP |
+| `/poruv-shop` | Tukar Poruv jadi Owocash, e-wallet, custom role, atau item Mythic acak — lihat bagian **Poruv Shop** di bawah |
 | `/quest` | Quest harian, mingguan & bulanan: progres dan tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
-| `/leaderboard balance\|points\|voice\|rank\|mingguan` | Papan peringkat teks, 10 baris per halaman sampai 50 user; `mingguan` = poin yang didapat pekan ini |
+| `/leaderboard balance\|points\|voice\|rank\|mingguan` | Papan peringkat teks, 10 baris per halaman sampai 50 user; `mingguan` = Poruv yang didapat pekan ini |
 | `/leaderboard card [kategori]` | Papan peringkat versi gambar, top 10 |
 
 ### Umum
 
 | Command | Fungsi |
 |---|---|
-| `/guide` | Panduan interaktif dengan dropdown kategori (11 halaman: Beranda, Ekonomi, Poin & Level, Aktivitas, Quest, Rank Tier, Item & Rarity, Reward, Utilitas, Admin, Tips) |
+| `/guide` | Panduan interaktif dengan dropdown kategori (11 halaman: Beranda, Ekonomi, Poruv & Level, Aktivitas, Quest, Rank Tier, Item & Rarity, Reward, Utilitas, Admin, Tips) |
 | `/ping` | Latency websocket bot |
-| `/credit` | Tim yang membangun bot beserta perannya |
+| `/credit` | Tim yang membangun bot beserta perannya — 3 halaman (Developer, Executive, Beta Tester) dengan tombol navigasi |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
 | `/ai-ask <input>` | Tanya apa saja soal bot; dijawab AI berdasarkan `Docs/ai.md` |
 
 | `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
-| `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, poin, level, inventori, quest |
+| `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, Poruv, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
 | `/admin-spawn-boss` | **Admin:** paksa undian boss sekarang (untuk tes) |
 
@@ -65,7 +66,7 @@ level yang terpisah.
 Semua nilai di bawah ada di `src/config/constants.js` — itu satu-satunya tempat
 yang perlu diubah kalau mau balancing ulang.
 
-**Chat.** Tiap 7 kata bernilai 2 poin. Sisa kata yang belum genap disimpan di
+**Chat.** Tiap 7 kata bernilai 2 Poruv. Sisa kata yang belum genap disimpan di
 kolom `pendingWords`, jadi chat pendek tetap terakumulasi dan tidak hangus.
 XP-nya 1 per kata dengan batas 20 XP per pesan, supaya menempel satu paragraf
 panjang tidak lebih untung daripada ngobrol normal.
@@ -74,17 +75,17 @@ Kalau `POINT_CHANNEL_ID` diisi di `.env`, semua ini hanya berlaku di channel itu
 
 **Anti-spam.** Pesan yang datang kurang dari 3 detik sejak pesan sebelumnya,
 atau yang isinya sama persis dengan pesan sebelumnya dalam 30 detik, tidak
-dihitung sama sekali — tanpa poin, XP, maupun akumulasi kata. Logikanya ada
+dihitung sama sekali — tanpa Poruv, XP, maupun akumulasi kata. Logikanya ada
 di `src/lib/antispam.js`; daftar pesan terakhir disimpan di memori dengan
 batas 1000 user, jadi restart bot menghapus riwayat spam (tidak masalah; ini
 penyaring, bukan data ekonomi).
 
-**Voice.** Tiap 15 menit di voice channel bernilai 8 poin dan 10 XP, dengan syarat
+**Voice.** Tiap 15 menit di voice channel bernilai 8 Poruv dan 10 XP, dengan syarat
 channel berisi minimal dua manusia yang tidak deaf — user yang dinilai ikut
 terhitung, jadi duduk berdua sudah cukup. AFK channel tidak pernah dihitung.
 Kalau syarat hilang di tengah jalan (teman keluar atau semua deaf), sisa masa
 layak dibayar seketika lalu penghitungan dijeda sampai syarat terpenuhi lagi;
-waktu sendirian tidak pernah menumpuk jadi poin. Total durasi untuk
+waktu sendirian tidak pernah menumpuk jadi Poruv. Total durasi untuk
 leaderboard jam voice tetap mencatat semua waktu di voice. Pindah channel
 tidak memutus sesi, tapi kelayakan dievaluasi ulang. Sesi berjalan dicerminkan
 ke tabel `voice_sessions` (write-through), jadi kalau bot mati di tengah sesi,
@@ -92,7 +93,7 @@ waktu sebelum mati dilanjutkan saat boot — bukan hangus. Baris untuk user yang
 sudah keluar voice selama bot mati dibuang otomatis saat restore.
 
 **Level.** XP yang dibutuhkan untuk naik dari level N adalah `N × 100`. Naik
-level memberi `level × 10` poin, `min(level × 50, 2500)` coin, dan peluang
+level memberi `level × 10` Poruv, `min(level × 50, 2500)` coin, dan peluang
 item acak dari katalog sebesar `10% + level × 1%` (maksimum 50%). Item acak
 diundi berdasarkan rarity lewat `weightedRandom()`, bukan uniform. Kalau
 `LEVEL_ROLES` di `src/config/index.js` diisi, role juga otomatis diberikan.
@@ -105,6 +106,34 @@ Bonus streak dibatasi maksimum 3.000 (setara 30 hari). Perbandingan hari
 memakai tanggal kalender dalam zona waktu server (`BOSS_UTC_OFFSET`, default
 WIB) — klaim jam 23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong
 sehari, streak kembali ke 1.
+
+**Poruv Shop.** `/poruv-shop` (`src/config/constants.js`, array `PORUV_SHOP`;
+logic di `src/database/poruvShop.js`) adalah tempat membelanjakan Poruv untuk
+barang bernilai di luar bot — bukan item dalam game seperti `/shop` biasa:
+
+| Item | Harga | Fulfillment |
+|---|---|---|
+| Item Mythic (Acak) | 2.500 Poruv | Otomatis — masuk `/inventory` langsung |
+| Owocash 1.000.000 | 5.000 Poruv | Manual — admin |
+| Custom Role | 10.000 Poruv | Manual — admin |
+| E-Wallet 25.000 | 15.000 Poruv | Manual — admin |
+
+Redeem memotong Poruv dan mencatat baris ke tabel `poruv_redemptions` dalam
+satu transaksi (`db.transaction()`), jadi tidak mungkin Poruv terpotong tanpa
+tercatat atau sebaliknya. Item Mythic diundi dari katalog `/shop` yang sudah
+ada (filter tier `Mythic`, pakai `weightedRandom()` yang sama dengan sistem
+loot lain) lalu langsung di-`grantItem()` ke inventori — statusnya otomatis
+`fulfilled`, tanpa notifikasi. Tiga item lain butuh proses manual, jadi masuk
+status `pending` dan memicu **DM** ke tiap member yang punya salah satu role
+di `ADMIN_ROLE_IDS` (`.env`, comma-separated role ID; lihat `.env.example`).
+Bot mengambil member dari `role.members` (fetch seluruh guild sekali kalau
+cache kosong), jadi butuh **Server Members Intent** aktif. Kegagalan kirim
+DM (izin ditolak, DM ditutup, dst) tidak membatalkan redeem yang sudah
+tercatat — hanya notifikasinya yang hilang untuk admin itu, klaim tetap ada
+di database dan admin lain yang DM-nya berhasil tetap diberi tahu.
+
+Harga ditentukan langsung oleh owner. Detail perkiraan waktu tebus per item
+ada di [ai.md](ai.md#3b-poruv-shop).
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
@@ -122,7 +151,7 @@ embed ikut warna tier saat filter tier aktif. Item diurutkan dari rarity
 tertinggi lalu harga termahal.
 
 **Item & efek.** Sebagian item punya efek dan bisa dipakai lewat `/use <id>`:
-sekali pakai mengurangi stok di inventori lalu memberi XP atau poin. Daftar
+sekali pakai mengurangi stok di inventori lalu memberi XP atau Poruv. Daftar
 efeknya ada di `src/database/shopCatalog.js` — item tanpa efek hanya koleksi.
 Sengaja tidak ada efek "dapat coin" yang nilainya di atas harga item, supaya
 beli-pakai-beli tidak jadi mesin cetak uang. XP dari item tidak langsung
@@ -149,12 +178,14 @@ secara eksplisit; dia menghapus baris user di keempat tabel (users, points,
 user_items, quests), bukan sekadar men-nol-kan. Semua aksi admin tercatat di
 log konsol dengan awalan `[Admin]`.
 
-**Leaderboard mingguan.** `/leaderboard mingguan` menampilkan poin yang
+**Leaderboard mingguan.** `/leaderboard mingguan` menampilkan Poruv yang
 didapat user di pekan berjalan (kunci pekan ISO yang sama dengan quest
 mingguan, reset tiap Senin). Snapshot-nya terisi otomatis di `addPoints()` —
-satu pintu untuk semua sumber poin (chat, voice, exchange) — ke tabel
-`weekly_points`. Baris pekan lama dipertahankan sebagai riwayat; tidak ada
-pekerjaan reset berkala.
+satu pintu untuk semua sumber Poruv (chat, voice, boss, level up) — ke tabel
+`weekly_points`. Belanja di `/poruv-shop` sengaja tidak lewat pintu ini
+(lihat `spendPoints()` di `src/database/points.js`), supaya belanja tidak
+tercatat sebagai "pendapatan" mingguan negatif. Baris pekan lama dipertahankan
+sebagai riwayat; tidak ada pekerjaan reset berkala.
 
 **Mini boss.** Satu boss diundi tiap pukul 12:00 dan 20:00 waktu lokal event
 (`BOSS.SPAWN_HOURS`, offset `BOSS_UTC_OFFSET`, default WIB) di channel
@@ -208,7 +239,8 @@ struktur folder. Menambah command = menambah file, tidak ada daftar manual yang
 perlu diperbarui.
 
 **`src/database/`** dipecah per domain: `users.js` (saldo, daily, transfer),
-`points.js` (poin, XP, leaderboard), `shop.js` (katalog, pembelian, inventori).
+`points.js` (Poruv, XP, leaderboard), `poruvShop.js` (redeem Poruv Shop),
+`shop.js` (katalog, pembelian, inventori).
 `index.js` menyatukan semuanya, jadi pemakai cukup
 `require('../../database')`. Skema dibuat lewat `CREATE TABLE IF NOT EXISTS`
 dan kolom baru ditambal `ensureColumn()` saat start — database lama tidak perlu
@@ -239,7 +271,7 @@ unicode langsung di command — detailnya di [Emoji.md](Emoji.md).
 - **Command tidak muncul di Discord.** Definisi command hanya sampai ke Discord
   lewat `npm run deploy`. Command global butuh waktu sampai sejenak untuk
   tersebar; pakai `GUILD_ID` saat development.
-- **Poin tidak bertambah.** Cek Message Content Intent aktif, dan cek apakah
+- **Poruv tidak bertambah.** Cek Message Content Intent aktif, dan cek apakah
   `POINT_CHANNEL_ID` mengunci ke channel lain.
 - **Muncul teks mentah `<:coin:123>`.** ID emoji salah atau emoji sudah dihapus
   dari aplikasi.

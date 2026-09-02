@@ -123,11 +123,18 @@ function useItem(userId, guildId, itemId) {
     return { ok: false, message: `Kamu tidak punya **${item.name}**. Beli dulu di \`/shop\`.` };
   }
 
-  // Sturdy: selama jatahnya ada, item tidak berkurang saat dipakai.
-  const kept = consumeCharge(userId, guildId, 'no_consume');
+  // Item yang justru memberi Sturdy tidak boleh dilindungi Sturdy: kalau boleh,
+  // ingot kedua dipakai gratis dan charge-nya menumpuk terus (dupe buff).
+  const grantsCharge = effect.type === 'ability' && effect.key === 'no_consume';
+
+  let kept = false;
   let abilityNote = null;
 
   const consume = db.transaction(() => {
+    // Sturdy: selama jatahnya ada, item tidak berkurang saat dipakai.
+    // Dipanggil di dalam transaksi supaya charge tidak hangus kalau gagal.
+    kept = grantsCharge ? false : consumeCharge(userId, guildId, 'no_consume');
+
     if (!kept && entry.quantity <= 1) {
       db.prepare('DELETE FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?').run(
         userId,

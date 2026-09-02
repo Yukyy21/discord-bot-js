@@ -8,7 +8,7 @@ const { xpForLevel } = require('../../config/constants');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('profile')
-    .setDescription('Lihat profil lengkap kamu (balance, streak, poin, level)'),
+    .setDescription('Lihat profil lengkap kamu (balance, streak, Poruv, level)'),
   async execute(interaction) {
     await interaction.deferReply();
     const p = getProfile(interaction.user.id, interaction.guildId);

@@ -53,13 +53,13 @@ function bossEmbed(row, topDamagers = []) {
       },
       {
         name: `${e('boss_loot')} Hadiah`,
-        value: `Top 3 damager + pemberi **last hit** dapat coin, XP, poin, dan peluang item.`,
+        value: `Top 3 damager + pemberi **last hit** dapat coin, XP, Poruv, dan peluang item.`,
         inline: false,
       },
     );
 
   const icon = bossIcon(row.bossKey);
-  if (icon) embed.setThumbnail(icon.url);
+  if (icon) embed.setImage(icon.url);
 
   if (topDamagers.length) {
     embed.addFields({
@@ -104,7 +104,7 @@ function bossRampageEmbed(row, hits) {
   }
   embed.setFooter({ text: 'Kutukan bisa dibersihkan dengan Chrono Core (Time Skip)' });
   const icon = bossIcon(row.bossKey);
-  if (icon) embed.setThumbnail(icon.url);
+  if (icon) embed.setImage(icon.url);
   return embed;
 }
 
@@ -127,7 +127,7 @@ function attackResultEmbed(row, result, { multiplier = 1, debuff = 1, missed = f
     .setTitle(`${e('boss')} Serangan Masuk`)
     .setDescription(lines.join('\n'));
   const icon = bossIcon(row.bossKey);
-  if (icon) embed.setThumbnail(icon.url);
+  if (icon) embed.setImage(icon.url);
   return embed;
 }
 
@@ -145,7 +145,7 @@ function bossDefeatedEmbed(row, rewards, totalHits = 0) {
   );
 
   const icon = bossIcon(row.bossKey);
-  if (icon) embed.setThumbnail(icon.url);
+  if (icon) embed.setImage(icon.url);
 
   for (const reward of rewards) {
     const loot = reward.loot.length
@@ -157,7 +157,7 @@ function bossDefeatedEmbed(row, rewards, totalHits = 0) {
       name: `${reward.roles.map(r => ROLE_LABEL[r]).join(' + ')} — ${num(reward.damage)} damage`,
       value: [
         `<@${reward.userId}>`,
-        `${e('coin')} **${num(reward.coin)}** coin ${e('xp')} **${num(reward.xp)}** XP ${e('point')} **${num(reward.points)}** poin`,
+        `${e('coin')} **${num(reward.coin)}** coin ${e('xp')} **${num(reward.xp)}** XP ${e('point')} **${num(reward.points)}** Poruv`,
         `${e('boss_loot')} ${loot}`,
       ].join('\n'),
       inline: false,
@@ -177,7 +177,7 @@ function bossEscapedEmbed(row) {
     `${e('warn')} Tidak ada yang berhasil menghabisi **${boss.name}**. Sisa HP **${num(row.hp)}** / ${num(row.maxHp)}.\nHadiah tidak dibagikan. Tunggu spawn berikutnya.`,
   );
   const icon = bossIcon(row.bossKey);
-  if (icon) embed.setThumbnail(icon.url);
+  if (icon) embed.setImage(icon.url);
   return embed;
 }
 

@@ -27,7 +27,7 @@ const DEBUFF_META = {
   'debuff:damage': { label: 'Damage ke boss', worse: 'lower' },
   'debuff:loot': { label: 'Peluang loot boss', worse: 'lower' },
   'debuff:xp': { label: 'XP didapat', worse: 'lower' },
-  'debuff:points': { label: 'Poin didapat', worse: 'lower' },
+  'debuff:points': { label: 'Poruv didapat', worse: 'lower' },
   'debuff:coin': { label: 'Coin didapat', worse: 'lower' },
   'debuff:miss': { label: 'Serangan meleset', worse: 'higher' },
 };
@@ -73,7 +73,7 @@ const BOSS_ATTACKS = {
   hex_of_silence: {
     id: 'hex_of_silence',
     name: 'Kutukan Bisu',
-    text: 'Suaramu tercekat — poin yang kamu dapat berkurang sebentar.',
+    text: 'Suaramu tercekat — Poruv yang kamu dapat berkurang sebentar.',
     effects: [{ key: 'debuff:points', value: 0.8, durationMs: 10 * MINUTE }],
   },
   dizzy_blow: {

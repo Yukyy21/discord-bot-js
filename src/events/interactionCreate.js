@@ -7,6 +7,8 @@ const { buildShop } = require('../commands/economy/shop');
 const { buildInventory } = require('../commands/economy/inventory');
 const { buildQuest } = require('../commands/economy/quest');
 const { buildLeaderboard } = require('../commands/general/leaderboard');
+const { buildCredit } = require('../commands/general/credit');
+const poruvShopCmd = require('../commands/economy/poruvShop');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 const { handleBossAttack } = require('../lib/bossManager');
 
@@ -94,6 +96,12 @@ async function handleButton(interaction) {
 
       case 'lb_page': // a = kategori, b = halaman
         return await interaction.update(buildLeaderboard(a, interaction.guildId, Number(b) || 0));
+
+      case 'credit_page': // a = halaman
+        return await interaction.update(buildCredit(Number(a) || 0));
+
+      case 'poruv_redeem': // a = item key
+        return await poruvShopCmd.handleRedeem(interaction, a);
 
       default:
         return;

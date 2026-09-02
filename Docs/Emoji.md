@@ -30,17 +30,36 @@ Nama yang belum diisi akan jatuh ke padanan unicode di `src/lib/emojis.js`.
 
 ## Emoji Credit & Info Bot
 
-Dipakai oleh `/credit` dan `/botinfo`:
+Dipakai oleh `/credit` dan `/botinfo`. `/credit` sekarang 3 halaman
+(Developer, Executive, Beta Tester) lewat `pagerRow('credit_page', ...)` —
+lihat [Contributor.md](Contributor.md#credit-3-halaman) untuk cara menambah
+anggota baru.
 
-| Key | Emoji |
-|---|---|
-| `backend` | `<:Backend:...>` |
-| `frontend` | `<:Frontend:...>` |
-| `person` | `<:Dev_human:...>` |
-| `developer` | `<a:developer:...>` (animated) |
-| `nodejs` | `<:Nodejs:...>` |
-| `discordjs` | `<:Discordjs:...>` |
-| `database` | `<:Sql_database:...>` |
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `backend` | `<:Backend:...>` | Halaman 1 — role Backend |
+| `frontend` | `<:Frontend:...>` | Halaman 1 — role Frontend |
+| `person` | `<:Dev_human:...>` | Baris "dibangun oleh", role UI/UX & Aset Emoji |
+| `developer` | `<a:developer:...>` (animated) | Judul halaman 1 (Developer) |
+| `servermanager` | `<:Servermanager:...>` | Halaman 2 — role Server Manager |
+| `idea` | `<:Idea:...>` | Halaman 2 — role Idea Master |
+| `artwork` | `<:Designer:...>` | Halaman 2 — role Boss Artwork |
+| `betatester` | `<:Betatester:...>` | Judul & isi halaman 3 (Beta Tester) |
+| `nodejs` | `<:Nodejs:...>` | `/botinfo` |
+| `discordjs` | `<:Discordjs:...>` | `/botinfo` |
+| `database` | `<:Sql_database:...>` | `/botinfo` |
+
+## Emoji Poruv Shop
+
+Dipakai oleh `/poruv-shop` — lihat [Bot.md](Bot.md#poruv-shop) untuk cara
+kerja redeem-nya.
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `owocash` | `<:Owocash:...>` | Item "Owocash 1.000.000" |
+| `wallet` | `<:wallet:...>` | Item "E-Wallet 25.000" |
+| `role` | `<:Role:...>` | Item "Custom Role" |
+| `inventory` | `<:tas:...>` | Item "Item Mythic (Acak)" (dipakai ulang dari ikon inventori) |
 
 ## Emoji AI (`/ai-ask`)
 

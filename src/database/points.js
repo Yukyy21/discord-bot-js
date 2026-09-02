@@ -18,9 +18,23 @@ function addPoints(userId, guildId, amount) {
     userId,
     guildId,
   );
-  // Snapshot ke pekan berjalan; satu pintu supaya chat/voice/exchange
+  // Snapshot ke pekan berjalan; satu pintu supaya chat/voice/poruv-shop
   // semuanya otomatis masuk leaderboard mingguan.
   addWeeklyPoints(userId, guildId, amount);
+}
+
+/**
+ * Kurangi Poruv tanpa menyentuh snapshot mingguan — dipakai saat belanja di
+ * /poruv-shop. Belanja bukan "pendapatan", jadi tidak boleh membuat
+ * leaderboard mingguan turun negatif seperti addPoints(-amount) akan lakukan.
+ */
+function spendPoints(userId, guildId, amount) {
+  getPoints(userId, guildId);
+  db.prepare('UPDATE points SET points = points - ? WHERE userId = ? AND guildId = ?').run(
+    amount,
+    userId,
+    guildId,
+  );
 }
 
 function addXp(userId, guildId, amount) {
@@ -90,6 +104,7 @@ function getXpRank(userId, guildId) {
 module.exports = {
   getPoints,
   addPoints,
+  spendPoints,
   addXp,
   addVoiceSeconds,
   setPendingWords,

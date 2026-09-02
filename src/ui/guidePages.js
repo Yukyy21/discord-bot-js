@@ -25,12 +25,12 @@ const PAGES = {
         .setDescription(
           [
             'Bot ini bikin ngobrol dan nongkrong di server jadi progres:',
-            'chat & voice menghasilkan **XP** dan **poin**, coin dipakai belanja',
+            'chat & voice menghasilkan **XP** dan **Poruv**, coin dipakai belanja',
             'di shop yang stoknya berganti tiap 10 menit.',
             line,
             `${e('coin')} **Ekonomi** — saldo, bank, daily, shop, inventory, transfer`,
-            `${e('point')} **Poin & Level** — profil, rank, leaderboard`,
-            `${e('voice')} **Aktivitas** — cara dapat poin dari chat & voice`,
+            `${e('point')} **Poruv & Level** — profil, rank, leaderboard, Poruv Shop`,
+            `${e('voice')} **Aktivitas** — cara dapat Poruv dari chat & voice`,
             `${e('quest')} **Quest** — misi harian, mingguan & bulanan berhadiah coin`,
             `${e('boss')} **Mini Boss** — boss muncul tiap 12 malam & 12 siang, serang bareng`,
             `${e('leaderboard')} **Rank Tier** — daftar tier dan syarat levelnya`,
@@ -75,27 +75,24 @@ const PAGES = {
             ].join('\n'),
           },
           {
-            name: 'Transfer & Tukar',
-            value: [
-              `${e('give')} \`/give <user> <amount>\` — kirim coin ke teman`,
-              `${e('exchange')} \`/exchange <amount>\` — **500 coin = 1 poin**`,
-            ].join('\n'),
+            name: 'Transfer',
+            value: [`${e('give')} \`/give <user> <amount>\` — kirim coin ke teman`].join('\n'),
           },
         ),
   },
 
   points: {
-    label: 'Poin & Level',
+    label: 'Poruv & Level',
     emoji: 'point',
-    description: 'Profil, rank, dan leaderboard',
+    description: 'Profil, rank, leaderboard, dan Poruv Shop',
     build: () =>
       baseEmbed()
         .setColor(COLORS.info)
-        .setTitle(`${e('point')} Poin & Leveling`)
+        .setTitle(`${e('point')} Poruv & Leveling`)
         .setDescription(
           [
             `${e('xp')} XP naik dari chat; **level × 100 XP** untuk naik satu level`,
-            `${e('point')} Poin adalah mata uang prestise — dari chat, voice, dan \`/exchange\``,
+            `${e('point')} Poruv adalah mata uang prestise — dari chat, voice, quest, dan naik level`,
             line,
           ].join('\n'),
         )
@@ -103,19 +100,26 @@ const PAGES = {
           {
             name: 'Kartu Kamu',
             value: [
-              `${e('profile')} \`/profile\` — kartu profil (saldo, streak, poin, level)`,
+              `${e('profile')} \`/profile\` — kartu profil (saldo, streak, Poruv, level)`,
               `${e('rank')} \`/rank\` — kartu rank + progress bar XP`,
-              `${e('point')} \`/points\` — rincian poin kamu`,
+              `${e('point')} \`/points\` — rincian Poruv kamu`,
+            ].join('\n'),
+          },
+          {
+            name: 'Belanjakan Poruv',
+            value: [
+              `${e('shop')} \`/poruv-shop\` — tukar Poruv jadi Owocash, e-wallet, custom role, item Mythic`,
+              `${e('warn')} Redeem masuk antrean; diproses manual oleh admin`,
             ].join('\n'),
           },
           {
             name: 'Leaderboard',
             value: [
               `${e('first')} \`/leaderboard balance\` — coin terbanyak`,
-              `${e('second')} \`/leaderboard points\` — poin terbanyak`,
+              `${e('second')} \`/leaderboard points\` — Poruv terbanyak`,
               `${e('third')} \`/leaderboard voice\` — jam voice terbanyak`,
               `${e('rank')} \`/leaderboard rank\` — level & rank tertinggi`,
-              `${e('clock')} \`/leaderboard mingguan\` — poin yang didapat pekan ini`,
+              `${e('clock')} \`/leaderboard mingguan\` — Poruv yang didapat pekan ini`,
               `${e('leaderboard')} \`/leaderboard card [kategori]\` — versi gambar`,
             ].join('\n'),
           },
@@ -125,7 +129,7 @@ const PAGES = {
   activity: {
     label: 'Aktivitas',
     emoji: 'voice',
-    description: 'Cara dapat XP & poin dari chat dan voice',
+    description: 'Cara dapat XP & Poruv dari chat dan voice',
     build: () =>
       baseEmbed()
         .setColor(COLORS.success)
@@ -134,7 +138,7 @@ const PAGES = {
           {
             name: 'Chat',
             value: [
-              `${e('chat')} Tiap **7 kata** = **+2 poin** (sisa kata disimpan, tidak hangus)`,
+              `${e('chat')} Tiap **7 kata** = **+2 Poruv** (sisa kata disimpan, tidak hangus)`,
               `${e('xp')} **1 XP per kata**, maksimal **20 XP** per pesan`,
               `${e('clock')} Anti-spam: pesan dihitung paling cepat tiap **3 detik**`,
               `${e('warn')} Pesan dengan isi sama persis diabaikan selama **30 detik**`,
@@ -143,9 +147,9 @@ const PAGES = {
           {
             name: 'Voice',
             value: [
-              `${e('clock')} Tiap **15 menit** di voice = **+5 poin**`,
+              `${e('clock')} Tiap **15 menit** di voice = **+8 Poruv**`,
               `${e('voice')} Syarat: minimal **2 orang** (bukan bot, tidak deaf) di channel`,
-              `${e('error')} AFK channel dan nongkrong sendirian tidak menghasilkan poin`,
+              `${e('error')} AFK channel dan nongkrong sendirian tidak menghasilkan Poruv`,
               `${e('success')} Sesi voice tahan restart — bot mati tidak menghanguskan waktumu`,
             ].join('\n'),
           },
@@ -223,7 +227,7 @@ const PAGES = {
             value: [
               `${e('leaderboard')} **Top 3 damager**: 40% / 25% / 15% dari total hadiah`,
               `${e('boss_hit')} **Last hit**: 20% — bisa ditumpuk kalau kamu juga masuk top 3`,
-              `${e('boss_loot')} Hadiahnya: item acak, coin, XP, dan poin`,
+              `${e('boss_loot')} Hadiahnya: item acak, coin, XP, dan Poruv`,
               `${e('ability')} Item ability boss (Sharpened Edge, Kingslayer, dll) menaikkan damage & loot`,
             ].join('\n'),
           },
@@ -273,7 +277,7 @@ const PAGES = {
           {
             name: 'Item Pakai vs Koleksi',
             value: [
-              `${e('ability')} Item berefek bisa dipakai \`/use <id>\` — memberi **XP** atau **poin**`,
+              `${e('ability')} Item berefek bisa dipakai \`/use <id>\` — memberi **XP** atau **Poruv**`,
               `${e('inventory')} Item tanpa efek murni koleksi, tetap tercatat di tas`,
               `${e('warn')} Item habis setelah dipakai; efeknya tidak bisa dijual balik`,
             ].join('\n'),
@@ -281,8 +285,8 @@ const PAGES = {
           {
             name: 'Contoh',
             value: [
-              '`Slime Gel` +30 XP · `Tattered Parchment` +2 poin',
-              '`Holy Grail Fragment` +400 XP · `Chrono Core` +200 poin',
+              '`Slime Gel` +30 XP · `Tattered Parchment` +2 Poruv',
+              '`Holy Grail Fragment` +400 XP · `Chrono Core` +200 Poruv',
             ].join('\n'),
           },
         ),
@@ -300,7 +304,7 @@ const PAGES = {
           {
             name: 'Naik Level',
             value: [
-              `${e('point')} Poin: **level × 10**`,
+              `${e('point')} Poruv: **level × 10**`,
               `${e('coin')} Coin: **level × 50**`,
               `${e('inventory')} Peluang item random: **10% + 1% per level** (maks 50%)`,
               `${e('level')} XP berlebih tidak hangus — bisa lompat beberapa level sekaligus`,
@@ -311,6 +315,13 @@ const PAGES = {
             value: [
               `${e('daily')} Dasar **500 coin**, bonus **+100 per hari streak**`,
               `${e('streak')} Klaim tiap hari tanpa bolong biar streak tidak reset`,
+            ].join('\n'),
+          },
+          {
+            name: 'Poruv Shop',
+            value: [
+              `${e('shop')} \`/poruv-shop\` — tukar Poruv jadi Owocash, e-wallet, custom role, atau item Mythic acak`,
+              `${e('warn')} Semua item di sini butuh proses manual admin, bukan langsung masuk otomatis`,
             ].join('\n'),
           },
         ),
@@ -351,7 +362,7 @@ const PAGES = {
             `${e('coin')} \`/admin give-coin <user> <jumlah>\` — beri coin untuk event/hadiah`,
             `${e('level')} \`/admin set-level <user> <level>\` — atur level manual`,
             `${e('error')} \`/admin reset-user <user> <konfirmasi>\` — hapus semua data user`,
-            'di server ini (saldo, poin, level, inventori, quest). Wajib `konfirmasi: true`.',
+            'di server ini (saldo, Poruv, level, inventori, quest). Wajib `konfirmasi: true`.',
           ].join('\n'),
         ),
   },
@@ -367,11 +378,11 @@ const PAGES = {
         .setDescription(
           [
             `${e('arrow')} Ngobrol tiap hari — XP kecil tapi konsisten paling cepat`,
-            `${e('arrow')} Nongkrong di voice **berdua atau lebih**, poin jalan sendiri`,
+            `${e('arrow')} Nongkrong di voice **berdua atau lebih**, Poruv jalan sendiri`,
             `${e('arrow')} Cek \`/quest\` pagi hari; hadiah quest jauh lebih besar dari daily`,
             `${e('arrow')} Cek \`/shop\` tiap 10 menit, item bagus cepat habis`,
             `${e('arrow')} Simpan coin di bank biar aman dan tidak kepakai iseng`,
-            `${e('arrow')} Kalau poin kurang, tukar coin pakai \`/exchange\``,
+            `${e('arrow')} Kumpulkan Poruv dari chat & voice, lalu tukar di \`/poruv-shop\``,
             `${e('arrow')} Kirim pesan yang beda-beda — duplikat persis tidak dihitung`,
           ].join('\n'),
         ),

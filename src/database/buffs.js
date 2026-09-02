@@ -42,6 +42,20 @@ function getDebuffMultiplier(userId, guildId, key, now = Date.now()) {
 function addBuff(userId, guildId, { key, value = 1, durationMs = null, charges = null }, now = Date.now()) {
   const bonus = key === 'duration' ? 1 : getMultiplier(userId, guildId, 'duration', now);
   const ms = withDurationBonus(durationMs, bonus);
+
+  // Buff berbasis charge (Sturdy) digabung ke baris yang sudah ada supaya sisa
+  // jatahnya jelas satu angka, bukan beberapa baris yang saling menumpuk.
+  if (charges != null && ms == null) {
+    const existing = getActiveBuffs(userId, guildId, now).find(
+      r => r.userId === userId && r.key === key && r.expiresAt == null && r.charges != null,
+    );
+    if (existing) {
+      const total = existing.charges + charges;
+      db.prepare('UPDATE user_buffs SET charges = ?, value = ? WHERE id = ?').run(total, value, existing.id);
+      return { key, value, expiresAt: null, charges: total };
+    }
+  }
+
   db.prepare(
     'INSERT INTO user_buffs (userId, guildId, key, value, expiresAt, charges) VALUES (?, ?, ?, ?, ?, ?)',
   ).run(userId, guildId, key, value, ms == null ? null : now + ms, charges);

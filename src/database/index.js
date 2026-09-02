@@ -14,6 +14,7 @@ const voiceSessions = require('./voiceSessions');
 const buffs = require('./buffs');
 const debuffs = require('./debuffs');
 const boss = require('./boss');
+const poruvShop = require('./poruvShop');
 
 createTables();
 runMigrations();
@@ -46,4 +47,5 @@ module.exports = {
   ...buffs,
   ...debuffs,
   ...boss,
+  ...poruvShop,
 };

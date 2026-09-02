@@ -8,7 +8,7 @@
 //   { type: 'ability', key, name, value?, durationMs?, charges? }
 //   { type: 'xp' | 'points', value }   // efek instan lama, tetap didukung
 //
-// Multiplier coin sengaja tidak pernah menyentuh /give dan /exchange supaya
+// Multiplier coin sengaja tidak pernah menyentuh /give supaya
 // item tidak berubah jadi mesin cetak uang.
 const { ABILITIES: ABILITY_KEYS } = require('../lib/abilities');
 
@@ -230,7 +230,7 @@ const SHOP_CATALOG = [
 const STAT_META = {
   coin: { emoji: 'coin', label: 'Coin' },
   xp: { emoji: 'xp', label: 'XP' },
-  points: { emoji: 'point', label: 'Poin' },
+  points: { emoji: 'point', label: 'Poruv' },
 };
 
 const statList = stat => (Array.isArray(stat) ? stat : [stat]).filter(s => STAT_META[s]);
@@ -246,7 +246,7 @@ const EFFECTS = {
   },
   points: {
     valid: e => typeof e.value === 'number',
-    describe: e => ({ text: `+${e.value} poin`, emoji: 'point' }),
+    describe: e => ({ text: `+${e.value} Poruv`, emoji: 'point' }),
   },
   mult: {
     valid: e => statList(e.stat).length > 0 && typeof e.value === 'number',

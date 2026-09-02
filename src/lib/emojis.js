@@ -24,7 +24,6 @@ const REGISTRY = {
   buy: { name: 'struk', id: '1540187788404592661', animated: false, fallback: '🧾' },
   inventory: { name: 'tas', id: '1540187793106534480', animated: false, fallback: '🎒' },
   give: { name: 'give', id: '1540187750815498321', animated: false, fallback: '🤝' },
-  exchange: { name: 'exchange', id: '1540187743156445274', animated: false, fallback: '🔄' },
 
   // — Poin & Level —
   point: { name: 'point', id: '1540187774664056942', animated: false, fallback: '⭐' },
@@ -86,6 +85,17 @@ const REGISTRY = {
   discordjs: { name: 'Discordjs', id: '1540378499926196425', animated: false, fallback: '🤖' },
   nodejs: { name: 'Nodejs', id: '1540378501549400124', animated: false, fallback: '🟩' },
   database: { name: 'Sql_database', id: '1540378503407607928', animated: false, fallback: '🗄️' },
+
+  // — Credit: Executive & Beta Tester —
+  idea: { name: 'Idea', id: '1543822774861045920', animated: false, fallback: '💡' },
+  betatester: { name: 'Betatester', id: '1543822772965482566', animated: false, fallback: '🧪' },
+  artwork: { name: 'Designer', id: '1543822769639264276', animated: false, fallback: '🖌️' },
+  servermanager: { name: 'Servermanager', id: '1543822771279372308', animated: false, fallback: '🛡️' },
+
+  // — Poruv Shop —
+  owocash: { name: 'Owocash', id: '1543862336039817328', animated: false, fallback: '🦉' },
+  wallet: { name: 'wallet', id: '1543862337675460618', animated: false, fallback: '💳' },
+  role: { name: 'Role', id: '1543862339546386512', animated: false, fallback: '🎭' },
 
   // — Rank Tier —
   tier_novice: { name: 'Novice', id: '1540187768330784798', animated: false, fallback: '🔹' },

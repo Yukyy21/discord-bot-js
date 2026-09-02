@@ -47,8 +47,9 @@ voice_seconds), `shop_items` + `user_items`, `quests`, `weekly_points`,
 `user_buffs` (userId `*` = buff seluruh guild), dan `voice_sessions` sebagai
 cermin sesi voice supaya waktu tidak hangus kalau proses mati.
 
-Tiga nilai sengaja dipisah: **Poin** (kontribusi, tidak bisa ditransfer),
-**Coin** (belanja, bisa `/give`), **XP** (menentukan level → tier rank).
+Tiga nilai sengaja dipisah: **Poruv** (kontribusi, tidak bisa ditransfer,
+dibelanjakan di `/poruv-shop`), **Coin** (belanja di `/shop`, bisa `/give`),
+**XP** (menentukan level → tier rank).
 
 ## Titik Kuat
 

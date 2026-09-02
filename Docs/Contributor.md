@@ -57,7 +57,7 @@ Kalau butuh query baru, tambahkan fungsi di file domain yang sesuai
 (`users.js`, `points.js`, `shop.js`) dan ekspor dari `index.js`.
 
 **Angka balancing masuk `src/config/constants.js`.** Kalau menulis angka
-telanjang di tengah logika (rate poin, harga, cooldown), pindahkan ke sana.
+telanjang di tengah logika (rate Poruv, harga, cooldown), pindahkan ke sana.
 
 **Emoji lewat `e()` / `eo()`.** Jangan tempel unicode atau ID mentah di command.
 
@@ -83,6 +83,30 @@ kartu sudah melakukannya; token interaksi hangus setelah 3 detik.
   Batasan API Discord, keanehan SQLite, dan keputusan balancing layak
   dikomentari. `// ambil user` di atas `getUser()` tidak.
 - Command sebaiknya tipis: validasi input, panggil helper, kirim balasan.
+
+## Credit (3 Halaman)
+
+`/credit` (`src/commands/general/credit.js`) menampilkan 3 halaman lewat
+`pagerRow('credit_page', ...)`, ditangani di `interactionCreate.js` seperti
+pager lainnya (state di customId, bukan memori):
+
+1. **Developer** — Backend, Frontend
+2. **Executive** — Server Manager, Idea Master, Boss Artwork, UI/UX & Aset Emoji
+3. **Beta Tester** — daftar tester
+
+Untuk menambah/mengganti orang, edit array `PAGES` di `credit.js` — isi
+`members` dengan Discord User ID (string), tidak perlu sentuh bagian render:
+
+```js
+{
+  role: 'Backend',
+  emoji: 'backend',
+  members: ['123456789012345678', '234567890123456789'],
+},
+```
+
+Emoji role baru didaftarkan dulu di `REGISTRY` pada `src/lib/emojis.js`
+(lihat [Emoji.md](Emoji.md)), baru dipakai lewat key-nya di `credit.js`.
 
 ## Sebelum Kirim PR
 

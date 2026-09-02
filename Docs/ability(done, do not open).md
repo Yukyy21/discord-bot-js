@@ -35,7 +35,7 @@ efeknya jalan. Buff aktif dicek dengan `/buffs`.
 | Tears of the Fallen | Second Wind | Reset cooldown `/daily` |
 | Blade of the Fallen King | Kingslayer | **[boss]** Damage ke boss ×1.6, 30 menit |
 | Phoenix Whisper Bow | Rekindle | Semua buff aktif +30 menit |
-| Adamantine Ingot | Sturdy | 3 pemakaian `/use` berikutnya tidak menghabiskan item |
+| Adamantine Ingot | Sturdy | 3 pemakaian `/use` berikutnya tidak menghabiskan item (ingot itu sendiri selalu terpakai; charge dari beberapa ingot digabung jadi satu sisa jatah) |
 | Leviathan's Scale | Deep Current | Coin dari quest dan boss ×2, 30 menit |
 | Holy Grail Fragment | Blessing | XP penuh sampai ambang level berikutnya |
 | Starbreaker Claymore | Star Cleave | **[boss]** Damage ke boss ×2, 30 menit |

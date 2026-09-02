@@ -5,7 +5,7 @@
 const BUFF_LABELS = {
   coin: 'Coin',
   xp: 'XP',
-  points: 'Poin',
+  points: 'Poruv',
   quest: 'Progres quest',
   quest_coin: 'Coin quest & boss',
   boss_damage: 'Damage ke boss',

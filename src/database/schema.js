@@ -117,8 +117,25 @@ function createTables() {
       PRIMARY KEY (bossId, userId)
     );
 
+    -- Klaim item Poruv Shop (Owocash, custom role, e-wallet, item Mytic).
+    -- Semua butuh aksi manual admin, jadi baris ini adalah antrean/riwayat
+    -- klaim, bukan langsung tergenapi otomatis seperti item coin biasa.
+    CREATE TABLE IF NOT EXISTS poruv_redemptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      guildId TEXT NOT NULL,
+      itemKey TEXT NOT NULL,
+      itemName TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      detail TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      createdAt INTEGER NOT NULL,
+      resolvedAt INTEGER
+    );
+
     CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);
     CREATE INDEX IF NOT EXISTS idx_boss_slot ON boss_spawns (guildId, slot);
+    CREATE INDEX IF NOT EXISTS idx_poruv_status ON poruv_redemptions (guildId, status);
   `);
 }
 

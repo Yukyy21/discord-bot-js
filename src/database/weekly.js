@@ -3,7 +3,7 @@ const { weeklyKey } = require('../lib/quests');
 
 /**
  * Catat poin yang didapat user di pekan berjalan. Dipanggil otomatis dari
- * addPoints() supaya semua sumber poin (chat, voice, exchange) terhitung
+ * addPoints() supaya semua sumber Poruv (chat, voice, boss, level up) terhitung
  * tanpa perlu hook terpisah. Pekan baru = kunci periode baru = mulai dari
  * nol; baris pekan lama tetap tersimpan sebagai riwayat.
  */

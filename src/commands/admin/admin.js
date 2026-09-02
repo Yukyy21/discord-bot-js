@@ -24,7 +24,7 @@ module.exports = {
     .addSubcommand(sc =>
       sc
         .setName('reset-user')
-        .setDescription('Hapus semua data user: saldo, poin, level, inventori, quest')
+        .setDescription('Hapus semua data user: saldo, Poruv, level, inventori, quest')
         .addUserOption(o => o.setName('user').setDescription('User yang direset').setRequired(true))
         .addBooleanOption(o =>
           o
@@ -91,7 +91,7 @@ module.exports = {
           name: 'Baris terhapus',
           value: [
             `${e('coin')} Saldo/streak: **${wiped.users}**`,
-            `${e('point')} Poin/level: **${wiped.points}**`,
+            `${e('point')} Poruv/level: **${wiped.points}**`,
             `${e('inventory')} Item: **${wiped.items}**`,
             `${e('daily')} Quest: **${wiped.quests}**`,
           ].join('\n'),

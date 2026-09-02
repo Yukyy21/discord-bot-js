@@ -15,7 +15,7 @@ const ABILITIES = {
   quest: { kind: 'buff', boss: false, text: 'Progres quest dikali' },
   quest_coin: { kind: 'buff', boss: false, text: 'Coin dari quest dan boss dikali' },
   no_consume: { kind: 'buff', boss: false, text: 'Pemakaian /use berikutnya tidak menghabiskan item' },
-  all_mult: { kind: 'buff', boss: false, text: 'Coin, XP, dan Poin dikali' },
+  all_mult: { kind: 'buff', boss: false, text: 'Coin, XP, dan Poruv dikali' },
   server_xp: { kind: 'buff', boss: false, text: 'XP seluruh member server dikali' },
   duration: { kind: 'buff', boss: false, text: 'Buff yang dipasang setelah ini bertahan lebih lama' },
   daily_reset: { kind: 'instant', boss: false, text: 'Cooldown /daily direset' },

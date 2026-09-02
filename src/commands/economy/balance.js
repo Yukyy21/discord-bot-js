@@ -17,7 +17,7 @@ module.exports = {
         { name: `${e('bank')} Bank`, value: `**${user.bank.toLocaleString()}**`, inline: true },
         { name: `${e('streak')} Streak`, value: `**${user.streak || 0}** hari`, inline: true },
       )
-      .setFooter({ text: 'Tambah coin: /daily • /exchange • aktif di chat' });
+      .setFooter({ text: 'Tambah coin: /daily • /shop • aktif di chat' });
 
     await interaction.reply({ embeds: [embed] });
   },

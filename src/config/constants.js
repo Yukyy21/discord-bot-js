@@ -30,14 +30,59 @@ const DAILY = {
   DAY_MS: 24 * 60 * 60 * 1000,
 };
 
-/** Kurs /exchange: 1000 coin = 1 poin. */
-const EXCHANGE_RATE = 1000;
+/** Kurs Poruv Shop dihapus — Poruv sekarang dipakai langsung lewat /poruv-shop. */
 
 /** Stok /shop diacak ulang tiap 10 menit. */
 const SHOP = {
   REFRESH_INTERVAL_MS: 10 * 60 * 1000,
   STOCK_SIZE: 10,
 };
+
+/**
+ * Katalog /poruv-shop. Harga ditentukan langsung oleh owner (bukan hasil
+ * proyeksi income otomatis lagi):
+ *  - Item Mythic (Acak)   : 2.500 Poruv
+ *  - Owocash 1.000.000    : 5.000 Poruv
+ *  - Custom Role          : 10.000 Poruv
+ *  - E-Wallet 25.000      : 15.000 Poruv
+ * `fulfillment: 'manual'` artinya redeem masuk antrean dan admin di-DM
+ * (lihat notifyAdmins di poruvShop.js command) — bot tidak menyerahkan
+ * barangnya sendiri, kecuali item Mythic yang otomatis lewat /inventory.
+ */
+const PORUV_SHOP = [
+  {
+    key: 'mythic_item',
+    name: 'Item Mythic (Acak)',
+    emoji: 'inventory',
+    price: 2500,
+    fulfillment: 'manual',
+    description: 'Satu item Mythic acak dari katalog /shop (Starbreaker Claymore, Genesis Scepter, dst).',
+  },
+  {
+    key: 'owocash_1m',
+    name: 'Owocash 1.000.000',
+    emoji: 'owocash',
+    price: 5000,
+    fulfillment: 'manual',
+    description: 'Transfer 1.000.000 Owocash (OwO bot), diproses admin manual.',
+  },
+  {
+    key: 'custom_role',
+    name: 'Custom Role',
+    emoji: 'role',
+    price: 10000,
+    fulfillment: 'manual',
+    description: 'Role custom (nama & warna sesuai request), dibuatkan admin manual.',
+  },
+  {
+    key: 'ewallet_25k',
+    name: 'E-Wallet 25.000',
+    emoji: 'wallet',
+    price: 15000,
+    fulfillment: 'manual',
+    description: 'Saldo e-wallet Rp25.000, dikirim admin setelah verifikasi.',
+  },
+];
 
 /** Quest harian, mingguan & bulanan. Jumlah yang ditugaskan per periode per user. */
 const QUEST = {
@@ -47,12 +92,12 @@ const QUEST = {
 };
 
 /**
- * Mini boss. Boss spawn otomatis di jam 12 dan 20 waktu lokal event
+ * Mini boss. Boss spawn otomatis di jam 00:00 dan 12:00 waktu lokal event
  * (BOSS_UTC_OFFSET, default WIB) di channel BOSS_CHANNEL_ID.
  * Player tidak punya HP — yang berdarah hanya boss.
  */
 const BOSS = {
-  SPAWN_HOURS: [12, 20],
+  SPAWN_HOURS: [0, 12],
   UTC_OFFSET: Number(process.env.BOSS_UTC_OFFSET ?? 7), // 7 = WIB
   CHECK_INTERVAL_MS: 60 * 1000, // penjaga jadwal & despawn
   ATTACK_COOLDOWN_MS: 10 * 1000, // jeda tombol serang per user (dikali debuff `debuff:cooldown`)
@@ -76,4 +121,4 @@ function xpForLevel(level) {
   return level * 100;
 }
 
-module.exports = { CHAT, VOICE, DAILY, EXCHANGE_RATE, SHOP, QUEST, BOSS, xpForLevel };
+module.exports = { CHAT, VOICE, DAILY, SHOP, PORUV_SHOP, QUEST, BOSS, xpForLevel };

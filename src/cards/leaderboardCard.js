@@ -117,7 +117,7 @@ async function renderLeaderboardCard(interaction, kategori) {
     rows = isBalance
       ? getBalanceLeaderboard(interaction.guildId, 10)
       : getPointsLeaderboard(interaction.guildId, 10);
-    label = isBalance ? 'Coin' : 'Poin';
+    label = isBalance ? 'Coin' : 'Poruv';
   }
 
   if (rows.length === 0) {
@@ -179,7 +179,7 @@ async function renderLeaderboardCard(interaction, kategori) {
     .setPlaceholder('Filter kategori')
     .addOptions(
       { label: 'Coin', value: 'balance' },
-      { label: 'Poin', value: 'points' },
+      { label: 'Poruv', value: 'points' },
       { label: 'Jam Voice', value: 'voice' },
       { label: 'Rank', value: 'rank' },
     );
