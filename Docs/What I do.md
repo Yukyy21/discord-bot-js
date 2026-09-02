@@ -4,6 +4,81 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Delapan — Sistem Staff: `/staff`, `/staff-rating`, `/best-staff-of-the-month`
+
+Permintaan owner: sistem staff yang dikelola **manual lewat command admin**,
+bukan diturunkan dari role Discord — lengkap dengan rating dari member dan
+leaderboard bulanan aktivitas. Planning di `Docs/ToDoV3.md` sudah menjadi
+bahan eksekusi.
+
+**Database (`src/database/schema.js`)**
+- Tabel `staff`: `userId, guildId, divisi, deskripsi, addedAt, addedBy`
+  (PK user+guild — satu orang satu baris per server).
+- Tabel `staff_ratings`: `staffUserId, raterUserId, guildId, stars, comment,
+  createdAt, updatedAt` dengan PK unik `(staffUserId, raterUserId, guildId)` —
+  1 user cuma boleh 1 rating per staff; memberi ulang = memperbarui
+  (`ON CONFLICT ... DO UPDATE`), bukan nambah baris.
+- Tabel `staff_activity`: `userId, guildId, yearMonth, messageCount,
+  voiceMinutes, tagCount, announcementCount` (PK user+guild+bulan). Baris baru
+  per bulan = skor otomatis reset tiap ganti bulan, histori bulan lalu tetap
+  tersimpan.
+
+**Lapis data (`src/database/staff.js`, baru)**
+- CRUD: `isStaff`, `addStaff` (tolak duplikat), `removeStaff`, `getStaff`,
+  `listStaff` (kelompok per divisi, urut addedAt).
+- Rating: `setRating` (tolak menilai diri sendiri & non-staff).
+- Aktivitas: `getActivity` (inisialisasi baris bulan), `bumpActivity`,
+  `addVoiceMinutes`.
+- **`bestStaff`**: 4 metrik tiap-tiap dinormalisasi ke nilai tertinggi bulan
+  itu (nilai dibagi max → rentang 0-1) **baru** dirata-rata sama rata (25%
+  masing-masing). Ini menjawab concern "satuannya beda" — staff yang seimbang
+  tidak kalah otomatis hanya karena staff lain menumpuk satu metrik, dan
+  skor tidak dijumlah mentah. Tabel digabungkan ke `staff` (JOIN) jadi hanya
+  staff yang tampil; 1 leaderboard gabungan, tidak dipisah per divisi.
+
+**Command (`src/commands/staff/`, baru; auto-register via readdir `index.js`)**
+- `/staff-set` (**admin**, `PermissionFlagsBits.Administrator`): subcommand
+  `add` (`user`, `divisi` wajib, `deskripsi` opsional) & `remove` (`user`).
+- `/staff`: daftar staff per divisi — nama, deskripsi, rata-rata bintang rating
+  (`⭐` + nilai desimal) — pagination `staff_page` memakai `pagerRow`
+  (`src/ui/pager.js`); tombol di-wire ke `interactionCreate.js` (pattern sama
+  dengan `credit_page`). Membangun `buildStaff(guildId, page)` yang dipakai
+  command & handler tombol.
+- `/staff-rating <user> <stars 1-5> [comment]`: simpan/memperbarui rating.
+- `/best-staff-of-the-month [bulan]`: argumen `bulan` opsional dengan pilihan
+  3 bulan terakhir (default bulan berjalan), menampilkan 1-2-3 dengan medal
+  dan skor (0-100) + rincian 4 metrik per staff. Kosong kalau bulan itu belum
+  ada aktivitas.
+
+**Tracking & hooks**
+- `messageCreate.js`: cabang baru di atas gate `POINT_CHANNEL_ID` — kalau
+  pengirim adalah staff (`isStaff`), increment `messageCount`; kalau
+  `message.mentions.everyone` atau `message.mentions.roles.size > 0`,
+  increment `tagCount`; kalau `message.channelId` ada di
+  `ANNOUNCEMENT_CHANNEL_IDS`, increment `announcementCount`. Berdiri sendiri
+  (jalan di semua channel, tidak terkunci channel poin) tapi tetap lewat
+  `shouldCountMessage` (anti-spam) supaya spam tidak menggelembungkan skor.
+- `voiceStateUpdate.js`: di `endSession`, kalau user staff dan sesinya
+  berakhir dalam kondisi `eligible` (minimal 2 orang tidak deaf — syarat sama
+  dengan Poruv), `addVoiceMinutes(userId, guildId, floor(seconds/60))`. Sama
+  seperti `voice_seconds` yang ada, menit diakumulasikan saat sesi berakhir
+  (bukan tiap interval), jadi konsisten tanpa double-count.
+
+**Env & dokumentasi**
+- `ANNOUNCEMENT_CHANNEL_IDS` (baru, comma-separated, opsional) ditambah ke
+  `.env.example` dan tabel env `README.md`. Kosong = tidak ada pesan yang
+  dihitung sebagai announcement.
+- `Docs/Bot.md` & `Docs/ai.md`: 4 command + narasi cara kerja staff
+  (manual, rating hanya info, skor normalisasi). `Docs/ToDoV3.md`: bagian
+  fitur staff ditandai SELESAI.
+
+**Verifikasi**: `test/staff.test.js` (baru, DB temp terisolasi, 9 kasus) —
+CRUD, penolakan duplikat, group divisi, rating replace-once, self/non-staff
+tolak, bump metrik, voice minutes, dan **bestStaff**: tes sengaja membandingkan
+staff dengan banyak pesan tapi metrik lain nol lawan staff seimbang — yang
+seimbang harus menang karena normalisasi (menjaga proporsi). `npm run lint`
+bersih, `npm test` **100/100** hijau.
+
 ## Gelombang Tujuh — Level-up di Semua Sumber, Plafon XP Chat, Sink Coin, & Equip Item
 
 Gelombang ini gabungan perbaikan bug, balancing ekonomi, dan satu fitur
