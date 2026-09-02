@@ -24,7 +24,7 @@ Butuh Node.js 18+ (bot memakai `fetch` bawaan Node).
 | `CLIENT_ID` | ya | Application ID, dipakai saat deploy command |
 | `GUILD_ID` | tidak | Kalau diisi, command hanya didaftarkan ke server ini dan langsung muncul |
 | `POINT_CHANNEL_ID` | tidak | Kalau diisi, Poruv chat hanya dihitung di channel ini |
-| `BOSS_CHANNEL_ID` | tidak | Channel tempat mini boss diundi & muncul |
+| `BOSS_CHANNEL_ID` | tidak | Fallback channel mini boss — tiap server bisa atur channelnya sendiri lewat `/boss-channel` |
 | `BOSS_UTC_OFFSET` | tidak | Offset UTC buat jadwal boss & reset harian (default 7 / WIB, tidak perlu diisi kalau sudah pas) |
 | `LOG_LEVEL` | tidak | Level log konsol (default `info`) |
 | `ADMIN_ROLE_IDS` | tidak | Comma-separated role ID; membernya di-DM tiap ada klaim manual baru di `/poruv-shop` |

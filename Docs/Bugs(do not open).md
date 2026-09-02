@@ -1,7 +1,7 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, dan #5 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, #5, dan #6 sudah diperbaiki**, sisanya masih terbuka.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -58,12 +58,23 @@ memakai etalase server-nya masing-masing. Setiap guild punya undian acak dan
 jam rotasi 10 menit sendiri; interval global tetap mengundi ulang semua guild
 yang pernah membuka shop.
 
-## 6. Mini boss hanya bisa satu guild
+## 6. (fixed) Mini boss hanya bisa satu guild â€" SUDAH DIPERBAIKI
 
 `BOSS_CHANNEL_ID` dibaca sekali dari `.env`, jadi penjadwal hanya pernah spawn
 di satu channel/guild. Bot di lebih dari satu server tidak akan punya boss di
 server lainnya. Kalau memang multi-guild, channel boss perlu disimpan per guild
 di database.
+
+Perbaikan (selesai): channel boss kini dikonfigurasi per-guild lewat command
+admin baru `/boss-channel` (`set` / `show` / `clear`), disimpan di tabel
+`guild_config` (`src/database/guildConfig.js`). Penjadwal (`startBossScheduler`
+di `src/lib/bossManager.js`) mengiterasi semua guild yang punya konfigurasi
+lewat `listBossTargets()` dan spawn di tiap channel yang jadwal slot-nya belum
+dipakai. `spawnBoss()` memakai prioritas channel: eksplisit → konfigurasi
+per-guild → fallback `BOSS_CHANNEL_ID` (dari `.env`, tetap dilayani untuk
+guild yang belum di-set). `/admin-spawn-boss` sekarang spawn di guild tempat
+command dijalankan. Boss di tiap guild tetap satu-satu (`getActiveBoss(guildId)`
+dan `slotUsed(guildId, slot)` sudah per-guild).
 
 ## 7. Balapan update embed boss
 

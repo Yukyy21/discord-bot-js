@@ -11,7 +11,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   `/shop` dipakai bersama lintas server — server rame bisa menghabiskan stok
   server lain. Pisahkan stok per guild atau jadikan stok tidak terbatas.
 
-- [ ] **Mini boss hanya bisa satu guild.** (Bugs.md #6) `BOSS_CHANNEL_ID`
+- [x] **Mini boss hanya bisa satu guild.** (Bugs.md #6) `BOSS_CHANNEL_ID`
   tunggal berarti hanya satu server yang bisa spawn boss. Perlu tabel
   konfigurasi per guild (channel boss per server) dan penjadwal yang
   mengiterasi semuanya.

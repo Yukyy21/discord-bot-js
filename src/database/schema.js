@@ -133,6 +133,15 @@ function createTables() {
       resolvedAt INTEGER
     );
 
+    -- Konfigurasi per-guild. bossChannelId = channel tempat mini boss spawn
+    -- untuk server itu (diatur lewat /boss-channel). Kalau null, bot memakai
+    -- fallback BOSS_CHANNEL_ID dari .env.
+    CREATE TABLE IF NOT EXISTS guild_config (
+      guildId TEXT PRIMARY KEY,
+      bossChannelId TEXT,
+      updatedAt INTEGER
+    );
+
     CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);
     CREATE INDEX IF NOT EXISTS idx_boss_slot ON boss_spawns (guildId, slot);
     CREATE INDEX IF NOT EXISTS idx_poruv_status ON poruv_redemptions (guildId, status);

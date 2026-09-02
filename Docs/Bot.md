@@ -60,6 +60,7 @@ level yang terpisah.
 | `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, Poruv, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
 | `/admin-spawn-boss` | **Admin:** paksa undian boss sekarang (untuk tes) |
+| `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
 
 ## Aturan Angka
 
@@ -191,9 +192,13 @@ tercatat sebagai "pendapatan" mingguan negatif. Baris pekan lama dipertahankan
 sebagai riwayat; tidak ada pekerjaan reset berkala.
 
 **Mini boss.** Satu boss diundi tiap pukul 12:00 dan 20:00 waktu lokal event
-(`BOSS.SPAWN_HOURS`, offset `BOSS_UTC_OFFSET`, default WIB) di channel
-`BOSS_CHANNEL_ID`: Pump Freakin 45% (24.000 HP, 8.000 coin), Clown Orca 45%
-(30.000 HP, 10.000 coin), Ancient Mummy 10% (60.000 HP, 25.000 coin, spesial).
+(`BOSS.SPAWN_HOURS`, offset `BOSS_UTC_OFFSET`, default WIB): Pump Freakin 45%
+(24.000 HP, 8.000 coin), Clown Orca 45% (30.000 HP, 10.000 coin), Ancient
+Mummy 10% (60.000 HP, 25.000 coin, spesial). Channel spawn **per-guild**: tiap
+server punya channel bosnya sendiri lewat `/boss-channel` (tabel
+`guild_config`); kalau guild belum di-set, dipakai fallback `BOSS_CHANNEL_ID`
+dari `.env`. Penjadwal di `src/lib/bossManager.js` mengiterasi semua guild yang
+terkonfigurasi, jadi bot multi-server memunculkan boss di tiap servernya.
 Player tidak punya HP — yang berdarah hanya boss. Satu klik tombol memberi
 damage acak sesuai rentang boss (300–900 sebelum buff `boss_damage`), dengan
 cooldown 10 detik per orang; boss kabur setelah 6 jam. Hadiah: 60% pool dibagi

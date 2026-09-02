@@ -28,7 +28,7 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const bossKey = interaction.options.getString('boss');
-    const result = await spawnBoss(interaction.client, { bossKey });
+    const result = await spawnBoss(interaction.client, { bossKey, guildId: interaction.guildId });
 
     if (!result.ok) {
       return interaction.editReply({ embeds: [errorEmbed(result.message)] });

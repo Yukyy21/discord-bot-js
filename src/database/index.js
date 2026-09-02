@@ -15,6 +15,7 @@ const buffs = require('./buffs');
 const debuffs = require('./debuffs');
 const boss = require('./boss');
 const poruvShop = require('./poruvShop');
+const guildConfig = require('./guildConfig');
 
 createTables();
 runMigrations();
@@ -48,4 +49,5 @@ module.exports = {
   ...debuffs,
   ...boss,
   ...poruvShop,
+  ...guildConfig,
 };

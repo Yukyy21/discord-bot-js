@@ -363,6 +363,8 @@ const PAGES = {
             `${e('level')} \`/admin set-level <user> <level>\` — atur level manual`,
             `${e('error')} \`/admin reset-user <user> <konfirmasi>\` — hapus semua data user`,
             'di server ini (saldo, Poruv, level, inventori, quest). Wajib `konfirmasi: true`.',
+            `${e('boss')} \`/boss-channel set <channel>\` — tentukan channel mini boss server ini`,
+            `${e('boss')} \`/boss-channel show\` / \`clear\` — lihat/hapus channel boss per-guild`,
           ].join('\n'),
         ),
   },

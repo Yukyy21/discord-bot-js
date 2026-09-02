@@ -20,6 +20,8 @@ const {
   consumeDebuffCharge,
   applyBossAttack,
   markRampage,
+  getBossChannel,
+  getAllBossChannels,
 } = require('../database');
 const {
   pickBoss,
@@ -58,13 +60,39 @@ async function resolveBossChannel(client, channelId = BOSS_CHANNEL_ID) {
 }
 
 /**
+ * Semua pasangan guild → channel boss yang perlu dicek jadwal spawn.
+ * Konfigurasi per-guild (tabel guild_config) terlebih dahulu; kalau sedang di
+ * satu guild tidak ada konfigurasi, fallback BOSS_CHANNEL_ID tetap dilayani.
+ */
+function listBossTargets() {
+  const targets = [];
+  for (const row of getAllBossChannels()) {
+    if (row.bossChannelId) targets.push({ guildId: row.guildId, channelId: row.bossChannelId });
+  }
+  if (BOSS_CHANNEL_ID) targets.push({ guildId: null, channelId: BOSS_CHANNEL_ID });
+  return targets;
+}
+
+/**
  * Munculkan boss di channel minibos.
+ * Prioritas channel: `channel` eksplisit → konfigurasi per-guild
+ * (`guildId`, diatur lewat /boss-channel) → fallback `BOSS_CHANNEL_ID`.
  * `bossKey` diisi hanya oleh /admin-spawn-boss; jadwal otomatis mengundi
  * sendiri (Pump Freakin 45%, Clown Orca 45%, Ancient Mummy 10%).
  */
-async function spawnBoss(client, { bossKey = null, slot = null, channel = null } = {}) {
-  const target = channel ?? (await resolveBossChannel(client));
-  if (!target) return { ok: false, message: 'Channel boss belum diatur. Isi `BOSS_CHANNEL_ID` di `.env`.' };
+async function spawnBoss(client, { bossKey = null, slot = null, channel = null, guildId = null } = {}) {
+  let target = channel;
+  if (!target) {
+    const configured = guildId ? getBossChannel(guildId) : null;
+    target = await resolveBossChannel(client, configured || BOSS_CHANNEL_ID);
+  }
+  if (!target) {
+    return {
+      ok: false,
+      message:
+        'Channel boss belum diatur. Set dengan `/boss-channel set` untuk server ini, atau isi `BOSS_CHANNEL_ID` di `.env`.',
+    };
+  }
 
   const existing = getActiveBoss(target.guild.id);
   if (existing) {
@@ -275,11 +303,13 @@ async function restoreBosses(client) {
 
 /**
  * Penjaga jadwal: tiap menit cek apakah sekarang jam spawn (00 & 12 waktu
- * lokal event) dan apakah ada boss yang sudah lewat batas waktunya.
+ * lokal event) dan apakah ada boss yang sudah lewat batas waktunya. Spawn
+ * dijalankan untuk SETIAP guild yang punya channel boss (konfigurasi per-guild
+ * di tabel guild_config, plus fallback BOSS_CHANNEL_ID).
  */
 function startBossScheduler(client) {
-  if (!BOSS_CHANNEL_ID) {
-    log.warn('BOSS_CHANNEL_ID belum diisi — boss tidak akan spawn otomatis.');
+  if (!BOSS_CHANNEL_ID && getAllBossChannels().length === 0) {
+    log.warn('Belum ada channel boss (konfigurasi per-guild kosong & BOSS_CHANNEL_ID kosong) — boss tidak akan spawn otomatis.');
   }
 
   const tick = async () => {
@@ -294,11 +324,18 @@ function startBossScheduler(client) {
       }
 
       const slot = dueSpawnSlot();
-      if (!slot || !BOSS_CHANNEL_ID) return;
-      const channel = await resolveBossChannel(client);
-      if (!channel) return;
-      if (slotUsed(channel.guild.id, slot)) return;
-      await spawnBoss(client, { slot, channel });
+      if (slot) {
+        for (const target of listBossTargets()) {
+          try {
+            const channel = await resolveBossChannel(client, target.channelId);
+            if (!channel) continue;
+            if (slotUsed(channel.guild.id, slot)) continue;
+            await spawnBoss(client, { slot, channel });
+          } catch (error) {
+            log.error(`Gagal spawn boss di guild ${target.guildId ?? target.channelId}:`, error);
+          }
+        }
+      }
     } catch (error) {
       log.error('Scheduler boss error:', error);
     }

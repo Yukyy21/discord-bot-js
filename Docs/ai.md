@@ -263,7 +263,9 @@ Quest event sudah ada: `boss_join` (harian, ikut serang mini boss) dan
 ## 6b. Mini Boss
 
 - Boss diundi otomatis tiap **12:00** dan **20:00** waktu lokal event
-  (offset `BOSS_UTC_OFFSET`, default WIB) lalu dikirim ke channel mini boss.
+  (offset `BOSS_UTC_OFFSET`, default WIB) lalu dikirim ke channel mini boss
+  server masing-masing (channel per-guild diatur admin lewat `/boss-channel`;
+  fallback `BOSS_CHANNEL_ID`).
   Admin bisa memaksa lewat `/admin-spawn-boss`.
 - Cara ikut: klik tombol **Serang!** di pesan boss. Player tidak punya HP, jadi
   tidak ada risiko mati. Jeda antar serangan **10 detik** per orang (bisa molor
