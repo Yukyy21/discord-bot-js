@@ -4,6 +4,91 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Tujuh — Level-up di Semua Sumber, Plafon XP Chat, Sink Coin, & Equip Item
+
+Gelombang ini gabungan perbaikan bug, balancing ekonomi, dan satu fitur
+sistem equip. Semua dikerjakan di branch `ferr-path2`.
+
+**Bug #8 — `xp_fill`/level-up menggantung kalau `POINT_CHANNEL_ID` diisi**
+- Akar masalah: rekonsiliasi level (yang menset level, kasih reward, dan
+  mengirim embed notifikasi) hanya ada di `src/events/messageCreate.js`, yang
+  di-gate `POINT_CHANNEL_ID`. XP yang masuk dari jalur lain — item `xp_fill`,
+  voice, reward boss — tidak pernah memicu level-up sampai user kebetulan
+  chat lagi di channel poin.
+- Fix: satu jalur bersama **`src/lib/levelingManager.js`** (baru) dengan
+  `reconcileLevels(client, guildId, [{ userId, channelId? }])` yang menangani
+  set level, reward poin/coin/item acak, role, quest `level_up`, dan
+  mengumumkan level-up. Notifikasi dikirim ke `POINT_CHANNEL_ID` kalau terisi,
+  kalau tidak ke channel konteks event atau channel teks pertama guild.
+- Dipanggil dari **semua** sumber XP:
+  - `messageCreate.js` (menggantikan `handleLevelUp` inline),
+  - `src/commands/economy/use.js` (item/`xp_fill`),
+  - `voiceStateUpdate.js` (tiga titik pemberian XP voice),
+  - `bossManager.js` (saat hadiah boss dibagikan).
+- Pesan `xp_fill` di `src/database/abilities.js` tidak lagi menjanjikan
+  "tinggal chat sekali" karena level kini naik seketika di `/use`.
+
+**Balancing — plafon XP chat per menit**
+- Spam chat dengan cooldown anti-spam 3 detik bisa memompa ~400 XP/menit
+  (20 pesan × 20 XP), jauh di atas chat aktif normal.
+- `src/config/constants.js`: `CHAT.XP_CAP_PER_MINUTE: 200` +
+  `XP_CAP_WINDOW_MS` (jendela bergulir 60 detik).
+- `src/lib/xpCap.js` (baru): `capChatXp()` memotong XP (yang sudah dikali buff)
+  ke plafon jendela bergulir; `resetXpCap()` dipakai Time Skip
+  (`cooldown_reset` di `abilities.js`).
+- `messageCreate.js` melewatkan XP yang di-buff melalui `capChatXp` sebelum
+  `addXp`. Chat normal <200 XP/menit tak tersentuh.
+
+**Balancing — biaya `/give` 5% benar-benar dibakar (sink coin)**
+- Bug yang lama nyamar: `give.js` sudah memvalidasi `totalCost = amount + fee`,
+  tapi `transferCoins()` hanya mendebit **sebesar `amount`** — biaya 5% bocor.
+- Fix: `transferCoinsWithFee()` baru di `src/database/users.js` — dalam satu
+  transaksi mendebit `amount + fee` dari pengirim dan mengkredit `amount` ke
+  penerima; `fee` dibakar (sink coin). Dipakai `/give`.
+- `GIVE_FEE_RATE` dipindah ke `src/config/constants.js` (mengikuti konvensi
+  "semua angka di constants"). Test `test/give.test.js` (baru, DB temp
+  terisolasi) membuktikan fee benar-benar terpotong.
+
+**Balancing — rebalance harga Plasma Blaster & Crystal Dagger**
+- Keduanya overpriced (18.000/15.000 coin) vs buff yang kena plafon 20 XP/pesan.
+- `src/database/shopCatalog.js`: **Plasma Blaster** 18.000 → **4.500 coin**
+  (×1.25 → **×1.3**, 60 menit), **Crystal Dagger** 15.000 → **3.500 coin**
+  (×1.2, 60 menit). Keduanya tetap tier **Rare** (via `ITEM_TIERS`).
+- Harga item tidak disinkron otomatis dari katalog (hanya `effect` lewat
+  `syncEffects`), jadi tambah `shop.rebalancePrices()` (`src/database/shop.js`)
+  yang dipanggil startup memakai `SHOP_CATALOG.REBALANCED_ITEM_IDS = [11, 12]`
+  supaya DB yang sudah seed ikut dapat harga baru.
+
+**Quest `boss_join` & `boss_kill` (tandai selesai, tanpa perubahan kode)**
+- Ternyata sudah terimplementasi penuh: katalog `boss_join_1` (daily) &
+  `boss_kill_2` (weekly) di `src/lib/quests.js`; `addQuestProgress('boss_join')`
+  di `bossManager.js` saat serangan pertama (`result.hits === 1`), dan
+  `addQuestProgress('boss_kill')` saat hadiah dibagikan. Hanya dicentang di
+  `Docs/ToDoV3.md`.
+
+**Fitur — sistem equip item (5 slot) + `/equip`**
+- Model yang dipilih: equip sebagai **penanda build/carpool** — efek item
+  **tetap aktif lewat `/use`**; kolom status equip siap dipakai untuk mekanik
+  pasif kelak.
+- `src/database/schema.js`: migrasi kolom `equipped INTEGER DEFAULT 0` di
+  `user_items`.
+- `src/config/constants.js`: `EQUIP_SLOTS = 5`.
+- `src/database/shop.js`: `setEquipped()` (equip/unequip, cek slot 5, item
+  sudah terpasang ditolak), `getEquipCount()`, dan `getInventory()` kini memuat
+  `ui.equipped`. Ketemu & diperbaiki bug saat tes: SELECT awal tidak menyertakan
+  `equipped`, sehingga pengecekan "sudah terpasang" tak berfungsi.
+- `src/commands/economy/equip.js` (baru): `/equip equip|unequip <id>` —
+  auto-register via `readdirSync` di `index.js`.
+- `src/commands/economy/inventory.js`: menampilkan counter `dipasang X/5`,
+  badge "Terpasang", dan perintah equip/unequip per item.
+- Test `test/equip.test.js` (baru, DB temp terisolasi, 5 kasus).
+
+Dokumentasi pengguna disinkronkan di `Docs/Bot.md`, `Docs/ai.md`, dan
+`Docs/ToDoV3.md`. Changelog resmi tidak disentuh (file `Changelog(...).md`
+memang memberi tahu agar tidak diupdate).
+
+Verifikasi per bagian: `npm run lint` bersih dan `npm test` **91/91** hijau.
+
 ## Gelombang Enam — `/exchange` Hilang, Poin Jadi Poruv, Ada `/poruv-shop`
 
 Permintaan owner: hapus `/exchange`, rename "poin" jadi "Poruv" di seluruh
