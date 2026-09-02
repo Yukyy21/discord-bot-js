@@ -58,11 +58,10 @@ aktif:
   gaya main, tapi **alat timing**: pakai tepat sebelum klaim. Dragon Scale
   (10.000, ×1.25) yang dipakai sebelum quest bulanan 15.000 langsung balik
   modal +3.750, dan sebelum hadiah boss 30.000 jadi +7.500.
-- **Multiplier XP** (Plasma Blaster 18.000, ×1.25, 60 menit): batas 20 XP per
-  pesan bikin plafon realistis ±250 XP tambahan. Nilainya jauh di bawah harga.
-- **Multiplier poin** (Crystal Dagger 15.000, ×1.2, 60 menit): plafon ±60 poin
-  tambahan. Setara 30.000 coin di kurs `/exchange` — jadi tetap rugi, tapi
-  hanya karena kursnya sendiri yang aneh.
+- **Multiplier XP** (Plasma Blaster, kini 4.500, ×1.3, 60 menit): batas 20 XP per
+  pesan bikin plafon ±«200 XP/menit chat»; 4.500 coin lebih dekat ke nilai sebenarnya.
+- **Multiplier poin** (Crystal Dagger, kini 3.500, ×1.2, 60 menit): setara
+  ±60 poin tambahan; 3.500 coin jauh lebih masuk akal dari 15.000 lama.
 - **Ability boss** (Epic–Mythic): ini satu-satunya kelompok yang harganya masuk
   akal, karena hadiah boss memang besar.
 

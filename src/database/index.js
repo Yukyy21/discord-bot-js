@@ -21,6 +21,8 @@ createTables();
 runMigrations();
 shop.seedShop();
 shop.syncEffects();
+// Harga item yang pernah direbalance diterapkan ke DB yang sudah ada.
+shop.rebalancePrices(require('./shopCatalog').REBALANCED_ITEM_IDS);
 
 /** Gabungan data ekonomi + poin untuk kartu /profile dan /rank. */
 function getProfile(userId, guildId) {

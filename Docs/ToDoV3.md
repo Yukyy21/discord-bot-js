@@ -36,7 +36,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   `/bank withdraw` (mis. 1–2%), item konsumtif wajib untuk boss (elixir),
   atau harga shop yang naik mengikuti jumlah coin beredar.
 
-- [ ] **Harga item vs manfaatnya.** Crystal Dagger dan Plasma Blaster
+- [x] **Harga item vs manfaatnya.** Crystal Dagger dan Plasma Blaster
   (18.000 coin) tidak sepadan dengan buff-nya — buff XP kena plafon
   20 XP/pesan. Setel ulang harga/efek di `src/database/shopCatalog.js`
   setelah ada angka peredaran coin yang lebih baru.

@@ -88,14 +88,14 @@ const SHOP_CATALOG = [
   [
     11,
     'Plasma Blaster',
-    18000,
+    4500,
     'Senjata api berenergi plasma dengan akurasi tinggi',
-    { type: 'mult', stat: 'xp', value: 1.25, durationMs: 60 * MINUTE },
+    { type: 'mult', stat: 'xp', value: 1.3, durationMs: 60 * MINUTE },
   ],
   [
     12,
     'Crystal Dagger',
-    15000,
+    3500,
     'Belati tajam yang terbuat dari pecahan kristal es abadi',
     { type: 'mult', stat: 'points', value: 1.2, durationMs: 60 * MINUTE },
   ],
@@ -233,6 +233,10 @@ const STAT_META = {
   points: { emoji: 'point', label: 'Poruv' },
 };
 
+// ID item yang harga bawaannya pernah direbalance. Dipakai startup untuk
+// menerapkan harga baru ke database yang sudah ter-seed (lihat rebalancePrices).
+const REBALANCED_ITEM_IDS = [11, 12];
+
 const statList = stat => (Array.isArray(stat) ? stat : [stat]).filter(s => STAT_META[s]);
 
 const minutes = ms => `${Math.round(ms / 60000)} menit`;
@@ -281,4 +285,4 @@ function describeEffect(effect) {
   return meta && meta.valid(effect) ? meta.describe(effect) : null;
 }
 
-module.exports = { SHOP_CATALOG, STAT_META, statList, parseEffect, describeEffect };
+module.exports = { SHOP_CATALOG, STAT_META, statList, parseEffect, describeEffect, REBALANCED_ITEM_IDS };

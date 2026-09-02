@@ -48,6 +48,21 @@ function syncEffects() {
   sync();
 }
 
+/**
+ * Terapkan ulang harga item tertentu dari katalog ke database. Harga sengaja
+ * TIDAK disinkron otomatis seperti `effect` (biar admin bisa mengubah harga),
+ * jadi migrasi eksplisit dipakai saat harga bawaan diganti — server yang sudah
+ * ter-seed ikut dapat harga baru tanpa harus mereset database.
+ */
+function rebalancePrices(ids) {
+  const byId = new Map(SHOP_CATALOG.map(([id, , price]) => [id, price]));
+  const update = db.prepare('UPDATE shop_items SET price = ? WHERE id = ?');
+  for (const id of ids) {
+    const price = byId.get(id);
+    if (price !== undefined) update.run(price, id);
+  }
+}
+
 /** Tambah satu item ke inventori, atau naikkan jumlahnya kalau sudah punya. */
 function grantItem(userId, guildId, itemId) {
   db.prepare(
@@ -171,4 +186,4 @@ function useItem(userId, guildId, itemId) {
   };
 }
 
-module.exports = { getShopItems, seedShop, syncEffects, grantItem, buyItem, getInventory, useItem };
+module.exports = { getShopItems, seedShop, syncEffects, rebalancePrices, grantItem, buyItem, getInventory, useItem };
