@@ -16,7 +16,7 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   konfigurasi per guild (channel boss per server) dan penjadwal yang
   mengiterasi semuanya.
 
-- [ ] **Balapan update embed boss.** (Bugs.md #7) Dua penyerang bersamaan
+- [x] **Balapan update embed boss.** (Bugs.md #7) Dua penyerang bersamaan
   bisa menimpa update embed satu sama lain. Antrekan update embed boss
   (mutex per spawn) atau debounce dengan edit terjadwal.
 

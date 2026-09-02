@@ -1,7 +1,7 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, #5, dan #6 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, #5, #6, dan #7 sudah diperbaiki**, sisanya masih terbuka.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -76,12 +76,21 @@ guild yang belum di-set). `/admin-spawn-boss` sekarang spawn di guild tempat
 command dijalankan. Boss di tiap guild tetap satu-satu (`getActiveBoss(guildId)`
 dan `slotUsed(guildId, slot)` sudah per-guild).
 
-## 7. Balapan update embed boss
+## 7. (fixed) Balapan update embed boss â€" SUDAH DIPERBAIKI
 
 `handleBossAttack()` memakai `interaction.update()` pada pesan boss. Dua
 serangan yang datang hampir bersamaan bisa membuat embed menampilkan HP yang
 lebih tua (bukan salah data — data di SQLite tetap benar, hanya tampilannya
 yang bisa mundur sesaat).
+
+Perbaikan (selesai): update embed boss diantre per-spawn
+(`queueMessageEdit(bossId, task)` di `src/lib/bossManager.js`). Semua edit
+pesan boss — embed HP saat serangan, disable tombol saat despawn
+(`escapeBoss`), dan pemulihan saat restart (`restoreBosses`) — berjalan serial
+per `bossId`. Setiap task membaca ulang state terbaru dari database tepat
+sebelum menulis, jadi embed yang tampil selalu mengikuti kondisi terkini.
+`handleBossAttack()` kini `deferUpdate()` (biar tidak timeout) lalu edit
+diantre, jadi dua penyerang nyaris bersamaan tidak saling menimpa lagi.
 
 ## 8. `xp_fill` menggantung kalau `POINT_CHANNEL_ID` diisi
 

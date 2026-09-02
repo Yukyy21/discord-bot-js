@@ -48,6 +48,24 @@ const log = require('./logger').scope('Boss');
 
 const BOSS_CHANNEL_ID = process.env.BOSS_CHANNEL_ID;
 
+// Antrean edit pesan boss per spawn (Bugs.md #7): dua penyerang bersamaan
+// tidak boleh menimpa update embed satu sama lain. Semua edit pesan boss
+// (embed HP, disable tombol saat despawn/restart) dijalankan serial per
+// bossId, dan task selalu membaca ulang state terbaru dari database tepat
+// sebelum menulis — jadi tampilan tidak bisa mundur ke HP lama.
+const editChains = new Map(); // bossId -> Promise (ekor antrean)
+
+/**
+ * Jalankan `task` setelah semua edit boss `bossId` sebelumnya selesai.
+ * Error satu task tidak memutus antrean untuk edit berikutnya.
+ */
+function queueMessageEdit(bossId, task) {
+  const tail = editChains.get(bossId) ?? Promise.resolve();
+  const next = tail.then(task, task);
+  editChains.set(bossId, next.catch(() => {}));
+  return next;
+}
+
 /** Channel tempat boss muncul. Diatur lewat BOSS_CHANNEL_ID di .env. */
 async function resolveBossChannel(client, channelId = BOSS_CHANNEL_ID) {
   if (!channelId) return null;
@@ -176,12 +194,21 @@ async function handleBossAttack(interaction, bossId) {
   }
 
   const after = getBossById(row.id);
-  await interaction.update({
-    embeds: [bossEmbed(after, getContributions(row.id))],
-    components: [attackRow(row.id, result.defeated)],
-    // Attachment harus dikirim ulang tiap edit, kalau tidak thumbnail-nya hilang.
-    files: bossIconFiles(row.bossKey),
-  });
+  // Ack dulu supaya interaksi tidak pernah timeout (pesan boss sudah bisa
+  // berubah banyak), lalu update embed boss diantre per-spawn. Task membaca
+  // state terbaru dari DB saat mengeksekusi, jadi dua serangan nyaris
+  // bersamaan tidak akan saling menimpa dengan data basi.
+  await interaction.deferUpdate();
+  await queueMessageEdit(row.id, async () => {
+    const latest = getBossById(row.id);
+    if (!latest) return;
+    await interaction.message.edit({
+      embeds: [bossEmbed(latest, getContributions(row.id))],
+      components: [attackRow(row.id, latest.status !== 'active')],
+      // Attachment harus dikirim ulang tiap edit, kalau tidak thumbnail-nya hilang.
+      files: bossIconFiles(row.bossKey),
+    });
+  }).catch(error => log.error(`Gagal update embed boss ${row.id}:`, error.message));
   await interaction.followUp({
     embeds: [attackResultEmbed(after, result, { multiplier, debuff: damageDebuff, missed, counter })],
     files: bossIconFiles(row.bossKey),
@@ -274,10 +301,11 @@ async function escapeBoss(client, row) {
   const channel = await resolveBossChannel(client, row.channelId);
   if (!channel) return;
   if (row.messageId) {
-    await channel.messages
-      .fetch(row.messageId)
-      .then(msg => msg.edit({ components: [attackRow(row.id, true)] }))
-      .catch(() => {});
+    await queueMessageEdit(row.id, async () => {
+      const msg = await channel.messages.fetch(row.messageId).catch(() => null);
+      if (!msg) return;
+      await msg.edit({ components: [attackRow(row.id, true)] });
+    }).catch(() => {});
   }
   await channel.send({ embeds: [bossEscapedEmbed(row)], files: bossIconFiles(row.bossKey) }).catch(() => {});
   log.info(`Boss ${row.bossKey} (id ${row.id}) kabur tanpa dikalahkan`);
@@ -288,16 +316,15 @@ async function restoreBosses(client) {
   for (const row of getAllActiveBosses()) {
     const channel = await resolveBossChannel(client, row.channelId);
     if (!channel || !row.messageId) continue;
-    await channel.messages
-      .fetch(row.messageId)
-      .then(msg =>
-        msg.edit({
-          embeds: [bossEmbed(row, getContributions(row.id))],
-          components: [attackRow(row.id)],
-          files: bossIconFiles(row.bossKey),
-        }),
-      )
-      .catch(() => {});
+    await queueMessageEdit(row.id, async () => {
+      const msg = await channel.messages.fetch(row.messageId).catch(() => null);
+      if (!msg) return;
+      await msg.edit({
+        embeds: [bossEmbed(row, getContributions(row.id))],
+        components: [attackRow(row.id)],
+        files: bossIconFiles(row.bossKey),
+      });
+    }).catch(() => {});
   }
 }
 
