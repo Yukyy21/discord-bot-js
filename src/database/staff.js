@@ -65,6 +65,21 @@ function withRating(staffRow) {
 }
 
 /**
+ * Komentar terbaru untuk satu staff (yang komentarnya diisi), terbaru dulu.
+ * Dipakai halaman detail /staff supaya bukan cuma angka rata-rata yang
+ * tampil, tapi juga suara asli dari member yang menilai.
+ */
+function getRecentComments(staffUserId, guildId, limit = 3) {
+  return db
+    .prepare(
+      `SELECT raterUserId, stars, comment, updatedAt FROM staff_ratings
+       WHERE staffUserId = ? AND guildId = ? AND comment IS NOT NULL AND TRIM(comment) != ''
+       ORDER BY updatedAt DESC LIMIT ?`,
+    )
+    .all(staffUserId, guildId, limit);
+}
+
+/**
  * Beri/ubah rating. Satu user hanya 1 rating per staff di guild yang sama —
  * rating ulang sama seperti `INSERT OR REPLACE` (renilai, bukan nambah baris).
  */
@@ -172,6 +187,7 @@ module.exports = {
   removeStaff,
   getStaff,
   listStaff,
+  getRecentComments,
   setRating,
   getActivity,
   bumpActivity,

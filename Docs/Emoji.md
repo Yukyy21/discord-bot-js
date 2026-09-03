@@ -61,6 +61,16 @@ kerja redeem-nya.
 | `role` | `<:Role:...>` | Item "Custom Role" |
 | `inventory` | `<:tas:...>` | Item "Item Mythic (Acak)" (dipakai ulang dari ikon inventori) |
 
+## Emoji Sistem Staff
+
+Dipakai oleh `/staff`, `/staff-set`, `/staff-rating`, `/best-staff-of-the-month`
+— lihat bagian **Staff** di [Bot.md](Bot.md) untuk cara kerjanya.
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `staff` | `<:Staff:...>` | Judul embed & baris deskripsi di `/staff`, `/staff-set` |
+| `star_rating` | `<:StarRating:...>` | Bintang rating di `/staff-rating`, daftar `/staff`, dan `/best-staff-of-the-month` |
+
 ## Emoji AI (`/ai-ask`)
 
 | Key | Emoji | Dipakai di |

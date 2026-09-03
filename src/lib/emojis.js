@@ -97,6 +97,10 @@ const REGISTRY = {
   wallet: { name: 'wallet', id: '1543862337675460618', animated: false, fallback: '💳' },
   role: { name: 'Role', id: '1543862339546386512', animated: false, fallback: '🎭' },
 
+  // — Sistem Staff —
+  staff: { name: 'Staff', id: '1544937889912201236', animated: false, fallback: '🧑‍💼' },
+  star_rating: { name: 'StarRating', id: '1544937891782983690', animated: false, fallback: '⭐' },
+
   // — Rank Tier —
   tier_novice: { name: 'Novice', id: '1540187768330784798', animated: false, fallback: '🔹' },
   tier_apprentice: { name: 'Apprentice', id: '1540187723577430016', animated: false, fallback: '🔸' },

@@ -52,9 +52,9 @@ module.exports = {
     const medals = ['first', 'second', 'third'];
     const lines = rows.map((r, i) => {
       const medal = medals[i] ? `${e(medals[i])} ` : `${i + 1}. `;
-      const stars = '⭐'.repeat(Math.max(1, Math.round(r.score * 5)));
+      const stars = e('star_rating').repeat(Math.max(1, Math.round(r.score * 5)));
       return `${medal}<@${r.userId}> — skor ${(r.score * 100).toFixed(1)}/100 ${stars}\n` +
-        `> 💬 ${r.messageCount} · 🎤 ${r.voiceMinutes}m · 📣 ${r.tagCount} tag · 📢 ${r.announcementCount} announcemen`;
+        `> 💬 ${r.messageCount} · 🎤 ${r.voiceMinutes}m · 📣 ${r.tagCount} tag · 📢 ${r.announcementCount} announcement`;
     });
 
     const embed = themedEmbed('leaderboard', `Staff Terbaik · ${label}`, COLORS.primary)

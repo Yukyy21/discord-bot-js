@@ -77,7 +77,68 @@ CRUD, penolakan duplikat, group divisi, rating replace-once, self/non-staff
 tolak, bump metrik, voice minutes, dan **bestStaff**: tes sengaja membandingkan
 staff dengan banyak pesan tapi metrik lain nol lawan staff seimbang — yang
 seimbang harus menang karena normalisasi (menjaga proporsi). `npm run lint`
-bersih, `npm test` **100/100** hijau.
+bersih, `npm test` 100/100 hijau — tapi lihat catatan **Perbaikan** di bawah:
+suite ini hanya menguji `src/database/staff.js`, tidak menyentuh
+`messageCreate.js`, jadi bug pemanggilan ganda di bawah ini lolos tanpa
+terdeteksi test.
+
+**Perbaikan (review sebelum deploy)**
+
+- **Bug kritis: Poruv/XP chat berhenti total.** `messageCreate.js` memanggil
+  `shouldCountMessage()` dua kali per pesan — sekali untuk staff tracking,
+  sekali lagi untuk Poruv/XP. Fungsi itu stateful: tiap panggilan langsung
+  mencatat `lastAt = now` untuk user itu (lihat `src/lib/antispam.js`).
+  Panggilan kedua jadi selalu mengira jaraknya 0ms dari panggilan pertama
+  (pesan yang sama), sehingga selalu dianggap spam dan `false` — **Poruv dan
+  XP dari chat berhenti untuk semua orang**, bukan cuma staff, sejak
+  perubahan ini masuk. Dibuktikan lewat simulasi standalone sebelum
+  diperbaiki: dua pesan beda konten berjarak 5 detik pun tetap `false` di
+  panggilan kedua. Perbaikannya: panggil `shouldCountMessage()` **sekali**
+  di awal handler, simpan hasilnya ke variabel `counts`, pakai ulang untuk
+  kedua pengecekan (staff tracking dan Poruv/XP) — bukan dua evaluasi
+  terpisah untuk hal yang seharusnya satu keputusan yang sama.
+- **Typo `"announcemen"` → `"announcement"`** di baris rincian metrik
+  `bestStaffOfTheMonth.js`.
+- **2 emoji baru**: `staff` dan `star_rating` (ID dari upload owner) di
+  `src/lib/emojis.js`. Dipakai gantikan `person`/`⭐` unicode di keempat
+  command staff (`staffSet.js`, `staff.js`, `staffRating.js`,
+  `bestStaffOfTheMonth.js`), konsisten dengan pola bot yang selalu pakai
+  custom emoji server, bukan unicode, untuk elemen UI utama.
+- Dicatat, belum diperbaiki: `voiceMinutes` staff hanya tercatat saat
+  `endSession` (user keluar voice) — staff yang duduk berjam-jam tanpa
+  pernah leave channel tidak dapat kredit sampai dia keluar, beda dari
+  `voice_seconds` biasa yang juga diperbarui via interval periodik. Perlu
+  diputuskan apakah ini disengaja atau perlu disamakan — dicatat di
+  [ToDoV3.md](ToDoV3.md).
+
+**Desain ulang `/staff`: satu staff per halaman**
+
+Owner menilai tampilan awal (semua staff dikelompokkan per divisi dalam satu
+embed) kurang niat. Dirombak jadi mengikuti pola `/credit`: satu orang = satu
+halaman, navigasi lewat tombol.
+
+- `src/commands/staff/staff.js` ditulis ulang total. `flattenStaff()`
+  meratakan hasil `listStaff()` (yang dikelompokkan per divisi) jadi satu
+  daftar urut, lalu `paginate(all, page, 1)` — memakai fungsi pagination yang
+  sama dipakai `/shop`/`/leaderboard`, cukup dengan `size: 1` supaya satu
+  halaman = satu orang, tidak perlu logic pagination baru.
+- Tiap halaman sekarang berisi: **avatar asli** staff (fetch lewat
+  `client.users.fetch()`, pola yang sama dipakai `leaderboardCard.js`;
+  gagal fetch tidak menggagalkan embed, cuma thumbnail kosong), divisi di
+  judul, deskripsi, rating sebagai baris bintang terisi/kosong
+  (`⭐⭐⭐⭐☆` gaya, bukan cuma angka desimal), dan sampai 3 komentar
+  rating terbaru sebagai kutipan.
+- **Fungsi baru** `getRecentComments(staffUserId, guildId, limit)` di
+  `src/database/staff.js` — sebelumnya rating cuma diagregat jadi rata-rata,
+  komentar individual tidak pernah ditampilkan di mana pun. Sekarang
+  `/staff` mengutip langsung suara member yang menilai (terbaru dulu, cuma
+  yang komentarnya diisi).
+- `buildStaff()` berubah signature dan jadi **async**: `buildStaff(client,
+  guildId, page)`, bukan `buildStaff(guildId, page)` — perlu `client` untuk
+  fetch avatar. Pemanggil di `interactionCreate.js` (`case 'staff_page'`)
+  disesuaikan jadi `await`.
+- `Docs/Bot.md` dan `Docs/ai.md`: paragraf staff diperbarui supaya tidak lagi
+  bilang "dikelompokkan per divisi dalam satu embed".
 
 ## Gelombang Tujuh — Level-up di Semua Sumber, Plafon XP Chat, Sink Coin, & Equip Item
 

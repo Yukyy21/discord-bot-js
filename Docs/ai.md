@@ -85,17 +85,20 @@ untuk member biasa. `reset-user` wajib `konfirmasi: true`.
 | Command | Fungsi |
 |---|---|
 | `/staff-set add\|remove` | **Admin** — kelola daftar staff server ini (manual, bukan dari role) |
-| `/staff` | Daftar staff aktif per divisi + deskripsi + rata-rata rating |
+| `/staff` | Profil staff satu per halaman: avatar, divisi, deskripsi, rating, komentar terbaru |
 | `/staff-rating <user> <stars> [comment]` | Beri rating 1-5 bintang ke staff; rating ulang memperbarui |
 | `/best-staff-of-the-month [bulan]` | Leaderboard bulanan staff — 4 metrik bobot sama rata (pesan, voice, tag, announcement) |
 
 Sistem staff **bukan** diturunkan dari role Discord — admin mendaftarkan/menghapus
-orang lewat `/staff-set` (butuh izin Administrator). Rating user ke staff hanya
-satu per user per staff (memberi lagi = memperbarui), dan **tidak** ikut jadi
-skor bulanan — hanya info di `/staff`. Skor bulanan dihitung dari `staff_activity`
-yang di-snap per bulan; tiap metrik dinormalisasi ke nilai tertinggi bulan itu
-lalu dirata-rata sama rata. Channel "announcement" untuk metrik ke-4 ditentukan
-`ANNOUNCEMENT_CHANNEL_IDS` di `.env`.
+orang lewat `/staff-set` (butuh izin Administrator). `/staff` menampilkan satu
+staff per halaman (navigasi lewat tombol), bukan daftar semua staff dalam satu
+embed — tiap halaman berisi avatar, divisi, deskripsi, rata-rata bintang
+(terisi/kosong), dan sampai 3 komentar rating terbaru sebagai kutipan. Rating
+user ke staff hanya satu per user per staff (memberi lagi = memperbarui), dan
+**tidak** ikut jadi skor bulanan — hanya info di `/staff`. Skor bulanan dihitung
+dari `staff_activity` yang di-snap per bulan; tiap metrik dinormalisasi ke nilai
+tertinggi bulan itu lalu dirata-rata sama rata. Channel "announcement" untuk
+metrik ke-4 ditentukan `ANNOUNCEMENT_CHANNEL_IDS` di `.env`.
 
 ---
 

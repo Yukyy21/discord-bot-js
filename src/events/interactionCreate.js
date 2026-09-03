@@ -102,7 +102,7 @@ async function handleButton(interaction) {
         return await interaction.update(buildCredit(Number(a) || 0));
 
       case 'staff_page': // a = halaman
-        return await interaction.update(buildStaff(interaction.guildId, Number(a) || 0));
+        return await interaction.update(await buildStaff(interaction.client, interaction.guildId, Number(a) || 0));
 
       case 'poruv_redeem': // a = item key
         return await poruvShopCmd.handleRedeem(interaction, a);

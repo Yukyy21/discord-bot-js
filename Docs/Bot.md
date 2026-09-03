@@ -64,7 +64,7 @@ level yang terpisah.
 | `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
 
 | `/staff-set add\|remove` | **Admin:** kelola daftar staff server ini (tabel `staff`); staff ditentukan manual, bukan dari role |
-| `/staff` | Daftar staff aktif per divisi, lengkap dengan deskripsi dan rata-rata rating — pagination kalau banyak |
+| `/staff` | Profil satu staff per halaman (1 orang = 1 halaman): divisi, deskripsi, rating, komentar terbaru |
 | `/staff-rating <user> <stars> [comment]` | Beri rating 1-5 bintang ke staff; rating ulang memperbarui, bukan menumpuk |
 | `/best-staff-of-the-month [bulan]` | Leaderboard bulanan staff berdasar 4 metrik sama rata: pesan, voice, tag, announcement |
 
@@ -171,9 +171,13 @@ memengaruhi buff secara pasif.
 
 **Staff.** Daftar staff dikelola **manual** lewat `/staff-set` (admin, butuh
 izin Administrator) — bukan diturunkan dari role Discord. `/staff`
-menampilkan mereka dikelompokkan per divisi, lengkap dengan deskripsi dan
-rata-rata bintang dari `/staff-rating` (1-5, sekali per user per staff;
-memberi lagi memperbarui nilai lama). `/best-staff-of-the-month` menyusun
+menampilkan satu staff per halaman (bukan daftar per divisi dalam satu
+embed): avatar, divisi di judul, deskripsi, rata-rata bintang dari
+`/staff-rating` (1-5, sekali per user per staff; memberi lagi memperbarui
+nilai lama, ditampilkan sebagai bintang terisi/kosong), dan sampai 3
+komentar rating terbaru sebagai kutipan. Navigasi antar staff pakai tombol
+`pagerRow` yang sama seperti command lain, dengan `size: 1` di `paginate()`
+sehingga tiap halaman = tiap orang. `/best-staff-of-the-month` menyusun
 leaderboard bulanan semua staff berdasar **4 metrik bobot sama rata**: jumlah
 pesan, menit voice, jumlah tag `@everyone`/role, dan jumlah pesan di channel
 announcement (`ANNOUNCEMENT_CHANNEL_IDS` di `.env`). Tiap metrik dinormalisasi

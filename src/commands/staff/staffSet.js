@@ -37,9 +37,9 @@ module.exports = {
       if (!result.ok) {
         return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
       }
-      const embed = themedEmbed('person', 'Staff Ditambahkan', COLORS.success)
+      const embed = themedEmbed('staff', 'Staff Ditambahkan', COLORS.success)
         .setDescription(
-          `${e('person')} **${target.username}** sekarang staff di server ini.`,
+          `${e('staff')} **${target.username}** sekarang staff di server ini.`,
         )
         .addFields(
           { name: 'Divisi', value: divisi, inline: true },
@@ -54,8 +54,8 @@ module.exports = {
     }
     return interaction.reply({
       embeds: [
-        themedEmbed('person', 'Staff Dihapus', COLORS.economy).setDescription(
-          `${e('person')} **${target.username}** sudah dihapus dari daftar staff.`,
+        themedEmbed('staff', 'Staff Dihapus', COLORS.economy).setDescription(
+          `${e('staff')} **${target.username}** sudah dihapus dari daftar staff.`,
         ),
       ],
     });

@@ -28,10 +28,10 @@ module.exports = {
       return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
     }
 
-    const bar = '⭐'.repeat(stars);
-    const embed = themedEmbed('person', 'Rating Dikirim', COLORS.success)
+    const bar = e('star_rating').repeat(stars);
+    const embed = themedEmbed('star_rating', 'Rating Dikirim', COLORS.success)
       .setDescription(
-        `${e('person')} Kamu memberi **${target.username}** nilai ${stars} ${bar}${comment ? `\n> ${comment}` : ''}.`,
+        `${e('staff')} Kamu memberi **${target.username}** nilai ${stars} ${bar}${comment ? `\n> ${comment}` : ''}.`,
       )
       .setFooter({ text: 'Memberi rating ulang akan memperbarui nilai sebelumnya.' });
 

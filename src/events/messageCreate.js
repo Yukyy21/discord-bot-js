@@ -24,27 +24,33 @@ module.exports = {
   async execute(message) {
     if (message.author.bot || !message.guild) return;
 
-    // Tracking aktivitas staff berdiri sendiri — jalan di semua channel, tak
-    // terikat POINT_CHANNEL_ID. Pakai anti-spam yang sama supaya spam tidak
-    // menggelembungkan skor pesan/tag/announcement.
     const userId = message.author.id;
     const guildId = message.guildId;
-    if (shouldCountMessage(userId, guildId, message.content)) {
-      if (isStaff(userId, guildId)) {
-        bumpActivity(userId, guildId, 'messageCount');
-        if (message.mentions.everyone || message.mentions.roles.size > 0) {
-          bumpActivity(userId, guildId, 'tagCount');
-        }
-        if (ANNOUNCEMENT_CHANNEL_IDS.has(message.channelId)) {
-          bumpActivity(userId, guildId, 'announcementCount');
-        }
+
+    // Satu evaluasi anti-spam per pesan — dipakai ulang untuk staff tracking
+    // dan Poruv/XP. shouldCountMessage() itu stateful (mencatat timestamp
+    // pesan tiap kali dipanggil), jadi memanggilnya dua kali per pesan akan
+    // membuat evaluasi kedua selalu mengira jaraknya 0ms dari evaluasi
+    // pertama dan selalu dianggap spam. Jangan panggil dua kali.
+    const counts = shouldCountMessage(userId, guildId, message.content);
+
+    // Tracking aktivitas staff berdiri sendiri — jalan di semua channel, tak
+    // terikat POINT_CHANNEL_ID. Pakai hasil anti-spam yang sama supaya spam
+    // tidak menggelembungkan skor pesan/tag/announcement.
+    if (counts && isStaff(userId, guildId)) {
+      bumpActivity(userId, guildId, 'messageCount');
+      if (message.mentions.everyone || message.mentions.roles.size > 0) {
+        bumpActivity(userId, guildId, 'tagCount');
+      }
+      if (ANNOUNCEMENT_CHANNEL_IDS.has(message.channelId)) {
+        bumpActivity(userId, guildId, 'announcementCount');
       }
     }
 
     // Kalau POINT_CHANNEL_ID diisi, poin hanya jalan di channel itu.
     if (POINT_CHANNEL_ID && message.channel.id !== POINT_CHANNEL_ID) return;
 
-    if (!shouldCountMessage(userId, guildId, message.content)) return;
+    if (!counts) return;
 
     const words = message.content.trim().split(/\s+/).filter(Boolean).length;
     if (words === 0) return;
