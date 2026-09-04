@@ -41,7 +41,12 @@ function isEligible(guildId, userId) {
   let listeners = 0;
   for (const other of guild.voiceStates.cache.values()) {
     if (other.channelId !== state.channelId) continue;
-    if (other.member?.user.bot) continue;
+    // Member yang belum ke-cache tidak bisa dipastikan bot atau bukan — jangan
+    // dihitung sebagai manusia, supaya bot yang tak ke-cache tidak menyumbang
+    // ke ambang MIN_LISTENERS dan membuka pembayaran reward (Gelombang Empat
+    // Belas). Conservative: tak yakin = tidak dihitung.
+    if (other.member == null) continue;
+    if (other.member.user.bot) continue;
     if (other.selfDeaf || other.serverDeaf) continue;
     listeners++;
     if (listeners >= VOICE.MIN_LISTENERS) return true;
@@ -179,19 +184,27 @@ setInterval(() => {
       continue;
     }
     if (now - session.lastGrant < VOICE.INTERVAL_MS) continue;
+    // Bayar SEMUA interval yang sudah terakumulasi, bukan cuma satu. Ini
+    // penting setelah restart: restoreVoiceTracking melanjutkan lastGrant lama,
+    // jadi tick pertama harus meng-kredit seluruh durasi layak yang lewat,
+    // konsisten dengan endSession/syncEligibility (Gelombang Empat Belas).
+    const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
     addPoints(
       session.userId,
       session.guildId,
-      applyBuff(session.userId, session.guildId, 'points', VOICE.POINTS_PER_INTERVAL),
+      applyBuff(session.userId, session.guildId, 'points', chunks * VOICE.POINTS_PER_INTERVAL),
     );
     addXp(
       session.userId,
       session.guildId,
-      applyBuff(session.userId, session.guildId, 'xp', VOICE.XP_PER_INTERVAL),
+      applyBuff(session.userId, session.guildId, 'xp', chunks * VOICE.XP_PER_INTERVAL),
     );
     reconcileSession(session.guildId, session.userId);
-    grantStaffVoiceMinutes(session, 1);
-    session.lastGrant = now;
+    grantStaffVoiceMinutes(session, chunks);
+    // Majukan ke batas chunk terbayar (bukan `now`) supaya sisa pecahan
+    // interval ikut terakumulasi, sama seperti endSession — tidak ada waktu
+    // layak yang hilang atau dibayar ganda.
+    session.lastGrant = session.lastGrant + chunks * VOICE.INTERVAL_MS;
     saveVoiceSession(session.userId, session.guildId, session);
   }
 }, VOICE.INTERVAL_MS);
@@ -211,7 +224,8 @@ function restoreVoiceTracking(ref) {
   for (const guild of ref.guilds.cache.values()) {
     for (const state of guild.voiceStates.cache.values()) {
       if (!state.channelId) continue;
-      if (state.member?.user.bot) continue;
+      if (state.member == null) continue;
+      if (state.member.user.bot) continue;
       const key = `${guild.id}:${state.id}`;
       liveKeys.add(key);
       if (sessions.has(key)) continue;

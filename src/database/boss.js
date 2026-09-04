@@ -50,6 +50,12 @@ function setBossMessage(bossId, messageId) {
   db.prepare('UPDATE boss_spawns SET messageId = ? WHERE id = ?').run(messageId, bossId);
 }
 
+/** Hapus baris boss yang belum sempat "hidup" (mis. gagal kirim pesan spawn). */
+function deleteBoss(bossId) {
+  db.prepare('DELETE FROM boss_spawns WHERE id = ?').run(bossId);
+  db.prepare('DELETE FROM boss_damage WHERE bossId = ?').run(bossId);
+}
+
 function getContribution(bossId, userId) {
   return db.prepare('SELECT * FROM boss_damage WHERE bossId = ? AND userId = ?').get(bossId, userId);
 }
@@ -172,6 +178,7 @@ module.exports = {
   slotUsed,
   createBoss,
   setBossMessage,
+  deleteBoss,
   getContribution,
   getContributions,
   applyDamage,

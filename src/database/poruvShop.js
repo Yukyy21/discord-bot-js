@@ -40,17 +40,25 @@ function redeemPoruvItem(userId, guildId, key) {
 
   let grantedItemName = null;
 
+  const NO_MYTHIC = new Error('Tidak ada item Mythic di katalog');
+
   const redeem = db.transaction(() => {
+    // Item Mythic dipilih dulu sebelum Poruv dipotong. Kalau katalog kosong,
+    // transaksi dibatalkan dengan melempar error di bawah — user TIDAK
+    // diancap Poruv-nya tanpa mendapat barang (Gelombang Empat Belas).
+    let picked = null;
+    if (item.key === 'mythic_item') {
+      picked = pickRandomMythicItem();
+      if (!picked) throw NO_MYTHIC;
+    }
+
     spendPoints(userId, guildId, item.price);
 
     // Item Mythic langsung digenapi lewat sistem inventori yang sudah ada;
     // sisanya (Owocash, e-wallet, custom role) menunggu admin.
     if (item.key === 'mythic_item') {
-      const picked = pickRandomMythicItem();
-      if (picked) {
-        grantItem(userId, guildId, picked.id);
-        grantedItemName = picked.name;
-      }
+      grantItem(userId, guildId, picked.id);
+      grantedItemName = picked.name;
     }
 
     db.prepare(
@@ -67,7 +75,15 @@ function redeemPoruvItem(userId, guildId, key) {
       Date.now(),
     );
   });
-  redeem();
+
+  try {
+    redeem();
+  } catch (err) {
+    if (err === NO_MYTHIC) {
+      return { ok: false, message: 'Item Mythic sedang kosong di katalog. Coba lagi nanti.' };
+    }
+    throw err;
+  }
 
   const redemption = db
     .prepare('SELECT * FROM poruv_redemptions WHERE userId = ? AND guildId = ? ORDER BY id DESC LIMIT 1')

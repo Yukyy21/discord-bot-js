@@ -14,6 +14,7 @@ const {
   getPendingRedemptions,
   resolveRedemption,
   addPoints,
+  getPoints,
 } = require('../src/database');
 
 const G = 'guild-1';
@@ -58,4 +59,15 @@ test('resolve hanya berlaku dalam guild yang sama', () => {
   // Coba resolve dari guild lain — harus gagal karena id/guild tidak cocok.
   const wrong = resolveRedemption(res.redemption.id, G);
   assert.strictEqual(wrong.ok, false);
+});
+
+test('mythic_item digenapi otomatis, ter-catat fulfilled, dan Poruv terpotong tepat', () => {
+  addPoints('u4', G, 10000);
+  const before = getPoints('u4', G).points;
+  const res = redeemPoruvItem('u4', G, 'mythic_item');
+  assert.strictEqual(res.ok, true);
+  assert.ok(res.grantedItemName, 'item Mythic langsung masuk inventori, bukan antrean admin');
+  assert.strictEqual(res.redemption.status, 'fulfilled');
+  // Poruv dipotong di dalam transaksi yang sama dengan pemberian item.
+  assert.strictEqual(getPoints('u4', G).points, before - 2500);
 });

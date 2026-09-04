@@ -4,6 +4,72 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Empat Belas — Perbaikan Temuan Audit Lanjutan
+
+Audit lanjutan (tiga subagen eksplorasi + verifikasi manual) menemukan lima bug
+mayor dan beberapa celah minor. Semua diperbaiki di gelombang ini, lengkap
+dengan tes regression. Tidak ada command baru, jadi tidak perlu `npm run
+deploy`.
+
+**Critical — Sturdy tidak lagi melindungi item ability instan**
+- `src/database/shop.js` (`useItem`): ability berjenis `instant`
+  (`daily_reset`, `cooldown_reset`, `xp_fill`, `extend_buffs` — cek
+  `ABILITIES[key].kind` di `src/lib/abilities.js`) tidak lagi dicek
+  `consumeCharge('no_consume')`. Sebelumnya item sekali-pakai ini bisa dipakai
+  berulang selama jatah Sturdy ada → klaim `/daily` berulang tanpa batas,
+  streak membengkak sampai `STREAK_MAX_BONUS`, dan reset cooldown/XP berulang.
+  Ability buff tetap dilindungi Sturdy (item tidak habis).
+- Ini juga menutup dupe Sturdy: item yang *memberi* Sturdy sudah sejak dulu
+  tidak dilindungi (ingot kedua tidak bisa dipakai gratis untuk menumpuk
+  charge).
+- `test/sturdyAbility.test.js` (baru, DB temp): buff tetap dipertahankan Sturdy,
+  `xp_fill`/`daily_reset` habis walau Sturdy aktif, ingot tidak dipakai gratis.
+
+**Major — `computeLevelUp` tidak lagi over-level**
+- `src/lib/leveling.js`: lompatan multi-level dihitung bertahap (kurangi
+  kebutuhan tiap level satu per satu), bukan `Math.floor(xp / xpForLevel(level))`
+  sekali pakai biaya level awal — yang lama melebihkan level (contoh level 2
+  XP 750 dibagi biaya 200 → naik 3, padahal cuma cukup 2 setelah biaya 4
+  naik). Tes leveling lama yang mencatat perilaku keliru diperbarui ke nilai
+  benar.
+
+**Major — Voice interval membayar semua interval yang terakumulasi**
+- `src/events/voiceStateUpdate.js` (interval ~baris 181): sekarang menghitung
+  `chunks = floor((now - lastGrant) / INTERVAL_MS)` dan membayar semuanya,
+  konsisten dengan `endSession`/`syncEligibility`. Sebelumnya membayar satu
+  chunk per tick, jadi setelah restart (lastGrant lama dilanjutkan) durasi
+  downtime hangus — poin/XP/staff `voiceMinutes` hilang.
+
+**Major — `spawnBoss` tidak meninggalkan baris menganggur saat kirim gagal**
+- `src/lib/bossManager.js` (`spawnBoss`): `createBoss` insert sebelum `send`.
+  Kalau `send` gagal (channel hilang/hak akses), baris 'active' digulung agar
+  tidak menggantung 6 jam memblokir spawn guild itu.
+- `src/database/boss.js`: tambah `deleteBoss(bossId)` (hapus baris + damage)
+  dan diekspor via index.
+
+**Major — tombol `poruv_resolve` wajib Administrator**
+- `src/events/interactionCreate.js`: sebelum `resolveRedemption`, cek
+  `interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)`;
+  tanpa ini siapa pun yang menyalin tombol bisa menyelesaikan klaim/admin.
+
+**Minor**
+- `src/events/voiceStateUpdate.js` (`isEligible` & `restoreVoiceTracking`):
+  member yang belum ke-cache tidak lagi dihitung sebagai manusia (skip), jadi
+  bot yang tak ke-cache tidak menyumbang ke ambang `MIN_LISTENERS` dan membuka
+  pembayaran reward.
+- `src/lib/bossManager.js` (`finishBoss`): saat boss tumbang tapi kurang
+  peserta, kirim embed `bossDefeatedEmbed` ber-notes "kurang peserta" (sebelumnya
+  salah pakai `bossEscapedEmbed` seolah boss kabur).
+- `src/lib/bossManager.js`: `editChains.delete(row.id)` di titik terminal
+  (`finishBoss`/`escapeBoss`) supaya peta antrean edit tidak membesar tanpa
+  batas.
+- `src/database/poruvShop.js` (`redeemPoruvItem`): item Mythic dipilih dulu
+  sebelum Poruv dipotong; kalau katalog Mythic kosong, transaksi digagalkan
+  dan Poruv user **tidak** diancap (sebelumnya uang hangus tanpa barang).
+
+**Tes & verifikasi**: 6 tes baru/diubah (4 Sturdy, 1 poruv mythic, leveling
+diperbarui ke nilai benar). `npm run lint` bersih, `npm test` **122/122** hijau.
+
 ## Gelombang Tiga Belas — Kunci Perilaku Fixed (Timezone & Item Level-up)
 
 Dua bug dari `Docs/Bugs...md` (#3 dan #4) ternyata sudah diperbaiki di kode

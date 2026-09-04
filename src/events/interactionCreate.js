@@ -1,4 +1,4 @@
-const { MessageFlags } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { errorEmbed, warnEmbed } = require('../ui/embeds');
 const logger = require('../lib/logger');
 const { claimQuest } = require('../database');
@@ -110,6 +110,14 @@ async function handleButton(interaction) {
 
       case 'poruv_resolve': { // a = redemption id
         const { resolveRedemption } = require('../database');
+        // Tombol ini setara /poruv-resolve yang berizin Administrator; tanpa
+        // cek ini siapa pun yang menyalin tombol bisa menyelesaikan klaim.
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+          return await interaction.reply({
+            embeds: [errorEmbed('Kamu tidak punya izin menyelesaikan klaim Poruv Shop.')],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
         const result = resolveRedemption(Number(a), interaction.guildId);
         if (!result.ok) {
           return await interaction.reply({

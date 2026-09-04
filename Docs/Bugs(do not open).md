@@ -1,9 +1,10 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, #3, #4, #5, #6, #7, #8, #9, dan #10 sudah
+mengganggu. Status: **#1, #2, #3, #4, #5, #6, #7, #8, #9, #10, dan #11 sudah
 diperbaiki** — semuanya tutup. #3 & #4 sudah fix sejak lama tapi dokumen ini
 terlambat ditandai; perilakunya kini juga dikunci tes di Gelombang Tiga Belas.
+#11 adalah temuan audit lanjutan (Gelombang Empat Belas).
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -137,3 +138,46 @@ limit harian saja, tidak melibatkan minimum umur akun.
 `Docs/ToDoV2.md` masih menandai mini boss sebagai belum digarap padahal sudah
 jalan. Update ini juga menutup label status #3 dan #4 yang sudah lama fixed
 tapi belum didokumentasikan (Gelombang Tiga Belas).
+
+## 11. (fixed) Temuan audit lanjutan — Gelombang Empat Belas — SUDAH DIPERBAIKI
+
+Audit lanjutan (tiga subagen eksplorasi + verifikasi manual) menemukan bug
+mayor yang sebelumnya terlewat. Semua sudah diperbaiki; detail lengkapnya di
+`Docs/What I do.md` → Gelombang Empat Belas.
+
+- **#11a (critical) Sturdy melindungi ability instan** — `useItem`
+  (`src/database/shop.js`) memanggil `consumeCharge('no_consume')` untuk
+  SEMUA item non-Sturdy, termasuk `daily_reset`/`cooldown_reset`/`xp_fill`
+  (instant). Satu item bisa dipakai terus selama jatah Sturdy ada → /daily
+  diulang tanpa batas, streak membengkak, reset cooldown/XP berulang. Fix:
+  ability `kind: 'instant'` (dari `ABILITIES` di `src/lib/abilities.js`) tidak
+  lagi dilindungi Sturdy. Dikunci `test/sturdyAbility.test.js`.
+- **#11b (major) `computeLevelUp` over-level** — `src/lib/leveling.js`
+  membagi XP dengan biaya level awal (`Math.floor(xp / xpForLevel(level))`)
+  padahal biaya naik per level → bisa lompat lebih banyak level dari yang
+  seharusnya. Fix: hitung bertahap per level. Tes leveling diperbarui ke nilai
+  benar.
+- **#11c (major) voice interval under-pay** — interval
+  (`src/events/voiceStateUpdate.js`) membayar SATU chunk per tick walau sudah
+  lewat lama (mis. setelah restart), tidak konsisten dengan `endSession`/
+  `syncEligibility` yang membayar semua chunk → poin/XP/staff voiceMinutes
+  hangus. Fix: hitung `chunks` penuh dan bayar semuanya.
+- **#11d (major) spawnBoss baris menganggur** — `createBoss` insert sebelum
+  `send`; kalau send gagal, baris 'active' menggantung 6 jam memblokir spawn
+  guild. Fix: rollback via `deleteBoss` baru di `src/database/boss.js`.
+- **#11e (major) tombol poruv_resolve tanpa cek izin** — siapa pun yang
+  menyalin tombol bisa menyelesaikan klaim Poruv. Fix: wajib `Administrator`
+  (`src/events/interactionCreate.js`).
+- **#11f (minor) uncached bot dihitung sebagai manusia** — member yang belum
+  ke-cache (`member == null`) membuat `.bot` jadi `undefined`/falsy, jadi bot
+  yang tak ke-cache ikut menyumbang ke `MIN_LISTENERS`. Fix: member `null`
+  di-skip di `isEligible` & `restoreVoiceTracking`.
+- **#11g (minor) finishBoss salah pesan "kabur"** — boss tumbang tapi kurang
+  peserta memakai `bossEscapedEmbed` seolah boss kabur. Fix: `bossDefeatedEmbed`
+  + catatan jumlah peserta.
+- **#11h (minor) editChains leak** — peta antrean edit boss tidak pernah
+  dibersihkan. Fix: `editChains.delete(row.id)` di `finishBoss`/`escapeBoss`.
+- **#11i (minor) Poruv mythic hangus tanpa barang** — `redeemPoruvItem` memotong
+  Poruv sebelum cek item Mythic; kalau katalog kosong, user kehilangan Poruv.
+  Fix: pilih Mythic dulu, gagalkan transaksi & kembalikan ok:false bila kosong.
+  Dikunci `test/poruvResolve.test.js`.

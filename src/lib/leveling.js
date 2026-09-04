@@ -9,12 +9,20 @@ function computeLevelUp({ level, xp }, xpNeeded = xpForLevel(level)) {
   if (xpNeeded <= 0 || xp < xpNeeded) {
     return { leveled: false, level, xp, gained: 0, xpNeeded };
   }
-  const gained = Math.floor(xp / xpNeeded);
+  // Biaya XP naik tiap level, jadi lompatan multi-level dihitung bertahap:
+  // kurangi kebutuhan tiap level satu per satu, bukan dibagi sekali pakai
+  // kebutuhan level awal (yang lama over-level — lihat Gelombang Empat Belas).
+  let l = level;
+  let x = xp;
+  while (x >= xpForLevel(l)) {
+    x -= xpForLevel(l);
+    l += 1;
+  }
   return {
     leveled: true,
-    level: level + gained,
-    xp: xp % xpNeeded,
-    gained,
+    level: l,
+    xp: x,
+    gained: l - level,
     xpNeeded,
   };
 }

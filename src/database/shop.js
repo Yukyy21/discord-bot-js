@@ -4,6 +4,7 @@ const { getUser, updateBalance } = require('./users');
 const { addPoints, addXp } = require('./points');
 const { addBuff, consumeCharge } = require('./buffs');
 const { runAbility } = require('./abilities');
+const { ABILITIES } = require('../lib/abilities');
 const { EQUIP_SLOTS } = require('../config/constants');
 
 function getShopItems() {
@@ -180,6 +181,12 @@ function useItem(userId, guildId, itemId) {
   // Item yang justru memberi Sturdy tidak boleh dilindungi Sturdy: kalau boleh,
   // ingot kedua dipakai gratis dan charge-nya menumpuk terus (dupe buff).
   const grantsCharge = effect.type === 'ability' && effect.key === 'no_consume';
+  // Ability instan (daily_reset, cooldown_reset, xp_fill, extend_buffs) juga
+  // tidak dilindungi Sturdy. Sifatnya sekali pakai; kalau kebal Sturdy, satu
+  // item bisa dipakai terus selama jatahnya ada → klaim /daily/XP diulang
+  // tanpa batas dan streak membengkak (audit Gelombang Empat Belas).
+  const isInstantAbility =
+    effect.type === 'ability' && ABILITIES[effect.key]?.kind === 'instant';
 
   let kept = false;
   let abilityNote = null;
@@ -187,7 +194,7 @@ function useItem(userId, guildId, itemId) {
   const consume = db.transaction(() => {
     // Sturdy: selama jatahnya ada, item tidak berkurang saat dipakai.
     // Dipanggil di dalam transaksi supaya charge tidak hangus kalau gagal.
-    kept = grantsCharge ? false : consumeCharge(userId, guildId, 'no_consume');
+    kept = grantsCharge || isInstantAbility ? false : consumeCharge(userId, guildId, 'no_consume');
 
     if (!kept && entry.quantity <= 1) {
       db.prepare('DELETE FROM user_items WHERE userId = ? AND guildId = ? AND itemId = ?').run(

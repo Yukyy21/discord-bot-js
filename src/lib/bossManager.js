@@ -9,6 +9,7 @@ const {
   slotUsed,
   createBoss,
   setBossMessage,
+  deleteBoss,
   getContribution,
   getContributions,
   applyDamage,
@@ -128,16 +129,36 @@ async function spawnBoss(client, { bossKey = null, slot = null, channel = null, 
     slot,
   });
 
-  const message = await target.send({
-    content: `${e('boss')} **${boss.name}** muncul di ${target}! Klik **Serang!** untuk ikut.`,
-    embeds: [bossEmbed(row)],
-    components: [attackRow(row.id)],
-    files: bossIconFiles(boss.key),
-  });
+  let message;
+  try {
+    message = await target.send({
+      content: `${e('boss')} **${boss.name}** muncul di ${target}! Klik **Serang!** untuk ikut.`,
+      embeds: [bossEmbed(row)],
+      components: [attackRow(row.id)],
+      files: bossIconFiles(boss.key),
+    });
+  } catch (error) {
+    return rollbackSpawn(row, error);
+  }
   setBossMessage(row.id, message.id);
   log.info(`Spawn ${boss.name} (id ${row.id}) di guild ${target.guild.id}${slot ? ` slot ${slot}` : ''}`);
 
   return { ok: true, boss, row, message };
+}
+
+/**
+ * Rollback baris boss yang baru dibuat kalau pesan spawn gagal terkirim.
+ * Kalau tidak, baris 'active' menggantung sampai despawn dan memblokir spawn
+ * berikutnya di guild itu (getActiveBoss) meski bossnya tak pernah tampil.
+ */
+async function rollbackSpawn(row, error) {
+  try {
+    deleteBoss(row.id);
+  } catch (deleteErr) {
+    log.error(`Gagal rollback boss id ${row.id}:`, deleteErr);
+  }
+  log.error(`Boss ${row.bossKey} (id ${row.id}) gagal spawn di guild ${row.guildId}:`, error);
+  return { ok: false, message: 'Boss gagal muncul (channel tidak bisa dikirimi pesan).' };
 }
 
 /** Tombol serang. Player tidak punya HP — hanya boss yang berdarah. */
@@ -262,16 +283,18 @@ async function finishBoss(client, row) {
     expireBoss(row.id);
     const channel = await resolveBossChannel(client, row.channelId);
     if (channel) {
+      const embed = bossDefeatedEmbed(row, [])
+        .setDescription(
+          `${e('warn')} **${getBoss(row.bossKey).name}** tumbang, tapi peserta cuma **${contributions.length}** (butuh minimal **${BOSS.MIN_PARTICIPANTS}**). Hadiah tidak dibagikan.`,
+        );
       await channel
-        .send({
-          embeds: [bossEscapedEmbed(row)],
-          files: bossIconFiles(row.bossKey),
-        })
+        .send({ embeds: [embed], files: bossIconFiles(row.bossKey) })
         .catch(() => {});
     }
     log.info(
       `Boss ${row.bossKey} (id ${row.id}) tumbang tapi kurang peserta (${contributions.length}/${BOSS.MIN_PARTICIPANTS}) — hadiah tidak dibagikan`,
     );
+    editChains.delete(row.id);
     return [];
   }
 
@@ -297,6 +320,7 @@ async function finishBoss(client, row) {
   // chat di channel poin berikutnya.
   reconcileLevels(client, row.guildId, rewards.map(r => ({ userId: r.userId })));
   log.info(`Boss ${row.bossKey} (id ${row.id}) tumbang — ${rewards.length} penerima hadiah`);
+  editChains.delete(row.id);
   return rewards;
 }
 
@@ -314,6 +338,7 @@ async function escapeBoss(client, row) {
   }
   await channel.send({ embeds: [bossEscapedEmbed(row)], files: bossIconFiles(row.bossKey) }).catch(() => {});
   log.info(`Boss ${row.bossKey} (id ${row.id}) kabur tanpa dikalahkan`);
+  editChains.delete(row.id);
 }
 
 /** Segarkan embed boss aktif setelah restart supaya tombolnya jalan lagi. */

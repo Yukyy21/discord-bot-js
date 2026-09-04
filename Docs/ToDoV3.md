@@ -62,6 +62,23 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   di batas divergensi UTC↔WIB (mis. `22:00Z` sudah hari/bulan berikutnya di WIB).
   Dokumen Bugs #3/#4/#10 ditandai fixed. `npm test` **116/116** hijau.
 
+- [x] **Temuan audit lanjutan (Gelombang Empat Belas).** Lihat Bugs.md #11 dan
+  `Docs/What I do.md` → Gelombang Empat Belas. Meliputi: (a) Sturdy tidak lagi
+  melindungi ability instan (`daily_reset`/`cooldown_reset`/`xp_fill`/`extend_buffs`)
+  — sebelumnya satu item bisa dipakai terus selama jatah Sturdy ada; (b)
+  `computeLevelUp` (`src/lib/leveling.js`) menghitung lompatan level bertahap,
+  tidak lagi membagi XP dengan biaya level awal (yang over-level); (c) interval
+  voice (`src/events/voiceStateUpdate.js`) membayar semua chunk terakumulasi,
+  konsisten dengan `endSession`/`syncEligibility`; (d) `spawnBoss` menggulung
+  baris boss yang gagal terkirim (`deleteBoss` baru di `src/database/boss.js`);
+  (e) tombol `poruv_resolve` wajib Administrator; (f) member yang belum
+  ke-cache tidak dihitung sebagai manusia di ambang `MIN_LISTENERS`; (g)
+  `finishBoss` memakai `bossDefeatedEmbed` saat kurang peserta (bukan
+  "kabur"); (h) `editChains` dibersihkan di titik terminal; (i) Poruv Mythic
+  tidak terpotong kalau katalog kosong. Tes: `test/sturdyAbility.test.js` (4),
+  `test/poruvResolve.test.js` (+1), `test/leveling.test.js` diperbarui.
+  `npm test` **122/122** hijau.
+
 ## Balancing
 
 - [x] **Batasi XP chat per menit.** Spam chat bisa memompa puluhan ribu
