@@ -24,19 +24,16 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   Embed progres XP tidak pernah terkirim ketika channel poin di-set.
   Perbaiki jalur pengiriman notifikasi level-up.
 
-- [ ] **`voiceMinutes` staff cuma tercatat saat keluar voice.** Beda dari
-  `voice_seconds` biasa yang diperbarui tiap interval periodik
-  (`setInterval` di `voiceStateUpdate.js`), akumulasi `voiceMinutes` untuk
-  leaderboard staff (`addVoiceMinutes` di `src/database/staff.js`) cuma
-  jalan di `endSession()` — dipanggil saat user keluar voice channel. Staff
-  yang duduk berjam-jam tanpa pernah leave (pindah channel tidak masalah,
-  cuma leave beneran) tidak dapat kredit `voiceMinutes` sampai dia keluar,
-  jadi `/best-staff-of-the-month` bisa terlihat nol padahal staff itu aktif
-  di voice sepanjang bulan. Perlu diputuskan: apakah ini disengaja (staff
-  harus "menyelesaikan" sesi biar terhitung), atau perlu disamakan dengan
-  `voice_seconds`/Poruv yang membayar tiap `VOICE.INTERVAL_MS` supaya staff
-  yang sesi panjangnya belum berakhir tetap kelihatan progresnya di
-  leaderboard bulan berjalan.
+- [x] **`voiceMinutes` staff cuma tercatat saat keluar voice.** Diselesaikan
+  dengan memutuskan untuk menyamakan dengan `voice_seconds`/Poruv yang
+  membayar tiap `VOICE.INTERVAL_MS`. `voiceStateUpdate.js` kini punya helper
+  `grantStaffVoiceMinutes(session, chunks)` yang mengakumulasi `voiceMinutes`
+  staff pada setiap satuan interval **layak** yang dibayar — dipanggil dari
+  tiga jalur pembayaran poin (interval berkala, `syncEligibility` saat
+  kehilangan kelayakan, dan `endSession` untuk sisa interval terakhir).
+  Staff yang masih betah di voice mendapat kredit tiap 15 menit tanpa harus
+  leave, dan hanya waktu layak (bukan sendirian/deaf/AFK) yang dihitung,
+  konsisten dengan pembayaran Poruv/XP.
 
 ## Balancing
 

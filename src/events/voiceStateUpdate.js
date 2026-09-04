@@ -67,6 +67,20 @@ function reconcileSession(guildId, userId) {
   reconcileLevels(clientRef, guildId, [{ userId }]);
 }
 
+/**
+ * Sumbang menit voice untuk staff pada tiap satuan interval layak yang dibayar
+ * (chunks). Ini menyamakan staff dengan Poruv/voice_seconds yang dibayar tiap
+ * interval — jadi staff yang masih betah di voice tetap dapat kredit
+ * `voiceMinutes` tanpa harus keluar channel dulu. Hanya sesi yang sedang layak
+ * (bukan sendirian/deaf/AFK) yang dihitung, konsisten dengan pembayaran poin.
+ */
+function grantStaffVoiceMinutes(session, chunks) {
+  if (chunks <= 0) return;
+  if (!session.eligible) return;
+  if (!isStaff(session.userId, session.guildId)) return;
+  addVoiceMinutes(session.userId, session.guildId, chunks * VOICE.INTERVAL_MINUTES);
+}
+
 /** Bayar sisa poin yang belum sempat dibagi, lalu catat total durasinya. */
 function endSession(guildId, userId) {
   const key = `${guildId}:${userId}`;
@@ -86,8 +100,10 @@ function endSession(guildId, userId) {
   }
 
   const now = Date.now();
+  const seconds = Math.floor((now - session.joinedAt) / 1000);
   // Sisa poin hanya dibayar kalau sesi berakhir dalam kondisi layak; kalau
   // tidak, lastGrant sudah maju sepanjang masa tidak layak jadi memang nihil.
+  // Menit voice staff ikut diakumulasi dari sisa interval layak yang sama.
   if (session.eligible) {
     const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
     if (chunks > 0) {
@@ -103,17 +119,12 @@ function endSession(guildId, userId) {
       );
       reconcileSession(session.guildId, userId);
     }
+    grantStaffVoiceMinutes(session, chunks);
   }
 
-  const seconds = Math.floor((now - session.joinedAt) / 1000);
   if (seconds > 0) {
     addVoiceSeconds(userId, session.guildId, seconds);
     addQuestProgress(userId, session.guildId, 'voice', seconds);
-  }
-  // Aktivitas voice staff: dihitung dari durasi layak (minimal 2 orang tidak
-  // deaf) seperti syarat Poruv, untuk leaderboard bulanan.
-  if (session.eligible && isStaff(session.userId, session.guildId)) {
-    addVoiceMinutes(session.userId, session.guildId, Math.floor(seconds / 60));
   }
 
   sessions.delete(key);
@@ -149,6 +160,7 @@ function syncEligibility(guildId, userId) {
       );
       reconcileSession(guildId, session.userId);
     }
+    grantStaffVoiceMinutes(session, chunks);
   }
   session.lastGrant = now;
   session.eligible = eligible;
@@ -178,6 +190,7 @@ setInterval(() => {
       applyBuff(session.userId, session.guildId, 'xp', VOICE.XP_PER_INTERVAL),
     );
     reconcileSession(session.guildId, session.userId);
+    grantStaffVoiceMinutes(session, 1);
     session.lastGrant = now;
     saveVoiceSession(session.userId, session.guildId, session);
   }

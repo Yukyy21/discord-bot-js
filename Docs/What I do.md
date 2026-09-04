@@ -4,6 +4,45 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Sembilan — `voiceMinutes` Staff Dibayar Per Interval
+
+Bug dari `Docs/ToDoV3.md`: `voiceMinutes` untuk leaderboard staff cuma
+tercatat di `endSession()` — staff yang duduk berjam-jam di voice tanpa
+pernah leave tidak dapat kredit sampai dia keluar channel, jadi
+`/best-staff-of-the-month` bisa terlihat nol padahal staff itu aktif di
+voice sepanjang bulan. Disamakan dengan model Poruv/`voice_seconds` yang
+membayar tiap interval.
+
+**Keputusan**: menyamakan dengan interval periodik, bukan mengejar staf yang
+harus "menyelesaikan" sesi. Staff yang masih betah di voice tetap kelihatan
+progresnya di leaderboard bulan berjalan.
+
+**Jalur baru `src/events/voiceStateUpdate.js`**
+- `grantStaffVoiceMinutes(session, chunks)` (baru): mengakumulasi
+  `voiceMinutes` (via `addVoiceMinutes` di `src/database/staff.js`) sebesar
+  `chunks * VOICE.INTERVAL_MINUTES` untuk staff — tapi cuma kalau sesi sedang
+  **layak** (bukan sendirian/deaf/AFK), konsisten dengan pembayaran poin/XP.
+  Dipanggil dari **tiga** tempat pembayaran bisa terjadi:
+  1. `setInterval` berkala — tiap interval layak yang dibayar, `chunks = 1`.
+  2. `syncEligibility` — saat kehilangan kelayakan, sisa interval layak
+     (`chunks`) dibayarkan sekalian.
+  3. `endSession` — sisa interval layak terakhir (`chunks`) ikut dibayar.
+- **Pembersihan accounting yang lama**: blok lama `endSession` yang menambah
+  `voiceMinutes` dari **total durasi sesi** (`Math.floor(seconds / 60)`)
+  dihapus. Itu salah sasaran: menghitung seluruh waktu (termasuk masa tidak
+  layak), tidak searah dengan pembayaran poin yang cuma untuk masa layak.
+  Kini `voiceMinutes` selalu berasal dari interval layak yang sama dengan
+  yang membayar Poruv/XP, jadi tidak ada over/under-count.
+
+**`src/config/constants.js`**
+- `VOICE.INTERVAL_MINUTES` (15) — turunan dari `INTERVAL_MS`, dipakai sebagai
+  satuan menit tiap interval.
+
+**Dokumentasi**: `Docs/ToDoV3.md` baris bug `voiceMinutes` ditandai SELESAI
+dengan keputusan di atas.
+
+Verifikasi: `npm run lint` bersih, `npm test` hijau.
+
 ## Gelombang Delapan — Sistem Staff: `/staff`, `/staff-rating`, `/best-staff-of-the-month`
 
 Permintaan owner: sistem staff yang dikelola **manual lewat command admin**,

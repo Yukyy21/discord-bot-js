@@ -18,6 +18,7 @@ const CHAT = {
 /** Poin & XP dari nongkrong di voice channel. */
 const VOICE = {
   INTERVAL_MS: 15 * 60 * 1000,
+  INTERVAL_MINUTES: (15 * 60 * 1000) / 60000, // setara menit satu interval voice
   POINTS_PER_INTERVAL: 8,
   XP_PER_INTERVAL: 10,
   // Minimal manusia yang tidak deaf di satu channel (termasuk yang bersangkutan)
