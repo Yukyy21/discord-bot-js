@@ -40,6 +40,19 @@ test('lastDaily bisa berupa timestamp penuh', () => {
   assert.strictEqual(r.streak, 2);
 });
 
+test('streak lanjut di batas hari WIB walau jam UTC masih hari yang sama', () => {
+  // Mengunci perilaku timezone (Bug #4): tanggal hari "berganti" memakai
+  // localDateKey yang menambah BOSS.UTC_OFFSET (default +7 WIB), bukan tanggal
+  // UTC. 22:00 UTC masih 2026-01-10 di UTC, TAPI sudah 2026-01-11 05:00 di WIB.
+  // Jadi klaim di jam ini dihitung hari baru; streak lanjut dari yesterdayKey
+  // (2026-01-10). Kalau dulu logika UTC dipakai ulang, klaim ini malah ditolak
+  // karena todayKey == lastKey == '2026-01-10'.
+  const r = computeDailyClaim({ lastDaily: '2026-01-10', streak: 3 }, at('2026-01-10T22:00:00Z'));
+  assert.strictEqual(r.todayKey, '2026-01-11');
+  assert.strictEqual(r.claimable, true);
+  assert.strictEqual(r.streak, 4);
+});
+
 test('nextReward = hadiah kalau streak lanjut besok', () => {
   const r = computeDailyClaim({ lastDaily: null, streak: 0 }, at('2026-01-10T09:00:00Z'));
   assert.strictEqual(r.nextReward, r.reward + DAILY.STREAK_BONUS);

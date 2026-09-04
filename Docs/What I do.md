@@ -4,6 +4,43 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Tiga Belas — Kunci Perilaku Fixed (Timezone & Item Level-up)
+
+Dua bug dari `Docs/Bugs...md` (#3 dan #4) ternyata sudah diperbaiki di kode
+sejak lama, tapi tidak ada tes yang mengunci perilaku perbaikannya dan dokumen
+masih menandainya terbuka. Gelombang ini menutup keduanya: menambahkan tes
+regression di batas kritis + merapikan dokumen. Tidak ada perubahan logika
+produksi selain injection `rng` (backwards-compatible).
+
+**Timezone daily & quest (mengunci fix Bug #4)**
+- `src/lib/daily.js`, `dailyKey`/`weeklyKey`/`monthlyKey` di `src/lib/quests.js`
+  sudah memakai `localDateKey` (menambah `BOSS.UTC_OFFSET`, default +7 WIB).
+  Yang kurang: tidak ada tes di jendela UTC↔WIB berbedaan hari.
+- `test/daily.test.js` (baru 1 kasus): klaim di `2026-01-10T22:00:00Z` dengan
+  `lastDaily='2026-01-10'` — 22:00 UTC masih 10 Jan di UTC tapi sudah 11 Jan
+  WIB, jadi `claimable: true` dan `streak` lanjut (kalau logika UTC lama
+  dipakai ulang, klaim ini malah ditolak karena `todayKey == lastKey`).
+- `test/quest.test.js` (baru 1 kasus): `dailyKey`/`monthlyKey` di
+  `2026-01-31T22:00:00Z` → `daily:2026-02-01` & `monthly:2026-02` (rollover
+  bulan mengikuti WIB, bukan UTC); kontrol `05:00Z` tetap bulan yang sama.
+
+**Item level-up ditimbang rarity (mengunci fix Bug #3)**
+- Sejak refactor Bug #8, `reconcileLevels` (`src/lib/levelingManager.js`) memilih
+  item grant lewat `weightedRandom` — bukan uniform `Math.random`. Tapi
+  koneksinya belum dites end-to-end (hanya `weightedRandom` diisolasi di
+  `test/tiers.test.js`).
+- `src/lib/levelingManager.js`: `reconcileLevels(client, guildId, users, rng =
+  Math.random)` — `rng` diteruskan ke `weightedRandom(items, 1, rng)`. Parameter
+  opsional, tidak mengubah perilaku default; konsisten dengan pola `rng` yang
+  sudah dipakai `weightedRandom`/`drawQuests`/`rollLoot`.
+- `test/levelUpWeighted.test.js` (baru, DB temp terisolasi): paksa `randomItem`
+  selalu turun (patch `Math.random`), lalu dengan dua `rng` deterministik yang
+  berbeda, item yang digrant harus sama persis dengan prediksi `weightedRandom`
+  pada set shop yang sama — membuktikan jalur level-up benar-benar memakai
+  `weightedRandom`.
+
+**Verifikasi**: `npm run lint` bersih, `npm test` **116/116** hijau.
+
 ## Gelombang Dua Belas — `resetUser` Benar-Benar Bersih + Whitelist Aktivitas Staff
 
 Dua temuan audit ditutup di gelombang ini: `/admin reset-user` tidak membersihkan

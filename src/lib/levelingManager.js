@@ -19,7 +19,7 @@ const log = logger.scope('Level');
  * POINT_CHANNEL_ID bila terisi (walau XP datang dari jalur lain), kalau tidak
  * ke channel konteks event atau channel teks pertama guild.
  */
-function reconcileLevels(client, guildId, users) {
+function reconcileLevels(client, guildId, users, rng = Math.random) {
   const guild = client?.guilds?.cache?.get(guildId);
   for (const { userId, channelId } of users) {
     const stats = getPoints(userId, guildId);
@@ -47,7 +47,7 @@ function reconcileLevels(client, guildId, users) {
         ...item,
         tier: getTier(item.price, item.name),
       }));
-      const [item] = weightedRandom(items, 1);
+      const [item] = weightedRandom(items, 1, rng);
       if (item) {
         grantItem(userId, guildId, item.id);
         rewardText += `  ${e('inventory')} +${item.name}`;

@@ -1,7 +1,9 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, #5, #6, #7, #8, dan #9 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, #3, #4, #5, #6, #7, #8, #9, dan #10 sudah
+diperbaiki** — semuanya tutup. #3 & #4 sudah fix sejak lama tapi dokumen ini
+terlambat ditandai; perilakunya kini juga dikunci tes di Gelombang Tiga Belas.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -29,7 +31,7 @@ Perbaikan (selesai): `src/database/abilities.js` kini punya helper
 (`dateKey(Date.now() - DAILY.DAY_MS)`) untuk `daily_reset` maupun
 `cooldown_reset`. User bisa klaim lagi sekarang dan streak-nya tetap lanjut.
 
-## 3. Item acak level-up tidak ditimbang rarity
+## 3. (fixed) Item acak level-up tidak ditimbang rarity — SUDAH DIPERBAIKI
 
 `src/events/messageCreate.js` memilih hadiah item dengan
 `items[Math.floor(Math.random() * items.length)]` — uniform atas seluruh
@@ -37,11 +39,24 @@ katalog, jadi Mythic sama gampangnya dengan Common, dengan peluang sampai 50%
 per level. `weightedRandom()` di `src/lib/tiers.js` sudah ada tapi tidak
 dipakai di jalur ini. Dampaknya ke ekonomi besar (lihat [Balancing.md](Balancing.md)).
 
-## 4. Hari `/daily` memakai tanggal UTC
+Perbaikan (selesai, sejak refactor Bug #8): level-up dipindah ke satu jalur
+bersama `reconcileLevels()` di `src/lib/levelingManager.js`, yang memilih item
+grant lewat `weightedRandom(items, 1)` — peluang mengikuti bobot tier (Common
+30, Mythic 5). `reconcileLevels` juga kini menerima `rng` opsional (default
+`Math.random`) untuk tes deterministik. Dikunci oleh `test/levelUpWeighted.test.js`.
+
+## 4. (fixed) Hari `/daily` memakai tanggal UTC — SUDAH DIPERBAIKI
 
 `src/lib/daily.js` memotong ISO string UTC, jadi bagi pemain WIB "hari baru"
 mulai pukul **07:00 pagi**, bukan tengah malam. Sistem boss sudah punya
 `BOSS.UTC_OFFSET`; daily, quest harian, dan bulanan belum ikut offset yang sama.
+
+Perbaikan (selesai, sudah lama): `daily.js` dan ketiga kunci periode quest
+(`dailyKey`/`weeklyKey`/`monthlyKey` di `src/lib/quests.js`) semuanya melewati
+`localDateKey(new Date())` yang menambah `BOSS.UTC_OFFSET` (default +7 WIB),
+jadi "ganti hari" mengikuti waktu lokal server, bukan UTC. Dokumen ini
+terlambat ditandai. Dikunci oleh tes timezone di `test/daily.test.js` dan
+`test/quest.test.js` (Gelombang Tiga Belas).
 
 ## 5. (fixed) Stok shop global untuk semua guild â€" SUDAH DIPERBAIKI
 
@@ -116,8 +131,9 @@ Perbaikan (selesai): limit harian dipasang, dua-duanya (`GIVE` di
 lokal event) dan dicek di `/give` sebelum transfer. Keputusan owner: pasang
 limit harian saja, tidak melibatkan minimum umur akun.
 
-## 10. Dokumentasi tertinggal
+## 10. Dokumentasi tertinggal — SUDAH DIPERBAIKI
 
-`Docs/Bot.md` bagian "Aturan Angka" belum punya bagian mini boss (sudah
-ditambahkan pada update ini), dan `Docs/ToDoV2.md` masih menandai mini boss
-sebagai belum digarap padahal sudah jalan.
+`Docs/Bot.md` bagian "Aturan Angka" belum punya bagian mini boss, dan
+`Docs/ToDoV2.md` masih menandai mini boss sebagai belum digarap padahal sudah
+jalan. Update ini juga menutup label status #3 dan #4 yang sudah lama fixed
+tapi belum didokumentasikan (Gelombang Tiga Belas).

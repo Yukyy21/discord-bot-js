@@ -31,6 +31,17 @@ test('kunci periode punya format yang konsisten', () => {
   assert.match(monthlyKey(new Date('2026-08-23T05:00:00Z')), /^monthly:2026-08$/);
 });
 
+test('kunci periode mengikuti hari lokal (offset), bukan UTC', () => {
+  // Mengunci perilaku timezone (Bug #4): periode harian/bulanan "ganti hari"
+  // memakai localDateKey yang menambah BOSS.UTC_OFFSET (default +7 WIB). 22:00
+  // UTC masih 31 Jan di UTC, tapi sudah 1 Feb 05:00 di WIB → kunci pindah bulan.
+  assert.strictEqual(dailyKey(new Date('2026-01-31T22:00:00Z')), 'daily:2026-02-01');
+  assert.strictEqual(monthlyKey(new Date('2026-01-31T22:00:00Z')), 'monthly:2026-02');
+  // Kontrol: 05:00 UTC tetap masih hari/bulan yang sama di WIB (31 Jan 12:00).
+  assert.strictEqual(dailyKey(new Date('2026-01-31T05:00:00Z')), 'daily:2026-01-31');
+  assert.strictEqual(monthlyKey(new Date('2026-01-31T05:00:00Z')), 'monthly:2026-01');
+});
+
 test('currentPeriodKeys memuat ketiga scope', () => {
   const keys = currentPeriodKeys(new Date('2026-08-23T05:00:00Z'));
   assert.strictEqual(keys.length, 3);

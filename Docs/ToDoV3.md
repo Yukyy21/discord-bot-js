@@ -50,6 +50,18 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   `/admin reset-user` menampilkan semua baris terhapus. Tes
   `test/adminReset.test.js` (5 kasus) + 113/113 hijau.
 
+- [x] **Item level-up dan hari `/daily`-quest ternyata sudah fix tapi tak
+  ber-tes, dan dokumen masih menandainya terbuka.** (Gelombang Tiga Belas) Bug
+  #3 (item level-up uniform, tak ditimbang rarity — Bugs.md) sudah terganti
+  sejak refactor Bug #8: `reconcileLevels` (`src/lib/levelingManager.js`) memilih
+  item pakai `weightedRandom`. Bug #4 (daily/quest pakai tanggal UTC — Bugs.md)
+  sudah lewat `localDateKey` yang menambah `BOSS.UTC_OFFSET`. Keduanya baru
+  sekarang dikunci: `reconcileLevels` menerima `rng` opsional untuk tes
+  deterministik + `test/levelUpWeighted.test.js` membuktikan item digrant sesuai
+  `weightedRandom`; `test/daily.test.js` & `test/quest.test.js` menambah kasus
+  di batas divergensi UTC↔WIB (mis. `22:00Z` sudah hari/bulan berikutnya di WIB).
+  Dokumen Bugs #3/#4/#10 ditandai fixed. `npm test` **116/116** hijau.
+
 ## Balancing
 
 - [x] **Batasi XP chat per menit.** Spam chat bisa memompa puluhan ribu
