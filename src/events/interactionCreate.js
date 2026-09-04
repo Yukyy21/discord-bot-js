@@ -10,6 +10,7 @@ const { buildLeaderboard } = require('../commands/general/leaderboard');
 const { buildCredit } = require('../commands/general/credit');
 const { buildStaff } = require('../commands/staff/staff');
 const poruvShopCmd = require('../commands/economy/poruvShop');
+const poruvResolveCmd = require('../commands/admin/poruvResolve');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 const { handleBossAttack } = require('../lib/bossManager');
 
@@ -106,6 +107,22 @@ async function handleButton(interaction) {
 
       case 'poruv_redeem': // a = item key
         return await poruvShopCmd.handleRedeem(interaction, a);
+
+      case 'poruv_resolve': { // a = redemption id
+        const { resolveRedemption } = require('../database');
+        const result = resolveRedemption(Number(a), interaction.guildId);
+        if (!result.ok) {
+          return await interaction.reply({
+            embeds: [errorEmbed(result.message)],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+        const r = result.row;
+        logger.info(`Button resolve poruv claim #${r.id} (${r.itemName}) for <@${r.userId}>`);
+        // Render ulang daftar pending tanpa klaim yang baru diselesaikan.
+        const { embeds, components } = poruvResolveCmd.buildPendingList(interaction.guildId);
+        return await interaction.update({ embeds, components });
+      }
 
       default:
         return;

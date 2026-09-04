@@ -61,7 +61,9 @@ level yang terpisah.
 | `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, Poruv, level, inventori, quest |
 | `/admin set-level <user> <level>` | **Admin:** atur level user manual; XP di-reset ke 0 di level baru |
 | `/admin-spawn-boss` | **Admin:** paksa undian boss sekarang (untuk tes) |
-| `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
+| `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum 
+di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
+| `/poruv-resolve list\|resolve <id>` | **Admin:** kelola klaim Poruv Shop manual — `list` menampilkan klaim pending + tombol resolve per klaim, `resolve <id>` menandai satu klaim selesai |
 
 | `/staff-set add\|remove` | **Admin:** kelola daftar staff server ini (tabel `staff`); staff ditentukan manual, bukan dari role |
 | `/staff` | Profil satu staff per halaman (1 orang = 1 halaman): divisi, deskripsi, rating, komentar terbaru |
@@ -119,9 +121,13 @@ WIB) — klaim jam 23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong
 sehari, streak kembali ke 1.
 
 **Transfer `/give`.** Biaya **5%** (`GIVE_FEE_RATE` di `src/config/constants.js`)
-dipotong dari saldo pengirim dan **dibakar** — penerima menerima jumlah penuh.
+dipotong dari saldo pengirim dan **dibakar** �?" penerima menerima jumlah penuh.
 Kalau nominal 100, pengirim keluar 105 dan penerima masuk 100; biayanya tidak
-berpindah ke siapa pun. Ini salah satu sink coin permanen bot.
+berpindah ke siapa pun. Ini salah satu sink coin permanen bot. Ada juga **limit
+harian** per user: maksimal `GIVE.DAILY_LIMIT_COUNT` (5) kali transfer dan
+`GIVE.DAILY_LIMIT_COIN` (50.000) coin keluar per hari (tanpa fee), reset tiap
+ganti hari waktu lokal event �?" ditelusuri lewat tabel `give_daily` untuk
+menutup santet alt.
 
 **Poruv Shop.** `/poruv-shop` (`src/config/constants.js`, array `PORUV_SHOP`;
 logic di `src/database/poruvShop.js`) adalah tempat membelanjakan Poruv untuk
@@ -150,6 +156,14 @@ di database dan admin lain yang DM-nya berhasil tetap diberi tahu.
 
 Harga ditentukan langsung oleh owner. Detail perkiraan waktu tebus per item
 ada di [ai.md](ai.md#3b-poruv-shop).
+
+Setelah admin selesai memproses klaim manual, klaim ditandai selesai lewat
+`/poruv-resolve` (admin): `list` menampilkan semua klaim `pending` beserta satu
+tombol hijau per klaim, klik untuk menandai `fulfilled` (daftar ikut render
+ulang), atau `resolve <id>` untuk menandai langsung tanpa buka daftar.
+Pemrosesan menetapkan `status = fulfilled` + `resolvedAt` di tabel
+`poruv_redemptions` (logikanya `resolveRedemption()` di
+`src/database/poruvShop.js`; command di `src/commands/admin/poruvResolve.js`).
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,

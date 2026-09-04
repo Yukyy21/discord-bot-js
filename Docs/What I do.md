@@ -4,6 +4,44 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Sebelas — Admin Menandai Klaim Poruv Shop Selesai
+
+Gap yang dicatat di Gelombang Enam: `resolveRedemption()` sudah ada sebagai
+fungsi database untuk mengubah status klaim `pending` → `fulfilled`, tapi
+tidak ada command/tombol yang memanggilnya — admin terpaksa query SQL manual
+setiap selesai memproses klaim manual (Owocash, custom role, e-wallet).
+Sekarang ditutup dengan command admin `/poruv-resolve`.
+
+**Command (`src/commands/admin/poruvResolve.js`, baru; auto-register via
+`readdirSync` di `index.js`)**
+- `/poruv-resolve list` — menampilkan semua klaim pending di guild ini
+  (id, user, item, harga, waktu klaim) **plus satu tombol hijau per klaim**.
+  Admin tinggal klik tombol klaim yang sudah diproses untuk menandai selesai.
+- `/poruv-resolve resolve <id>` — menandai satu klaim selesai via id langsung
+  (alternatif tanpa buka daftar).
+- Keduanya dibatasi **admin saja** (`setDefaultMemberPermissions` =
+  `Administrator`), konsisten dengan command admin lain.
+- `buildPendingList(guildId)` diekspor dan dipakai ulang: command `list` saat
+  pertama kali menampilkannya, dan handler tombol untuk **render ulang** daftar
+  setelah satu klaim diselesaikan (klaim yang sudah selesai otomatis hilang).
+
+**Handler tombol (`src/events/interactionCreate.js`)**
+- `case 'poruv_resolve'` (customId `poruv_resolve:<id>`) memanggil
+  `resolveRedemption(id, guildId)` lalu `interaction.update()` dengan daftar
+  pending terbaru dari `buildPendingList`. Kalau sudah bukan pending lagi
+  (mis. double-click), tampilkan error — tidak nge-crash (guard
+  `ALREADY_ACKNOWLEDGED` sudah ada).
+
+**Database (`src/database/poruvShop.js`)**
+- `resolveRedemption(id, guildId)` sudah ada sejak Gelombang Enam — tidak
+  diubah. Verifikasi: tolak kalau id/guild tidak cocok, dan tolak kalau
+  status bukan `pending` (tidak bisa resolve dua kali).
+
+**Verifikasi**: `test/poruvResolve.test.js` (baru, DB temp terisolasi, 3 kasus)
+— redeem manual masuk pending & resolve memindahkannya keluar dari daftar,
+resolve bend id tak ada / klaim sudah selesai ditolak, dan resolve bersifat
+per-guild. `npm run lint` bersih, `npm test` **108/108** hijau.
+
 ## Gelombang Sepuluh — Limit Harian `/give` (Count & Nominal)
 
 Bug dari `Docs/Bugs...md` #9: `/give` tanpa batas — tidak ada limit harian dan
@@ -385,11 +423,12 @@ item: Owocash 1.000.000, Custom Role, E-Wallet 25.000, Item Mythic acak.
 **3 emoji baru**
 - `src/lib/emojis.js`: `owocash`, `wallet`, `role`, ID sesuai upload owner.
 
-**Belum ada**: cara admin menandai klaim manual sebagai selesai lewat
-Discord (misal tombol "Sudah Diproses"). Untuk sekarang, `resolveRedemption()`
+**Belum ada** (SUDAH DIISI di Gelombang Sebelas): cara admin menandai klaim
+manual sebagai selesai lewat Discord. Untuk sekarang, `resolveRedemption()`
 di `poruvShop.js` sudah ada sebagai fungsi database, tapi belum ada command
 yang memanggilnya — admin masih perlu update status lewat query manual kalau
 mau menandai `fulfilled`. Dicatat sebagai kandidat gelombang berikutnya.
+(Lihat Gelombang Sebelas: `/poruv-resolve` menutup celah ini.)
 
 ## Gelombang Lima — `/credit` Jadi 3 Halaman
 
