@@ -17,6 +17,7 @@ const boss = require('./boss');
 const poruvShop = require('./poruvShop');
 const guildConfig = require('./guildConfig');
 const staff = require('./staff');
+const giveDaily = require('./giveDaily');
 
 createTables();
 runMigrations();
@@ -54,4 +55,5 @@ module.exports = {
   ...poruvShop,
   ...guildConfig,
   ...staff,
+  ...giveDaily,
 };

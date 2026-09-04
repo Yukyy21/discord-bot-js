@@ -1,7 +1,7 @@
 # Bug & Temuan
 
 Hasil pembacaan kode + menjalankan `npm test`. Diurutkan dari yang paling
-mengganggu. Status: **#1, #2, #5, #6, #7, dan #8 sudah diperbaiki**, sisanya masih terbuka.
+mengganggu. Status: **#1, #2, #5, #6, #7, #8, dan #9 sudah diperbaiki**, sisanya masih terbuka.
 
 ## 1. (fixed)`npm test` merah (1 dari 66 test gagal) — SUDAH DIPERBAIKI
 
@@ -102,12 +102,19 @@ Level-up diumumkan ke `POINT_CHANNEL_ID` bila terisi, kalau tidak ke channel
 konteks event atau channel teks pertama guild. Pesan `xp_fill` juga tidak lagi
 menjanjikan "chat sekali" karena naik level sudah terjadi seketika di `/use`.
 
-## 9. `/give` dan `/exchange` tanpa batas
+## 9. (fixed) `/give` dan `/exchange` tanpa batas — SUDAH DIPERBAIKI
 
 Tidak ada limit harian, tidak ada minimum umur akun (pajak `/give` 5% sudah
 aktif dan benar-benar dipotong—lihat catatan sink coin). Coin dari akun lain
 bisa langsung jadi poin leaderboard. Detail dan usulan angkanya ada di
 [Balancing.md](Balancing.md).
+
+Perbaikan (selesai): limit harian dipasang, dua-duanya (`GIVE` di
+`src/config/constants.js`): `DAILY_LIMIT_COUNT = 5` (jumlah transfer/hari) dan
+`DAILY_LIMIT_COIN = 50000` (nominal keluar/hari). Dipantau lewat tabel
+`give_daily` (`src/database/giveDaily.js`, reset alami tiap ganti hari waktu
+lokal event) dan dicek di `/give` sebelum transfer. Keputusan owner: pasang
+limit harian saja, tidak melibatkan minimum umur akun.
 
 ## 10. Dokumentasi tertinggal
 

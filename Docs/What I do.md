@@ -4,6 +4,48 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Sepuluh — Limit Harian `/give` (Count & Nominal)
+
+Bug dari `Docs/Bugs...md` #9: `/give` tanpa batas — tidak ada limit harian dan
+tidak ada minimum umur akun, jadi coin bisa dijejalkan ke satu akun (santet
+alt) tanpa batas dan langsung naik langsung di leaderboard. Keputusan owner:
+pasang **limit harian**, dua-duanya (jumlah transfer & nominal), tanpa ribet
+soal umur akun.
+
+**Angka (bisa diubah di `src/config/constants.js`)**
+- `GIVE.DAILY_LIMIT_COUNT = 5` — maksimal 5× `/give` sukses per hari per user.
+- `GIVE.DAILY_LIMIT_COIN = 50000` — maksimal 50.000 coin keluar per hari per
+  user (nominal transfer, tanpa fee). Fee 5% tetap dibakar seperti biasa.
+- `GIVE_FEE_RATE` lama dipertahankan sebagai alias `GIVE.FEE_RATE` supaya
+  pemanggil/test yang sudah ada tidak patah.
+
+**Database (`src/database/schema.js`, `src/database/giveDaily.js` baru)**
+- Tabel `give_daily`: `userId, guildId, dayKey, count, totalCoin` (PK
+  user+guild+hari). `dayKey` = `YYYY-MM-DD` lokal event (`lib/boss
+  localDateKey`), jadi **reset alami tiap ganti hari**, tanpa perlu jam
+  midnight cleanup — konsisten dengan daily/quest/staff. Baris lama tetap
+  disimpan sebagai riwayat pemakaian.
+- `getGiveUsage(userId, guildId)` — baca pemakaian hari ini (buat baris kalau
+  belum ada).
+- `checkGiveLimit(userId, guildId, amount)` — satu keputusan untuk dua batas:
+  tolak kalau `count >= DAILY_LIMIT_COUNT` (`reason: 'count'`) atau kalau
+  `totalCoin + amount > DAILY_LIMIT_COIN` (`reason: 'coin'`). Balikan berisi
+  sisa jatah biar command bisa tampilkan pesan yang informatif.
+- `recordGive(userId, guildId, amount)` — tambah `count + 1` dan `totalCoin`
+  (dipanggil tepat setelah transfer sukses, jadi tidak ada yang terhitung
+  kalau transfer batal).
+
+**Command (`src/commands/economy/give.js`)**
+- Setelah cek saldo, sebelum transfer: `checkGiveLimit`. Kalau ditolak,
+  tampilkan error yang menyebut batas mana yang kena plus sisa jatah hari ini
+  (Jumlah transfer / nominal). `recordGive` dijalankan setelah
+  `transferCoinsWithFee` sukses.
+
+**Verifikasi**: `test/giveLimit.test.js` (baru, DB temp terisolasi, 5 kasus) —
+bawah batas diizinkan, akumulasi count & nominal, tolak di batas count, tolak
+saat amount melewati sisa nominal (walau belum kena batas count), dan reset di
+hari berikutnya. `npm run lint` bersih, `npm test` **105/105** hijau.
+
 ## Gelombang Sembilan — `voiceMinutes` Staff Dibayar Per Interval
 
 Bug dari `Docs/ToDoV3.md`: `voiceMinutes` untuk leaderboard staff cuma

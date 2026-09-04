@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getUser, transferCoinsWithFee, addQuestProgress } = require('../../database');
+const { getUser, transferCoinsWithFee, addQuestProgress, checkGiveLimit, recordGive } = require('../../database');
 const { themedEmbed, errorEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
-const { GIVE_FEE_RATE } = require('../../config/constants');
+const { GIVE } = require('../../config/constants');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -32,7 +32,7 @@ module.exports = {
     }
 
     const sender = getUser(senderId, guildId);
-    const fee = Math.ceil(amount * GIVE_FEE_RATE);
+    const fee = Math.ceil(amount * GIVE.FEE_RATE);
     const totalCost = amount + fee;
     if (sender.balance < totalCost) {
       return interaction.reply({
@@ -45,10 +45,31 @@ module.exports = {
       });
     }
 
+    // Batas harian /give: jumlah transfer & nominal. Cek sebelum transfer supaya
+    // pemakaian tidak dilewati. Reset otomatis tiap ganti hari (waktu lokal event).
+    const limit = checkGiveLimit(senderId, guildId, amount);
+    if (!limit.ok) {
+      const remainingCount = Math.max(0, limit.limitCount - limit.count);
+      const remainingCoin = Math.max(0, limit.limitCoin - limit.totalCoin);
+      const msg =
+        limit.reason === 'count'
+          ? `Kamu sudah mencapai batas **${limit.limitCount}×** transfer ${e('give')} hari ini.`
+          : `Jumlah ini melewati sisa batas harian **${remainingCoin.toLocaleString()}** ${e('coin')} (maks **${limit.limitCoin.toLocaleString()}** ${e('coin')}/hari).`;
+      return interaction.reply({
+        embeds: [
+          errorEmbed(
+            `${msg}\nSisa hari ini: **${remainingCount}×** / **${remainingCoin.toLocaleString()}** ${e('coin')}.`,
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     transferCoinsWithFee(senderId, target.id, guildId, amount, fee);
+    recordGive(senderId, guildId, amount);
     addQuestProgress(senderId, guildId, 'give', 1);
 
-    const feePercent = Math.round(GIVE_FEE_RATE * 100);
+    const feePercent = Math.round(GIVE.FEE_RATE * 100);
 
     const embed = themedEmbed('give', 'Transfer Berhasil', COLORS.economy)
       .setDescription(`${interaction.user} ${e('arrow')} ${target}`)

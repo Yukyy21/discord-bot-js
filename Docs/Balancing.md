@@ -82,9 +82,12 @@ aktif:
   justru pada pemukul paling rajin karena amukan menyasar penyerang teraktif.
 - **Jam spawn 00:00 dan 12:00 WIB.** Slot tengah malam nyaris tidak ada yang
   ikut, jadi boss kabur atau dipanen satu orang.
-- **`/give` makan biaya 5%** (dibakar, sink coin berjalan) tapi masih **tanpa
-  limit harian dan tanpa minimum umur akun** — ditambah `/exchange` tanpa batas,
-  poin leaderboard masih bisa disuplai akun kedua dalam volume besar.
+- **`/give` makan biaya 5%** (dibakar, sink coin berjalan). **Sudah ada limit
+  harian** (`GIVE.DAILY_LIMIT_COUNT = 5` transfer dan `GIVE.DAILY_LIMIT_COIN =
+  50.000` nominal/hari, reset tiap hari waktu lokal, lihat `give_daily`) — tapi
+  tanpa minimum umur akun, dan topik `/exchange` tanpa batas sudah tidak relevan
+  karena `/exchange` dihapus. Perlu dicermati apakah limit harian cukup menutup
+  santet alt.
 
 ## Target Angka yang Disarankan
 

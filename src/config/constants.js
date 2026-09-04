@@ -41,10 +41,20 @@ const DAILY = {
 const EQUIP_SLOTS = 5;
 
 /**
- * Biaya /give, dipotong dari saldo pengirim dan DIBAKAR (sink coin permanen).
- * Penerima tetap menerima jumlah penuh; biaya tidak dipindah ke siapa pun.
+ * Batasan /give. Dua hal yang dibatasi per hari per user (reset tengah malam
+ * waktu lokal event, lihat lib/boss localDateKey):
+ *  - DAILY_LIMIT_COUNT: berapa kali /give sukses dalam sehari.
+ *  - DAILY_LIMIT_COIN : total nominal coin yang boleh keluar (tanpa fee) sehari.
+ * Ini menutup santet alt — coin tidak bisa dijejalkan ke satu akun tanpa batas.
  */
-const GIVE_FEE_RATE = 0.05; // 5%
+const GIVE = {
+  FEE_RATE: 0.05, // 5%
+  DAILY_LIMIT_COUNT: 5,
+  DAILY_LIMIT_COIN: 50000,
+};
+
+// Nama lama dipertahankan untuk kompatibilitas pemanggil/test yang sudah ada.
+const GIVE_FEE_RATE = GIVE.FEE_RATE;
 
 /** Stok /shop diacak ulang tiap 10 menit. */
 const SHOP = {
@@ -143,6 +153,7 @@ module.exports = {
   PORUV_SHOP,
   QUEST,
   BOSS,
+  GIVE,
   GIVE_FEE_RATE,
   EQUIP_SLOTS,
   xpForLevel,

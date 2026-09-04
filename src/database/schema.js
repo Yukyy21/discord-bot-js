@@ -142,6 +142,19 @@ function createTables() {
       updatedAt INTEGER
     );
 
+    -- Pemakaian /give per user per hari (kunci dayKey = YYYY-MM-DD lokal event,
+    -- lewat lib/boss localDateKey). Dipakai membatasi jumlah transfer & nominal
+    -- harian supaya alt/santet tidak bisa memindah coin tanpa batas. Baris baru
+    -- otomatis per hari, reset alami tiap ganti hari.
+    CREATE TABLE IF NOT EXISTS give_daily (
+      userId TEXT,
+      guildId TEXT,
+      dayKey TEXT,
+      count INTEGER DEFAULT 0,
+      totalCoin INTEGER DEFAULT 0,
+      PRIMARY KEY (userId, guildId, dayKey)
+    );
+
     -- Daftar staff per-guild, diisi manual lewat /staff-set (bukan dari role
     -- Discord). Divisi bebas teks; deskripsi opsional.
     CREATE TABLE IF NOT EXISTS staff (
