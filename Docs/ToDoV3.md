@@ -35,6 +35,21 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   leave, dan hanya waktu layak (bukan sendirian/deaf/AFK) yang dihitung,
   konsisten dengan pembayaran Poruv/XP.
 
+- [x] **`/admin reset-user` tidak membersihkan semua jejak user, dan
+  `bumpActivity` merangkai nama kolom ke SQL tanpa saringan.** (Audit Gelombang
+  Dua Belas) `resetUser` (`src/database/admin.js`) hanya menghapus 4 tabel, jadi
+  buff aktif/limit `/give`/sesi voice/snapshot pekan/klaim Poruv/kontribusi
+  boss masih bertahan — "reset" tidak benar-benar bersih. Kini ditambah 6 tabel
+  (`give_daily`, `user_buffs`, `voice_sessions`, `weekly_points`, `boss_damage`,
+  `poruv_redemptions`) di dalam satu transaksi; buff guild-wide (`userId='*'`)
+  dipertahankan, dan data `staff`/`staff_ratings`/`staff_activity` sengaja tidak
+  dihapus (data keanggotaan, bukan data member). `boss_damage` tidak ber-guild,
+  jadi dihapus cukup per `userId`. Sementara itu `bumpActivity`
+  (`src/database/staff.js`) kini memfilter `field` terhadap daftar emas
+  `ACTIVITY_FIELDS` sebelum merangkai SQL menutup jalur injeksi. Embed
+  `/admin reset-user` menampilkan semua baris terhapus. Tes
+  `test/adminReset.test.js` (5 kasus) + 113/113 hijau.
+
 ## Balancing
 
 - [x] **Batasi XP chat per menit.** Spam chat bisa memompa puluhan ribu

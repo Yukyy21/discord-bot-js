@@ -4,6 +4,58 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Dua Belas — `resetUser` Benar-Benar Bersih + Whitelist Aktivitas Staff
+
+Dua temuan audit ditutup di gelombang ini: `/admin reset-user` tidak membersihkan
+semua jejak user, dan `bumpActivity` merangkai nama kolom ke SQL tanpa saringan.
+
+**Reset user jadi benar-benar bersih (`src/database/admin.js`, `resetUser`)**
+- Sebelumnya `resetUser` hanya menghapus 4 tabel (`users`, `points`,
+  `user_items`, `quests`). Tabel lain yang menyimpan data member tidak disentuh,
+  jadi state "bersih" palsu: buff aktif, limit `/give` hari ini, sesi voice,
+  snapshot poin pekan, klaim Poruv, dan kontribusi damage boss masih bertahan.
+- Sekarang ditambah 6 tabel di dalam transaksi yang sama:
+  - `give_daily` (`userId` + `guildId`) — limit `/give` hari ini ikut terhapus.
+  - `user_buffs` (`userId` + `guildId`) — buff aktif member dihapus, tapi buff
+    guild-wide (`userId = '*'`) sengaja **dipertahankan**.
+  - `voice_sessions` (`userId` + `guildId`).
+  - `weekly_points` (`userId` + `guildId`).
+  - `boss_damage` (`userId`) — tabel ini **tidak ber-guild** (PK `bossId` +
+    `userId`, lihat `schema.js`), jadi cukup difilter `userId` (unik lintas
+    guild) tanpa subquery ke `boss_spawns`. Semua kontribusi damage user ke
+    boss di semua guild ikut hilang.
+  - `poruv_redemptions` (`userId` + `guildId`) — klaim pending/riwayat Poruv.
+- **Data staff TIDAK ikut dihapus**: `staff`, `staff_ratings`, `staff_activity`
+  tetap utuh — itu data keanggotaan staff, bukan data member.
+- Return `resetUser` kini berisi jumlah baris terhapus per tabel (`wiped`),
+  dan embed `/admin reset-user` ditampilkan lebih lengkap
+  (`src/commands/admin/admin.js`, blok "Baris terhapus": Saldo/streak, Poruv,
+  Item, Quest, Buff aktif, Limit /give, Sesi voice, Snapshot pekan, Kontribusi
+  boss, Klaim Poruv).
+
+**Klarifikasi penting**: ada **dua** fungsi bernama `resetUser` yang berbeda.
+- `src/database/admin.js` — reset database; hanya dipakai `/admin reset-user`.
+  Inilah yang diperbaiki di gelombang ini.
+- `src/lib/antispam.js` — hanya menghapus catatan anti-spam (Map in-memory);
+  dipakai ability `cooldown_reset` (`src/lib/abilities.js`). Keduanya **bukan**
+  hal yang sama, jadi sengaja **tidak disatukan** dan `cooldown_reset` tidak
+  diubah.
+
+**Whitelist aktivitas staff (`src/database/staff.js`, `bumpActivity`)**
+- Nama kolom sebelumnya dirangkai langsung ke SQL (`SET ${field} = ...`). Nilai
+  `field` saat ini hanya dari daftar hardcoded (`messageCount`, `voiceMinutes`,
+  `tagCount`, `announcementCount`), jadi bukan celah yang bisa dieksploitasi —
+  tapi berisiko bila suatu saat `field` menerima input dari luar.
+- Kini ada `ACTIVITY_FIELDS` (daftar emas) dan `bumpActivity` menolak `field` di
+  luar daftar itu sebelum merangkai SQL (guard `row[field] === undefined` tetap
+  ada untuk field sah yang belum punya kolom).
+
+**Verifikasi**: `test/adminReset.test.js` (baru, DB temp terisolasi, 5 kasus) —
+reset menghapus 10 tabel data member, buff guild-wide `'*'` tetap, data staff
+tetap, user lain (guild sama & guild lain) tidak tersentuh, dan `boss_damage`
+user hilang di semua guild. Whitelist juga dicek (field tak dikenal dibuang
+diam-diam). `npm run lint` bersih, `npm test` **113/113** hijau.
+
 ## Gelombang Sebelas — Admin Menandai Klaim Poruv Shop Selesai
 
 Gap yang dicatat di Gelombang Enam: `resolveRedemption()` sudah ada sebagai

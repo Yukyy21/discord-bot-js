@@ -117,8 +117,14 @@ function getActivity(userId, guildId, yearMonth = currentYearMonth()) {
   return row;
 }
 
+// Kolom aktivitas yang sah untuk di-increment. Dipakai menyaring nilai `field`
+// di bumpActivity supaya nama kolom tidak pernah dirangkai ke SQL dari input
+// yang tidak dikenal (menutup jalur injeksi) dan hanya kolom ini yang diubah.
+const ACTIVITY_FIELDS = ['messageCount', 'voiceMinutes', 'tagCount', 'announcementCount'];
+
 /** Increment satu metrik aktivitas staff pada baris bulan berjalan. */
 function bumpActivity(userId, guildId, field, amount = 1) {
+  if (!ACTIVITY_FIELDS.includes(field)) return;
   const month = currentYearMonth();
   const row = getActivity(userId, guildId, month);
   if (row[field] === undefined) return;

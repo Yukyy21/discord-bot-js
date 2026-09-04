@@ -94,6 +94,12 @@ module.exports = {
             `${e('point')} Poruv/level: **${wiped.points}**`,
             `${e('inventory')} Item: **${wiped.items}**`,
             `${e('daily')} Quest: **${wiped.quests}**`,
+            `${e('info')} Buff aktif: **${wiped.buffs}**`,
+            `${e('coin')} Limit /give hari ini: **${wiped.give}**`,
+            `${e('info')} Sesi voice: **${wiped.voice}**`,
+            `${e('point')} Snapshot poin pekan: **${wiped.weekly}**`,
+            `${e('info')} Kontribusi boss: **${wiped.bossDmg}**`,
+            `${e('info')} Klaim Poruv Shop: **${wiped.poruv}**`,
           ].join('\n'),
           inline: false,
         });
