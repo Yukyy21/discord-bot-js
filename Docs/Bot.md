@@ -329,6 +329,25 @@ streak daily sebagai fungsi murni; command dan event hanya memanggilnya.
 **`src/lib/emojis.js`** memusatkan semua custom emoji. Jangan tulis emoji
 unicode langsung di command — detailnya di [Emoji.md](Emoji.md).
 
+## Rotate Status Bot
+
+Bot mengganti Custom Status (baris di bawah nama bot) tiap 5-10 detik acak,
+diatur `STATUS` di `src/config/constants.js` dan dijalankan
+`src/lib/statusRotator.js`, dipanggil sekali dari `ready.js`.
+
+Isi rotasinya 6 status: kredit developer, total member, ping, link invite
+server, tagline, dan total command terpakai. Total command dihitung dari
+tabel `bot_stats` (`src/database/botStats.js`), naik tiap slash command
+sukses jalan lewat `interactionCreate.js` — persisten, tidak reset saat bot
+restart.
+
+**Penting: emoji di status ini pakai unicode biasa, bukan custom emoji
+Discord.** Discord tidak merender `<:nama:id>` di teks Custom Status bot,
+cuma tampil sebagai teks mentah — ini keterbatasan resmi Discord API, bukan
+bug. Emoji `status_online`, `status_server`, `status_ontop`, `status_command`
+di `emojis.js` terdaftar untuk dipakai di tempat lain (embed dll), bukan di
+teks rotasi status ini.
+
 ## Hal yang Gampang Bikin Bingung
 
 - **Command tidak muncul di Discord.** Definisi command hanya sampai ke Discord
