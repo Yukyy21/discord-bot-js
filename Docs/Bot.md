@@ -121,12 +121,12 @@ WIB) — klaim jam 23.00 lalu jam 07.00 besoknya tetap dihitung streak. Bolong
 sehari, streak kembali ke 1.
 
 **Transfer `/give`.** Biaya **5%** (`GIVE_FEE_RATE` di `src/config/constants.js`)
-dipotong dari saldo pengirim dan **dibakar** �?" penerima menerima jumlah penuh.
+dipotong dari saldo pengirim dan **dibakar** — penerima menerima jumlah penuh.
 Kalau nominal 100, pengirim keluar 105 dan penerima masuk 100; biayanya tidak
 berpindah ke siapa pun. Ini salah satu sink coin permanen bot. Ada juga **limit
 harian** per user: maksimal `GIVE.DAILY_LIMIT_COUNT` (5) kali transfer dan
 `GIVE.DAILY_LIMIT_COIN` (50.000) coin keluar per hari (tanpa fee), reset tiap
-ganti hari waktu lokal event �?" ditelusuri lewat tabel `give_daily` untuk
+ganti hari waktu lokal event — ditelusuri lewat tabel `give_daily` untuk
 menutup santet alt.
 
 **Poruv Shop.** `/poruv-shop` (`src/config/constants.js`, array `PORUV_SHOP`;
