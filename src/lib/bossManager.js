@@ -220,22 +220,34 @@ async function handleBossAttack(interaction, bossId) {
   // berubah banyak), lalu update embed boss diantre per-spawn. Task membaca
   // state terbaru dari DB saat mengeksekusi, jadi dua serangan nyaris
   // bersamaan tidak akan saling menimpa dengan data basi.
-  await interaction.deferUpdate();
-  await queueMessageEdit(row.id, async () => {
-    const latest = getBossById(row.id);
-    if (!latest) return;
-    await interaction.message.edit({
-      embeds: [bossEmbed(latest, getContributions(row.id))],
-      components: [attackRow(row.id, latest.status !== 'active')],
-      // Attachment harus dikirim ulang tiap edit, kalau tidak thumbnail-nya hilang.
+  //
+  // PENTING: damage sudah di-commit ke DB lewat applyDamage() di atas —
+  // kalau boss sudah defeated di sini, finishBoss() harus tetap jalan
+  // walaupun langkah UI di bawah (deferUpdate/edit/followUp) gagal, misalnya
+  // karena interaksi keburu expire (window ~3 detik dari Discord). Kalau
+  // tidak, boss tertinggal berstatus 'defeated' tanpa reward pernah
+  // dibagikan, dan scheduler tidak akan menolongnya karena hanya memproses
+  // boss yang masih 'active'.
+  try {
+    await interaction.deferUpdate();
+    await queueMessageEdit(row.id, async () => {
+      const latest = getBossById(row.id);
+      if (!latest) return;
+      await interaction.message.edit({
+        embeds: [bossEmbed(latest, getContributions(row.id))],
+        components: [attackRow(row.id, latest.status !== 'active')],
+        // Attachment harus dikirim ulang tiap edit, kalau tidak thumbnail-nya hilang.
+        files: bossIconFiles(row.bossKey),
+      });
+    }).catch(error => log.error(`Gagal update embed boss ${row.id}:`, error.message));
+    await interaction.followUp({
+      embeds: [attackResultEmbed(after, result, { multiplier, debuff: damageDebuff, missed, counter })],
       files: bossIconFiles(row.bossKey),
+      flags: MessageFlags.Ephemeral,
     });
-  }).catch(error => log.error(`Gagal update embed boss ${row.id}:`, error.message));
-  await interaction.followUp({
-    embeds: [attackResultEmbed(after, result, { multiplier, debuff: damageDebuff, missed, counter })],
-    files: bossIconFiles(row.bossKey),
-    flags: MessageFlags.Ephemeral,
-  });
+  } catch (error) {
+    log.error(`Interaksi serangan boss ${row.id} gagal (kemungkinan expired):`, error.message);
+  }
 
   if (result.defeated) await finishBoss(interaction.client, after);
 }
