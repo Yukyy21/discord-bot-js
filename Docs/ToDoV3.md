@@ -26,20 +26,20 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   bikin `xp / xpNeeded` jadi `0/0 = NaN` di `profileCard.js` dan
   `rankCard.js`. Ada guard `pct > 0` jadi tidak crash, cuma tampil kosong.
   Cuma bisa dipicu lewat `/admin set-level 0`. Fix: guard `xpNeeded <= 0`
-  di kedua card.
+  di kedua card. (fix nanti(
 
 - [ ] **`undefined` sebagai parameter SQL di `quests.js`.** (bug2.md #8)
   `src/database/quests.js` mengoper `undefined` ke `update.run()`.
   better-sqlite3 mengoersi ke `null` sekarang, tapi bukan tipe parameter
   yang terdokumentasi resmi — bisa error kalau library di-upgrade. Fix:
-  pakai `null` sebagai ganti `undefined`.
+  pakai `null` sebagai ganti `undefined`. (fix nanti)
 
 - [ ] **Tombol serang stale saat boss kabur.** (bug2.md #9) Di
   `escapeBoss()` (`src/lib/bossManager.js`), kalau `resolveBossChannel`
   return null, fungsi return lebih awal sebelum sempat menonaktifkan tombol
   di pesan lama. Boss sudah `escaped` tapi tombolnya kelihatan masih aktif.
   Kosmetik saja (klik tombol itu cuma dapat "boss sudah selesai"), tidak
-  merusak data.
+  merusak data.(fix nanti)
 
 - [x] **Stok shop global untuk semua guild.** (Bugs.md #5) Stok item di
   `/shop` dipakai bersama lintas server — server rame bisa menghabiskan stok
