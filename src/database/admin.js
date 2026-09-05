@@ -11,8 +11,11 @@ const { db } = require('./connection');
  * Catatan:
  * - user_buffs hanya membersihkan buff milik member, buff guild-wide
  *   (userId = '*') sengaja dipertahankan.
- * - boss_damage tidak punya kolom guildId (PK bossId+userId), jadi cukup
- *   difilter oleh userId — userId unik lintas guild.
+ * - boss_damage tidak punya kolom guildId (PK bossId+userId), tapi bossId
+ *   selalu terikat satu guild lewat boss_spawns.guildId — jadi difilter
+ *   lewat subquery ke boss_spawns, BUKAN cuma userId. Kalau cuma userId,
+ *   damage user itu ke boss di guild lain ikut terhapus juga (userId unik
+ *   lintas guild justru bikin over-delete, bukan pengaman).
  * - Data staff (staff, staff_ratings, staff_activity) TIDAK ikut dihapus;
  *   itu data keanggotaan staff, bukan data member.
  */
@@ -26,7 +29,9 @@ function resetUser(userId, guildId) {
     const buffs = db.prepare('DELETE FROM user_buffs WHERE userId = ? AND guildId = ?').run(userId, guildId);
     const voice = db.prepare('DELETE FROM voice_sessions WHERE userId = ? AND guildId = ?').run(userId, guildId);
     const weekly = db.prepare('DELETE FROM weekly_points WHERE userId = ? AND guildId = ?').run(userId, guildId);
-    const bossDmg = db.prepare('DELETE FROM boss_damage WHERE userId = ?').run(userId);
+    const bossDmg = db
+      .prepare('DELETE FROM boss_damage WHERE userId = ? AND bossId IN (SELECT id FROM boss_spawns WHERE guildId = ?)')
+      .run(userId, guildId);
     const poruv = db.prepare('DELETE FROM poruv_redemptions WHERE userId = ? AND guildId = ?').run(userId, guildId);
     return {
       users: users.changes,
