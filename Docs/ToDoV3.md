@@ -7,23 +7,20 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
 
 ## Bug
 
-- [ ] **`finishBoss` tidak idempoten.** (bug2.md #3) Tidak ada guard status
-  sebelum `distributeRewards` di `src/lib/bossManager.js`. Aman sekarang
-  karena `applyDamage` sinkron dalam satu transaksi (event loop satu thread),
-  tapi kalau nanti ada refactor async atau command "force-finish", reward
-  bisa dibagikan 2×. Fix: `if (getBossById(row.id)?.status !== 'defeated')
-  return [];` di awal `finishBoss`.
+- [x] **`finishBoss` tidak idempoten.** (bug2.md #3) Tidak ada guard status
+  sebelum `distributeRewards` di `src/lib/bossManager.js`. Fix: guard
+  `if (getBossById(row.id)?.status !== 'defeated') return [];` di awal
+  `finishBoss`.
 
-- [ ] **`/use` null-deref kalau `describeEffect` return null.** (bug2.md #5)
-  `src/commands/economy/use.js` akses `info.emoji` tanpa guard; aman hari ini
-  karena katalog selalu valid, tapi rapuh kalau katalog berubah di masa
-  depan. Fix: `if (!info) return error reply;` sebelum dipakai.
+- [x] **`/use` null-deref kalau `describeEffect` return null.** (bug2.md #5)
+  `src/commands/economy/use.js` kini cek `if (!info) return error reply;`
+  sebelum akses `info.emoji`.
 
-- [ ] **Voice chunks tak dibatasi setelah downtime lama.** (bug2.md #6)
-  `src/events/voiceStateUpdate.js` menghitung `chunks` tanpa batas atas —
-  downtime 24 jam bisa membayar 96 chunk sekaligus (768 Poruv + 960 XP dalam
-  satu tick), jadi insentif membiarkan bot down lama. Fix: konstanta
-  `MAX_CHUNKS` (misal 4 = cap 1 jam) di `src/config/constants.js`.
+- [x] **Voice chunks tak dibatasi setelah downtime lama.** (bug2.md #6)
+  `src/events/voiceStateUpdate.js` kini men-cap `chunks` ke
+  `VOICE.MAX_CHUNKS_PER_GRANT` (4 = 1 jam) di `syncEligibility` dan interval
+  berkala, di `src/config/constants.js`. Sisa chunk di atas cap tetap
+  tertelusuri lewat `lastGrant`, dibayar bertahap di tick berikutnya.
 
 - [ ] **Progress bar XP NaN di level 0.** (bug2.md #7) `xpForLevel(0) = 0`
   bikin `xp / xpNeeded` jadi `0/0 = NaN` di `profileCard.js` dan
