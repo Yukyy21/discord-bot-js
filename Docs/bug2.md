@@ -1,13 +1,16 @@
-# Bug2 — Temuan Audit Pasca-Merge (belum diperbaiki)
+# Bug2 — Temuan Audit Pasca-Merge
 
-Daftar bug yang **masih ada dan belum di-fix**, hasil audit lanjutan (3 subagen +
-verifikasi manual) di branch `neko-path2`/`ferr-path2`, commit `590f15e`
-(Gelombang Empat Belas). Diurutkan dari yang paling mengganggu. Belum ada yang
-diperbaiki — ini daftar bekas buat gelombang berikutnya.
+Daftar bug hasil audit lanjutan (3 subagen + verifikasi manual) di branch
+`neko-path2`/`ferr-path2`, commit `590f15e` (Gelombang Empat Belas).
+Diurutkan dari yang paling mengganggu.
+
+**Status: Critical (#1) dan Major (#2, #4) sudah diperbaiki dan diverifikasi
+— lihat [What I do.md](What%20I%20do.md). #3 (Major, defensive) dan Minor
+(#5-#9) masih belum dikerjakan, jadi gelombang berikutnya.**
 
 ## Critical
 
-## 1. Fitur amukan boss MATI total
+## 1. ~~Fitur amukan boss MATI total~~ ✅ DIPERBAIKI
 
 - `src/database/boss.js:66` — `getContributions` SELECT hanya `userId, damage,
   hits`, **tidak menyertakan `lastAttackAt`**.
@@ -24,11 +27,13 @@ melakukan query `getContributions` tiap tick tanpa hasil).
 secara eksplisit, jadi `pickRampageTargets` teruji terisolasi — tapi sumber data
 produksinya (`getContributions`) tidak pernah menyediakan field itu.
 
-**Perbaikan:** tambah `lastAttackAt` ke SELECT `getContributions`.
+**Perbaikan (diterapkan):** tambah `lastAttackAt` ke SELECT `getContributions`.
+Diverifikasi manual: `pickRampageTargets` sekarang mengembalikan target yang
+benar (bukan `[]`) saat diberi data dari `getContributions` yang sudah diperbaiki.
 
 ## Major
 
-## 2. `resetUser` menghapus `boss_damage` lintas semua guild
+## 2. ~~`resetUser` menghapus `boss_damage` lintas semua guild~~ ✅ DIPERBAIKI
 
 - `src/database/admin.js:29` — `DELETE FROM boss_damage WHERE userId = ?` tanpa
   filter guild.
@@ -38,8 +43,14 @@ produksinya (`getContributions`) tidak pernah menyediakan field itu.
 **Dampak:** admin reset user di guild A juga menghapus riwayat damage boss user
 itu di guild B/C/D (kehilangan data lintas server).
 
-**Perbaikan:**
+**Perbaikan (diterapkan):**
 `DELETE FROM boss_damage WHERE userId = ? AND bossId IN (SELECT id FROM boss_spawns WHERE guildId = ?)`.
+Diverifikasi lewat eksekusi SQL nyata (Python `sqlite3`): damage di guild yang
+direset terhapus, damage di guild lain tetap utuh. Komentar kode yang salah
+nalar ("userId unik lintas guild, jadi aman") juga diperbaiki. Test
+`test/adminReset.test.js` diupdate — sebelumnya test itu justru menguji dan
+mengharapkan behaviour lama (bug-nya), sekarang menguji behaviour yang benar
+(termasuk assertion baru yang memverifikasi damage guild lain tidak ikut hilang).
 
 ## 3. `finishBoss` tidak idempoten (potensi reward dobel)
 
@@ -52,7 +63,7 @@ ada refactor async atau command "force-finish", reward bisa dibagikan 2×.
 **Perbaikan:** `if (getBossById(row.id)?.status !== 'defeated') return [];` di awal
 `finishBoss`.
 
-## 4. Killing-blow hilang jika interaksi expire
+## 4. ~~Killing-blow hilang jika interaksi expire~~ ✅ DIPERBAIKI
 
 - `src/lib/bossManager.js:199` — damage sudah di-commit ke DB, lalu
   `await interaction.deferUpdate()`.
@@ -63,8 +74,13 @@ ada refactor async atau command "force-finish", reward bisa dibagikan 2×.
 reward dibagikan, tombol stale, dan tidak ada recovery (penjadwal hanya memproses
 boss `active`).
 
-**Perbaikan:** try/catch — untuk boss dengan `status='defeated'`, tetap panggil
-`finishBoss` meski UI gagal.
+**Perbaikan (diterapkan):** `deferUpdate()`, `queueMessageEdit()`, dan
+`followUp()` dibungkus try/catch tersendiri; `finishBoss(interaction.client, after)`
+dipanggil di luar blok itu, tanpa syarat sukses-nya langkah UI di atas — hanya
+bergantung pada `result.defeated` yang sudah ditentukan oleh `applyDamage()`
+yang ter-commit sebelum semua interaksi Discord. Diverifikasi lewat simulasi:
+`finishBoss` tetap terpanggil baik saat interaksi normal maupun saat
+`deferUpdate()` sengaja dibuat gagal (expired).
 
 ## Minor
 
