@@ -5,8 +5,8 @@ Daftar bug hasil audit lanjutan (3 subagen + verifikasi manual) di branch
 Diurutkan dari yang paling mengganggu.
 
 **Status: Critical (#1) dan Major (#2, #4) sudah diperbaiki dan diverifikasi
-— lihat [What I do.md](What%20I%20do.md). #3 (Major, defensive) dan Minor
-(#5-#9) masih belum dikerjakan, jadi gelombang berikutnya.**
+— lihat [What I do.md](What%20I%20do.md). #3, #5, dan #6 sudah diperbaiki.
+Minor (#7-#9) masih belum dikerjakan.**
 
 ## Critical
 
@@ -52,7 +52,7 @@ nalar ("userId unik lintas guild, jadi aman") juga diperbaiki. Test
 mengharapkan behaviour lama (bug-nya), sekarang menguji behaviour yang benar
 (termasuk assertion baru yang memverifikasi damage guild lain tidak ikut hilang).
 
-## 3. `finishBoss` tidak idempoten (potensi reward dobel)
+## 3. ~~`finishBoss` tidak idempoten (potensi reward dobel)~~ ✅ DIPERBAIKI
 
 - `src/lib/bossManager.js:278-299` — tidak ada guard sebelum `distributeRewards`.
 
@@ -84,7 +84,7 @@ yang ter-commit sebelum semua interaksi Discord. Diverifikasi lewat simulasi:
 
 ## Minor
 
-## 5. `/use` null-deref `describeEffect`
+## 5. ~~`/use` null-deref `describeEffect`~~ ✅ DIPERBAIKI
 
 - `src/commands/economy/use.js:40` — `themedEmbed(info.emoji, ...)` tanpa guard;
   `describeEffect` bisa return `null` (`src/database/shopCatalog.js:284-285`).
@@ -94,7 +94,7 @@ bisa memicu crash.
 
 **Perbaikan:** `if (!info) return error reply;` sebelum `info.emoji`.
 
-## 6. Voice chunks tak di-cap
+## 6. ~~Voice chunks tak di-cap~~ ✅ DIPERBAIKI
 
 - `src/events/voiceStateUpdate.js:186-205` — `chunks` tanpa batas atas setelah
   restart.
