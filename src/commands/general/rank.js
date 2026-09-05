@@ -12,7 +12,7 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
     const p = getProfile(interaction.user.id, interaction.guildId);
-    const rank = getXpRank(interaction.user.id, interaction.guildId);
+    const rank = getXpRank(interaction.user.id, interaction.guildId) || 0;
     const rankInfo = getRank(p.level);
     const rankLogo = asset('ranks', rankInfo.logo);
     const avatar = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });

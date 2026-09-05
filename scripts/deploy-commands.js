@@ -31,15 +31,22 @@ for (const category of categories) {
   }
 }
 
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const token = process.env.DISCORD_TOKEN;
+const clientId = process.env.CLIENT_ID;
+if (!token || !clientId) {
+  logger.error('DISCORD_TOKEN dan CLIENT_ID wajib diisi di .env sebelum deploy command.');
+  process.exit(1);
+}
+
+const rest = new REST().setToken(token);
 
 (async () => {
   try {
     logger.info(`Mendaftarkan ${commands.length} command...`);
 
     const route = process.env.GUILD_ID
-      ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
-      : Routes.applicationCommands(process.env.CLIENT_ID);
+      ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
+      : Routes.applicationCommands(clientId);
 
     const data = await rest.put(route, { body: commands });
 
