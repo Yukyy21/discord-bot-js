@@ -4,6 +4,31 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Enam Belas — Fitur Rotate Status Bot
+
+Fitur baru: Custom Status bot berganti otomatis tiap 5-10 detik acak,
+menampilkan 6 informasi bergiliran (kredit developer, total member, ping,
+link invite server, tagline, total command terpakai).
+
+- `src/config/constants.js` — konstanta `STATUS` (interval min/max, link
+  invite server).
+- `src/lib/statusRotator.js` (baru) — logic rotasi, dipanggil sekali dari
+  `ready.js` lewat `startStatusRotator(client)`. Pakai `ActivityType.Custom`
+  dari discord.js supaya teks tampil tanpa prefix "Playing".
+- `src/database/botStats.js` (baru) + tabel `bot_stats` di `schema.js` —
+  counter key-value persisten, dipakai untuk total command terpakai. Naik
+  tiap slash command sukses jalan lewat `interactionCreate.js` (setelah
+  `command.execute()` tidak melempar error).
+- `src/lib/emojis.js` — 4 emoji baru didaftarkan (`status_online`,
+  `status_server`, `status_ontop`, `status_command`) untuk pemakaian di
+  tempat lain; **tidak dipakai di teks rotasi status** karena Discord tidak
+  merender custom emoji di Custom Status bot (keterbatasan resmi API,
+  dikonfirmasi lewat dokumentasi Discord.Net dan forum feature-request
+  Discord sendiri). Rotasi pakai emoji unicode biasa.
+
+Detail lengkap di [Bot.md](Bot.md#rotate-status-bot) dan
+[Emoji.md](Emoji.md#emoji-rotate-status).
+
 ## Gelombang Lima Belas — Perbaikan Bug Kritis & Major dari bug2.md
 
 Audit susulan pasca-Gelombang Empat Belas (`Docs/bug2.md`) menemukan 9 bug
