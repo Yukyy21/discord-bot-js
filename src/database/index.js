@@ -18,6 +18,7 @@ const poruvShop = require('./poruvShop');
 const guildConfig = require('./guildConfig');
 const staff = require('./staff');
 const giveDaily = require('./giveDaily');
+const botStats = require('./botStats');
 
 createTables();
 runMigrations();
@@ -56,4 +57,5 @@ module.exports = {
   ...guildConfig,
   ...staff,
   ...giveDaily,
+  ...botStats,
 };
