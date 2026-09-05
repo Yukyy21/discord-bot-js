@@ -25,6 +25,9 @@ const VOICE = {
   // supaya waktu voice layak poin. Sendirian, semua teman deaf, atau duduk di
   // AFK channel tidak menghasilkan poin.
   MIN_LISTENERS: 2,
+  // Batas chunk yang dibayar sekaligus dalam satu tick (mis. setelah bot down
+  // lama). 4 chunk = cap 1 jam, supaya downtime panjang tidak jadi insentif.
+  MAX_CHUNKS_PER_GRANT: 4,
 };
 
 /** Reward /daily. Bonus naik tiap hari selama streak tidak putus, dibatasi. */
