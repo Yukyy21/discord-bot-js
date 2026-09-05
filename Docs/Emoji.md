@@ -79,6 +79,22 @@ Dipakai oleh `/staff`, `/staff-set`, `/staff-rating`, `/best-staff-of-the-month`
 | `ai_answer` | `<a:Aiask1:...>` (animated) | Judul & blok jawaban `/ai-ask` |
 | `ai_answer2` | `<a:aiask2:...>` (animated) | Baris penutup jawaban |
 
+## Emoji Rotate Status
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `status_online` | `<a:Online:...>` (animated) | Terdaftar, belum dipakai di teks Custom Status (lihat catatan) |
+| `status_server` | `<:Server:...>` | Terdaftar, belum dipakai di teks Custom Status (lihat catatan) |
+| `status_ontop` | `<a:Ontop:...>` (animated) | Terdaftar, belum dipakai di teks Custom Status (lihat catatan) |
+| `status_command` | `<:Command:...>` | Terdaftar, belum dipakai di teks Custom Status (lihat catatan) |
+
+**Discord tidak merender custom emoji di teks Custom Status bot** — cuma
+tampil sebagai teks mentah `<:nama:id>`, ini keterbatasan resmi Discord API.
+Karena itu rotasi status di `src/lib/statusRotator.js` pakai emoji unicode
+biasa (🟢🌐🔝⌨️ dst), bukan 4 key di atas. Key-key ini tetap didaftarkan di
+registry buat dipakai di tempat lain nanti (embed, dll) kalau dibutuhkan.
+Detail cara kerja rotasinya di [Bot.md](Bot.md#rotate-status-bot).
+
 ## Emoji Navigasi, Quest, Ability & Boss
 
 | Key | Emoji | Dipakai di |
