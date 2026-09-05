@@ -4,7 +4,7 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
-## Gelombang Tujuh Belas — Bug Minor #7 & #8 dari bug2.md
+## Gelombang Tujuh Belas — Bug Minor #7, #8, & #9 dari bug2.md
 
 ### #7 — Bar XP NaN di Level 0
 
@@ -34,11 +34,26 @@ parameter terdokumentasi, dan bisa error saat library di-upgrade.
   Tidak ada perubahan perilaku (kursi koersi `undefined → null` di
   better-sqlite3 sudah diamankan eksplisit).
 
+### #9 — `escapeBoss` meninggalkan tombol stale
+
+Bug Minor dari `Docs/bug2.md` #9: `escapeBoss()` di `src/lib/bossManager.js`
+meng-return awal saat `resolveBossChannel()` gagal (channel hilang/hak akses
+dicabut) — padahal boss sudah `escaped`, sehingga tombol serang di pesan lama
+masih tampil aktif (klik → "boss sudah selesai"). Ketidakkonsistenan UI saja,
+tidak merusak data.
+
+- `src/lib/bossManager.js`: jalur channel tak bisa diakses kini dicatat lewat
+  `log.warn` (bukan return senyap) dan antrean edit (`editChains`) tetap
+  dibersihkan. Kalau pesan boss tidak ditemukan saat mematikan tombol, ikut
+  dicatat. Pematian tombol tetap lewat `queueMessageEdit` (serial per bossId,
+  konsisten dengan `handleBossAttack`), terpisah dari kirim embed kabur.
+
 Catatan: tidak menjalankan `npm run format` untuk seluruh repo — format
 global mengubah 50+ file yang bukan bagian dari fix ini (repo tidak
 prettier-clean). Cukup lint + test.
 
-Verifikasi: `npm run lint` bersih, `npm test` **122/122** hijau.
+Verifikasi: `npm run lint` bersih, `npm test` **122/122** hijau. Seluruh isi
+`Docs/bug2.md` (9 dari 9) kini ditandai DIPERBAIKI.
 
 ## Gelombang Enam Belas — Fitur Rotate Status Bot
 

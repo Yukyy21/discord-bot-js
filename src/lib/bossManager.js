@@ -344,11 +344,23 @@ async function finishBoss(client, row) {
 async function escapeBoss(client, row) {
   expireBoss(row.id);
   const channel = await resolveBossChannel(client, row.channelId);
-  if (!channel) return;
+  // Kalau channel tidak bisa di-resolve (hilang / hak akses dicabut), tombol
+  // serang di pesan lama tidak bisa dimatikan — boss sudah expire, jangan
+  // return senyap: catat jelas dan tetap bersihkan antrean edit.
+  if (!channel) {
+    log.warn(
+      `Boss ${row.bossKey} (id ${row.id}) kabur tapi channel ${row.channelId} tidak bisa diakses — tombol serang di pesan lama kemungkinan masih tampil aktif.`,
+    );
+    editChains.delete(row.id);
+    return;
+  }
   if (row.messageId) {
     await queueMessageEdit(row.id, async () => {
       const msg = await channel.messages.fetch(row.messageId).catch(() => null);
-      if (!msg) return;
+      if (!msg) {
+        log.warn(`Boss ${row.bossKey} (id ${row.id}) kabur — pesan boss tidak ditemukan, tombol tidak bisa dimatikan.`);
+        return;
+      }
       await msg.edit({ components: [attackRow(row.id, true)] });
     }).catch(() => {});
   }

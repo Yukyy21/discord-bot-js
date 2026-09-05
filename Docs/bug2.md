@@ -4,9 +4,9 @@ Daftar bug hasil audit lanjutan (3 subagen + verifikasi manual) di branch
 `neko-path2`/`ferr-path2`, commit `590f15e` (Gelombang Empat Belas).
 Diurutkan dari yang paling mengganggu.
 
-**Status: Critical (#1) dan Major (#2, #4) sudah diperbaiki dan diverifikasi
-— lihat [What I do.md](What%20I%20do.md). #3, #5, #6, #7, dan #8 sudah
-diperbaiki. Minor (#9) masih belum dikerjakan.**
+**Status: SEMUA SUDAH DIPERBAIKI. Critical (#1) dan Major (#2, #4) diperbaiki
+dan diverifikasi — lihat [What I do.md](What%20I%20do.md). #3, #5, #6, #7,
+#8, dan #9 juga sudah ditutup di Gelombang Tujuh Belas.**
 
 ## Critical
 
@@ -130,10 +130,16 @@ bukan tipe parameter terdokumentasi → bisa error saat upgrade library.
 mengkoersi `undefined` → `null`), cuma menghilangkan tipe parameter yang
 tidak terdokumentasi.
 
-## 9. `escapeBoss` meninggalkan tombol stale
+## 9. ~~`escapeBoss` meninggalkan tombol stale~~ ✅ DIPERBAIKI
 
-- `src/lib/bossManager.js:328-336` — `resolveBossChannel` null → return awal
-  sebelum disable tombol.
+- `src/lib/bossManager.js` — `resolveBossChannel` null → return awal sebelum
+  disable tombol.
 
 Boss sudah `escaped`, tapi tombol serang di pesan lama masih tampil aktif (klik →
 "boss sudah selesai"). Ketidakkonsistenan UI saja, tidak merusak data.
+
+**Perbaikan (diterapkan):** `escapeBoss` tidak lagi return senyap saat channel
+tidak bisa di-resolve — kegagalan dicatat lewat log (warn) dan antrean edit
+(`editChains`) tetap dibersihkan. Kalau pesan boss tidak ditemukan saat
+mematikan tombol, ikut dicatat. Tombol tetap dimatikan lewat `queueMessageEdit`
+(serial, konsisten dengan `handleBossAttack`), terpisah dari kirim embed kabur.
