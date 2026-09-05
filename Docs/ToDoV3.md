@@ -7,6 +7,43 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
 
 ## Bug
 
+- [ ] **`finishBoss` tidak idempoten.** (bug2.md #3) Tidak ada guard status
+  sebelum `distributeRewards` di `src/lib/bossManager.js`. Aman sekarang
+  karena `applyDamage` sinkron dalam satu transaksi (event loop satu thread),
+  tapi kalau nanti ada refactor async atau command "force-finish", reward
+  bisa dibagikan 2×. Fix: `if (getBossById(row.id)?.status !== 'defeated')
+  return [];` di awal `finishBoss`.
+
+- [ ] **`/use` null-deref kalau `describeEffect` return null.** (bug2.md #5)
+  `src/commands/economy/use.js` akses `info.emoji` tanpa guard; aman hari ini
+  karena katalog selalu valid, tapi rapuh kalau katalog berubah di masa
+  depan. Fix: `if (!info) return error reply;` sebelum dipakai.
+
+- [ ] **Voice chunks tak dibatasi setelah downtime lama.** (bug2.md #6)
+  `src/events/voiceStateUpdate.js` menghitung `chunks` tanpa batas atas —
+  downtime 24 jam bisa membayar 96 chunk sekaligus (768 Poruv + 960 XP dalam
+  satu tick), jadi insentif membiarkan bot down lama. Fix: konstanta
+  `MAX_CHUNKS` (misal 4 = cap 1 jam) di `src/config/constants.js`.
+
+- [ ] **Progress bar XP NaN di level 0.** (bug2.md #7) `xpForLevel(0) = 0`
+  bikin `xp / xpNeeded` jadi `0/0 = NaN` di `profileCard.js` dan
+  `rankCard.js`. Ada guard `pct > 0` jadi tidak crash, cuma tampil kosong.
+  Cuma bisa dipicu lewat `/admin set-level 0`. Fix: guard `xpNeeded <= 0`
+  di kedua card.
+
+- [ ] **`undefined` sebagai parameter SQL di `quests.js`.** (bug2.md #8)
+  `src/database/quests.js` mengoper `undefined` ke `update.run()`.
+  better-sqlite3 mengoersi ke `null` sekarang, tapi bukan tipe parameter
+  yang terdokumentasi resmi — bisa error kalau library di-upgrade. Fix:
+  pakai `null` sebagai ganti `undefined`.
+
+- [ ] **Tombol serang stale saat boss kabur.** (bug2.md #9) Di
+  `escapeBoss()` (`src/lib/bossManager.js`), kalau `resolveBossChannel`
+  return null, fungsi return lebih awal sebelum sempat menonaktifkan tombol
+  di pesan lama. Boss sudah `escaped` tapi tombolnya kelihatan masih aktif.
+  Kosmetik saja (klik tombol itu cuma dapat "boss sudah selesai"), tidak
+  merusak data.
+
 - [x] **Stok shop global untuk semua guild.** (Bugs.md #5) Stok item di
   `/shop` dipakai bersama lintas server — server rame bisa menghabiskan stok
   server lain. Pisahkan stok per guild atau jadikan stok tidak terbatas.
