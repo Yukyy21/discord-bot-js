@@ -151,7 +151,9 @@ function syncEligibility(guildId, userId) {
 
   const now = Date.now();
   if (!eligible) {
-    const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
+    const rawChunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
+    // Cap biar downtime panjang tidak membayar chunk menumpuk sekaligus.
+    const chunks = Math.min(rawChunks, VOICE.MAX_CHUNKS_PER_GRANT);
     if (chunks > 0) {
       addPoints(
         session.userId,
@@ -188,7 +190,10 @@ setInterval(() => {
     // penting setelah restart: restoreVoiceTracking melanjutkan lastGrant lama,
     // jadi tick pertama harus meng-kredit seluruh durasi layak yang lewat,
     // konsisten dengan endSession/syncEligibility (Gelombang Empat Belas).
-    const chunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
+    const rawChunks = Math.floor((now - session.lastGrant) / VOICE.INTERVAL_MS);
+    // Cap biar downtime panjang (mis. bot mati 24 jam) tidak membayar semua
+    // chunk sekaligus — insentif membiarkan bot down jadi hilang.
+    const chunks = Math.min(rawChunks, VOICE.MAX_CHUNKS_PER_GRANT);
     addPoints(
       session.userId,
       session.guildId,
