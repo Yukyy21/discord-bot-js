@@ -86,6 +86,12 @@ const REGISTRY = {
   nodejs: { name: 'Nodejs', id: '1540378501549400124', animated: false, fallback: '🟩' },
   database: { name: 'Sql_database', id: '1540378503407607928', animated: false, fallback: '🗄️' },
 
+  // — Rotate Status —
+  status_online: { name: 'Online', id: '1545778619962495036', animated: true, fallback: '🟢' },
+  status_server: { name: 'Server', id: '1545778617760616468', animated: false, fallback: '🌐' },
+  status_ontop: { name: 'Ontop', id: '1545778615613005824', animated: true, fallback: '🔝' },
+  status_command: { name: 'Command', id: '1545778613725433906', animated: false, fallback: '⌨️' },
+
   // — Credit: Executive & Beta Tester —
   idea: { name: 'Idea', id: '1543822774861045920', animated: false, fallback: '💡' },
   betatester: { name: 'Betatester', id: '1543822772965482566', animated: false, fallback: '🧪' },
