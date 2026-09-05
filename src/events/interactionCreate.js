@@ -1,7 +1,7 @@
 const { MessageFlags, PermissionFlagsBits } = require('discord.js');
 const { errorEmbed, warnEmbed } = require('../ui/embeds');
 const logger = require('../lib/logger');
-const { claimQuest } = require('../database');
+const { claimQuest, increment: incrementStat } = require('../database');
 const { buildGuide } = require('../ui/guidePages');
 const { buildShop } = require('../commands/economy/shop');
 const { buildInventory } = require('../commands/economy/inventory');
@@ -177,6 +177,7 @@ async function handleCommand(interaction) {
 
   try {
     await command.execute(interaction);
+    incrementStat('commands_used');
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Command /${interaction.commandName} gagal:`, error);
