@@ -2,6 +2,7 @@ const logger = require('../lib/logger');
 const { restoreVoiceTracking } = require('./voiceStateUpdate');
 const { clearExpiredBuffs } = require('../database');
 const { startBossScheduler, restoreBosses } = require('../lib/bossManager');
+const { startStatusRotator } = require('../lib/statusRotator');
 
 // Sapu buff kadaluarsa tiap 10 menit supaya tabel user_buffs tidak menumpuk.
 const BUFF_CLEANUP_MS = 10 * 60 * 1000;
@@ -14,6 +15,7 @@ module.exports = {
     restoreVoiceTracking(client);
     clearExpiredBuffs();
     setInterval(clearExpiredBuffs, BUFF_CLEANUP_MS);
+    startStatusRotator(client);
 
     // Boss yang masih hidup dari sesi sebelumnya dipulihkan dulu, baru
     // penjaga jadwal spawn (jam 12 malam & 12 siang) dinyalakan.
