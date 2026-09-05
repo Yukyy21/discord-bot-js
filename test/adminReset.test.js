@@ -77,9 +77,11 @@ function seed() {
   // Buff guild-wide (*) harus dipertahankan — bukan milik member.
   db.prepare("INSERT INTO user_buffs (userId, guildId, key, value) VALUES ('*', ?, ?, ?)").run(G, 'xp', 1.5);
 
-  // boss_damage tidak ber-guild: seed boss di guild-a dan guild-b, lalu catat
-  // damage U1 di keduanya (keduanya harus hilang setelah reset) + U2 di guild-a
-  // (harus tetap).
+  // boss_damage tidak ber-guild secara langsung, tapi bossId terikat 1 guild
+  // lewat boss_spawns.guildId. Seed boss di guild-a dan guild-b, catat damage
+  // U1 di keduanya: yang di guild-a (target reset) harus hilang, yang di
+  // guild-b harus TETAP ADA (guild lain, bukan target reset). U2 di guild-a
+  // juga harus tetap ada (bukan user yang direset).
   const ba = db.prepare('INSERT INTO boss_spawns (guildId, channelId, bossKey, maxHp, hp, status, spawnedAt, endsAt) VALUES (?, ?, ?, 1000, 1000, ?, ?, ?)').run(G, 'ch', 'mini', 'active', NOW, NOW + 3600000);
   const bb = db.prepare('INSERT INTO boss_spawns (guildId, channelId, bossKey, maxHp, hp, status, spawnedAt, endsAt) VALUES (?, ?, ?, 1000, 1000, ?, ?, ?)').run(G2, 'ch', 'mini', 'active', NOW, NOW + 3600000);
   db.prepare('INSERT INTO boss_damage (bossId, userId, damage, hits) VALUES (?, ?, 500, 5)').run(ba.lastInsertRowid, U1);
@@ -105,7 +107,7 @@ function reset() {
   return resetUser(U1, G);
 }
 
-test('resetUser menghapus 10 tabel data member U1', () => {
+test('resetUser menghapus 10 tabel data member U1 (boss_damage hanya di guild yang direset)', () => {
   seed();
   const wiped = reset();
 
@@ -118,10 +120,12 @@ test('resetUser menghapus 10 tabel data member U1', () => {
   assert.strictEqual(wiped.buffs, 1);
   assert.strictEqual(wiped.voice, 1);
   assert.strictEqual(wiped.weekly, 1);
-  assert.strictEqual(wiped.bossDmg, 2);
+  // Hanya damage U1 di guild-a (target reset) yang terhapus — damage U1 di
+  // guild-b (guild lain) bukan bagian dari reset ini, jadi TIDAK dihitung.
+  assert.strictEqual(wiped.bossDmg, 1);
   assert.strictEqual(wiped.poruv, 1);
 
-  // Semua tabel data member kini kosong untuk U1.
+  // Semua tabel data member kini kosong untuk U1 di guild yang direset.
   assert.strictEqual(db.prepare('SELECT 1 FROM users WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
   assert.strictEqual(db.prepare('SELECT 1 FROM points WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
   assert.strictEqual(db.prepare('SELECT 1 FROM user_items WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
@@ -130,8 +134,19 @@ test('resetUser menghapus 10 tabel data member U1', () => {
   assert.strictEqual(db.prepare('SELECT 1 FROM user_buffs WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
   assert.strictEqual(db.prepare('SELECT 1 FROM voice_sessions WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
   assert.strictEqual(db.prepare('SELECT 1 FROM weekly_points WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
-  assert.strictEqual(db.prepare('SELECT 1 FROM boss_damage WHERE userId = ?').get(U1), undefined);
   assert.strictEqual(db.prepare('SELECT 1 FROM poruv_redemptions WHERE userId = ? AND guildId = ?').get(U1, G), undefined);
+
+  // Damage U1 di guild-a (yang direset) sudah hilang...
+  const bossA = db.prepare('SELECT id FROM boss_spawns WHERE guildId = ?').get(G);
+  assert.strictEqual(db.prepare('SELECT 1 FROM boss_damage WHERE bossId = ? AND userId = ?').get(bossA.id, U1), undefined);
+  // ...tapi damage U1 di guild-b (guild lain) HARUS TETAP ADA. Ini bug yang
+  // diperbaiki: sebelumnya `DELETE FROM boss_damage WHERE userId = ?` tanpa
+  // filter guild menghapus damage user itu lintas SEMUA guild.
+  const bossB = db.prepare('SELECT id FROM boss_spawns WHERE guildId = ?').get(G2);
+  assert.ok(
+    db.prepare('SELECT 1 FROM boss_damage WHERE bossId = ? AND userId = ?').get(bossB.id, U1),
+    'damage U1 di guild lain (guild-b) tidak boleh ikut terhapus',
+  );
 });
 
 test('resetUser mempertahankan buff guild-wide (*)', () => {
