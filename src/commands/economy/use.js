@@ -22,6 +22,12 @@ module.exports = {
     }
 
     const info = describeEffect(result.effect);
+    if (!info) {
+      return interaction.reply({
+        embeds: [errorEmbed('Efek item ini tidak dikenali. Laporkan ke admin.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
     addQuestProgress(interaction.user.id, interaction.guildId, 'use_item', 1);
     addQuestProgress(
       interaction.user.id,
