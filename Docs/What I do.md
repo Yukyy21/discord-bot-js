@@ -4,7 +4,9 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
-## Gelombang Tujuh Belas — Bar XP NaN di Level 0 (Bug2 #7)
+## Gelombang Tujuh Belas — Bug Minor #7 & #8 dari bug2.md
+
+### #7 — Bar XP NaN di Level 0
 
 Bug Minor dari `Docs/bug2.md` #7: di level 0, `xpForLevel(0) = 0`, jadi
 progres bar XP pada kartu `/profile` dan `/rank` menghitung `xp / xpNeeded`
@@ -17,6 +19,20 @@ progres bar XP pada kartu `/profile` dan `/rank` menghitung `xp / xpNeeded`
   `xp XP` tanpa rasio pembagi nol. Konsisten dengan `levelProgress()`
   (`src/lib/leveling.js`) dan `progressLine()` (`src/ui/embeds.js`).
 - `Docs/bug2.md`: #7 ditandai DIPERBAIKI dan dicoret dari daftar.
+
+### #8 — `undefined` sebagai parameter SQL
+
+Bug Minor dari `Docs/bug2.md` #8: `addQuestProgress()` di
+`src/database/quests.js` melewatkan `undefined` sebagai nilai
+`lockedMultiplier` saat quest belum selesai. Better-sqlite3 mengkoersi
+`undefined` → `null`, jadi tidak error hari ini — tapi `undefined` bukan tipe
+parameter terdokumentasi, dan bisa error saat library di-upgrade.
+
+- `src/database/quests.js`: default `lockedMult` diubah dari `undefined`
+  menjadi `null`, guard perbandingan jadi `lockedMult !== null`, dan
+  `update.run(next, null, ...)` menggantikan `update.run(next, undefined, ...)`.
+  Tidak ada perubahan perilaku (kursi koersi `undefined → null` di
+  better-sqlite3 sudah diamankan eksplisit).
 
 Catatan: tidak menjalankan `npm run format` untuk seluruh repo — format
 global mengubah 50+ file yang bukan bagian dari fix ini (repo tidak

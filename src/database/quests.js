@@ -98,11 +98,11 @@ function addQuestProgress(userId, guildId, type, amount = 1, meta = null) {
         const justCompleted = next >= row.target && row.progress < row.target;
         const lockedMult = justCompleted
           ? Math.max(getMultiplier(userId, guildId, 'coin'), getMultiplier(userId, guildId, 'quest_coin'))
-          : undefined;
-        if (lockedMult !== undefined) {
+          : null;
+        if (lockedMult !== null) {
           update.run(next, lockedMult, userId, guildId, row.period, row.questId);
         } else {
-          update.run(next, undefined, userId, guildId, row.period, row.questId);
+          update.run(next, null, userId, guildId, row.period, row.questId);
         }
       }
     }

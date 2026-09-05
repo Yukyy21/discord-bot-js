@@ -5,8 +5,8 @@ Daftar bug hasil audit lanjutan (3 subagen + verifikasi manual) di branch
 Diurutkan dari yang paling mengganggu.
 
 **Status: Critical (#1) dan Major (#2, #4) sudah diperbaiki dan diverifikasi
-— lihat [What I do.md](What%20I%20do.md). #3, #5, #6, dan #7 sudah diperbaiki.
-Minor (#8-#9) masih belum dikerjakan.**
+— lihat [What I do.md](What%20I%20do.md). #3, #5, #6, #7, dan #8 sudah
+diperbaiki. Minor (#9) masih belum dikerjakan.**
 
 ## Critical
 
@@ -117,14 +117,18 @@ cuma tampil `0/0 XP` / bar kosong (kosmetik).
 tampil sebagai `xp XP` tanpa rasio pembagi nol. Konsisten dengan
 `levelProgress()` (`src/lib/leveling.js`) dan `progressLine()` (`src/ui/embeds.js`).
 
-## 8. `undefined` sebagai parameter SQL
+## 8. ~~`undefined` sebagai parameter SQL~~ ✅ DIPERBAIKI
 
-- `src/database/quests.js:105` — `update.run(next, undefined, ...)`.
+- `src/database/quests.js` — `update.run(next, undefined, ...)`.
 
 Lolos hari ini (better-sqlite3 mengkoersi `undefined → null`), tapi `undefined`
 bukan tipe parameter terdokumentasi → bisa error saat upgrade library.
 
-**Perbaikan:** pakai `null` sebagai ganti `undefined`.
+**Perbaikan (diterapkan):** pakai `null` sebagai ganti `undefined` — default
+`lockedMult` jadi `null` (bukan `undefined`) dan guard perbandingan ikut
+`lockedMult !== null`. Tidak ada perubahan perilaku (better-sqlite3 memang
+mengkoersi `undefined` → `null`), cuma menghilangkan tipe parameter yang
+tidak terdokumentasi.
 
 ## 9. `escapeBoss` meninggalkan tombol stale
 
