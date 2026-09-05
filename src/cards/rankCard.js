@@ -50,7 +50,9 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
   const barH = 20;
   const x0 = 150;
   const y0 = 115;
-  const pct = Math.min(xp / xpNeeded, 1);
+  // Level 0 butuh 0 XP (xpForLevel(0) = 0) → bagi nol jadi NaN. Bar kosong dan
+  // label tanpa rasio kalau xpNeeded belum terdefinisi.
+  const pct = xpNeeded > 0 ? Math.min(xp / xpNeeded, 1) : 0;
 
   roundRect(ctx, x0, y0, barW, barH, barH / 2);
   ctx.fillStyle = '#404249';
@@ -63,7 +65,7 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 13px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`${xp}/${xpNeeded} XP`, x0 + barW / 2, y0 + barH - 5);
+  ctx.fillText(xpNeeded > 0 ? `${xp}/${xpNeeded} XP` : `${xp} XP`, x0 + barW / 2, y0 + barH - 5);
   ctx.textAlign = 'left';
 
   return canvas.toBuffer('image/png');

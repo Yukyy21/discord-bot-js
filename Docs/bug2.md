@@ -5,8 +5,8 @@ Daftar bug hasil audit lanjutan (3 subagen + verifikasi manual) di branch
 Diurutkan dari yang paling mengganggu.
 
 **Status: Critical (#1) dan Major (#2, #4) sudah diperbaiki dan diverifikasi
-— lihat [What I do.md](What%20I%20do.md). #3, #5, dan #6 sudah diperbaiki.
-Minor (#7-#9) masih belum dikerjakan.**
+— lihat [What I do.md](What%20I%20do.md). #3, #5, #6, dan #7 sudah diperbaiki.
+Minor (#8-#9) masih belum dikerjakan.**
 
 ## Critical
 
@@ -104,15 +104,18 @@ besar menahan outage of the bot).
 
 **Perbaikan:** konstanta `MAX_CHUNKS` (misal 4 = cap 1 jam).
 
-## 7. Bar XP NaN di level 0
+## 7. ~~Bar XP NaN di level 0~~ ✅ DIPERBAIKI
 
-- `src/cards/profileCard.js:66` & `src/cards/rankCard.js:53` — `xp / xpNeeded`;
-  `xpForLevel(0) = 0` (`src/config/constants.js:145`) → `0/0 = NaN`.
+- `src/cards/profileCard.js` & `src/cards/rankCard.js` — `xp / xpNeeded`;
+  `xpForLevel(0) = 0` (`src/config/constants.js`) → `0/0 = NaN`.
 
 Dijangkau via `/admin set-level 0`. Ada guard `if (pct > 0)` jadi **tidak crash**,
 cuma tampil `0/0 XP` / bar kosong (kosmetik).
 
-**Perbaikan:** guard `xpNeeded <= 0`.
+**Perbaikan (diterapkan):** guard `xpNeeded > 0` di kedua card — kalau
+`xpNeeded` nol (level 0), `pct` dipaksa `0` (bar kosong, tidak NaN) dan label
+tampil sebagai `xp XP` tanpa rasio pembagi nol. Konsisten dengan
+`levelProgress()` (`src/lib/leveling.js`) dan `progressLine()` (`src/ui/embeds.js`).
 
 ## 8. `undefined` sebagai parameter SQL
 
