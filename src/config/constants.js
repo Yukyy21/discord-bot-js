@@ -148,6 +148,13 @@ function xpForLevel(level) {
   return level * 100;
 }
 
+const STATUS = {
+  // Jeda antar pergantian status, acak di rentang ini biar tidak monoton.
+  MIN_INTERVAL_MS: 5 * 1000,
+  MAX_INTERVAL_MS: 10 * 1000,
+  SERVER_INVITE: 'https://discord.gg/ruv',
+};
+
 module.exports = {
   CHAT,
   VOICE,
@@ -159,5 +166,6 @@ module.exports = {
   GIVE,
   GIVE_FEE_RATE,
   EQUIP_SLOTS,
+  STATUS,
   xpForLevel,
 };
