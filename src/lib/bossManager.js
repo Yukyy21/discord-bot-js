@@ -288,6 +288,10 @@ async function rampageBoss(client, row) {
 
 /** Boss mati: bagi hadiah ke semua peserta (proporsional) + top 3 + last hit, lalu umumkan. */
 async function finishBoss(client, row) {
+  // Guard idempoten: cegah reward dobel kalau finishBoss terpanggil dua kali
+  // untuk boss yang sama (mis. refactor async atau command force-finish nanti).
+  if (getBossById(row.id)?.status !== 'defeated') return [];
+
   const contributions = getContributions(row.id);
 
   // Minimal peserta harus terpenuhi sebelum hadiah dibagikan
