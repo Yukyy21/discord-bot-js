@@ -196,6 +196,14 @@ function createTables() {
     CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);
     CREATE INDEX IF NOT EXISTS idx_boss_slot ON boss_spawns (guildId, slot);
     CREATE INDEX IF NOT EXISTS idx_poruv_status ON poruv_redemptions (guildId, status);
+
+    -- Statistik global bot, satu baris kunci-nilai. Dipakai antara lain buat
+    -- hitung total command yang pernah dieksekusi (rotate status), tahan
+    -- restart karena disimpan di sini, bukan variabel memori.
+    CREATE TABLE IF NOT EXISTS bot_stats (
+      key TEXT PRIMARY KEY,
+      value INTEGER NOT NULL DEFAULT 0
+    );
   `);
 }
 
