@@ -22,24 +22,27 @@ yang benar-benar belum digarap, diambil dari [Bugs.md](Bugs.md) dan
   berkala, di `src/config/constants.js`. Sisa chunk di atas cap tetap
   tertelusuri lewat `lastGrant`, dibayar bertahap di tick berikutnya.
 
-- [ ] **Progress bar XP NaN di level 0.** (bug2.md #7) `xpForLevel(0) = 0`
+- [x] **Progress bar XP NaN di level 0.** (bug2.md #7) `xpForLevel(0) = 0`
   bikin `xp / xpNeeded` jadi `0/0 = NaN` di `profileCard.js` dan
   `rankCard.js`. Ada guard `pct > 0` jadi tidak crash, cuma tampil kosong.
-  Cuma bisa dipicu lewat `/admin set-level 0`. Fix: guard `xpNeeded <= 0`
-  di kedua card. (fix nanti(
+  Cuma bisa dipicu lewat `/admin set-level 0`. Fix: `pct` di kedua card kini
+  `xpNeeded > 0 ? Math.min(xp / xpNeeded, 1) : 0`.
 
-- [ ] **`undefined` sebagai parameter SQL di `quests.js`.** (bug2.md #8)
+- [x] **`undefined` sebagai parameter SQL di `quests.js`.** (bug2.md #8)
   `src/database/quests.js` mengoper `undefined` ke `update.run()`.
   better-sqlite3 mengoersi ke `null` sekarang, tapi bukan tipe parameter
   yang terdokumentasi resmi — bisa error kalau library di-upgrade. Fix:
-  pakai `null` sebagai ganti `undefined`. (fix nanti)
+  `lockedMult` selalu `null` (bukan `undefined`); `update.run` dipanggil
+  dengan `null` eksplisit di kedua cabang.
 
-- [ ] **Tombol serang stale saat boss kabur.** (bug2.md #9) Di
+- [x] **Tombol serang stale saat boss kabur.** (bug2.md #9) Di
   `escapeBoss()` (`src/lib/bossManager.js`), kalau `resolveBossChannel`
   return null, fungsi return lebih awal sebelum sempat menonaktifkan tombol
   di pesan lama. Boss sudah `escaped` tapi tombolnya kelihatan masih aktif.
   Kosmetik saja (klik tombol itu cuma dapat "boss sudah selesai"), tidak
-  merusak data.(fix nanti)
+  merusak data. Fix: `escapeBoss` kini `log.warn` + `editChains.delete` di
+  cabang channel null, dan tombol pesan lama dinonaktifkan lewat
+  `queueMessageEdit` (attackRow status non-aktif) kalau channel ada.
 
 - [x] **Stok shop global untuk semua guild.** (Bugs.md #5) Stok item di
   `/shop` dipakai bersama lintas server — server rame bisa menghabiskan stok
