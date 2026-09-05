@@ -4,6 +4,26 @@ Pengganti [Changelog.md](Changelog.md) — file lama itu sudah kepanjangan,
 jadi mulai gelombang ini catatan perubahan lanjut di sini. Formatnya sama:
 perubahan diceritakan per gelombang, angka merujuk ke kode, bukan dihafal.
 
+## Gelombang Tujuh Belas — Bar XP NaN di Level 0 (Bug2 #7)
+
+Bug Minor dari `Docs/bug2.md` #7: di level 0, `xpForLevel(0) = 0`, jadi
+progres bar XP pada kartu `/profile` dan `/rank` menghitung `xp / xpNeeded`
+= `xp / 0` = `NaN`. Tidak crash (ada guard `if (pct > 0)`), tapi tampil
+`0/0 XP` dan bar kosong. Dijangkau via `/admin set-level 0`.
+
+- `src/cards/profileCard.js` & `src/cards/rankCard.js`: `pct` di-guard
+  `xpNeeded > 0 ? Math.min(xp / xpNeeded, 1) : 0` — kalau `xpNeeded` nol
+  (level 0), `pct` dipaksa `0` (bar kosong, tidak NaN) dan label tampil
+  `xp XP` tanpa rasio pembagi nol. Konsisten dengan `levelProgress()`
+  (`src/lib/leveling.js`) dan `progressLine()` (`src/ui/embeds.js`).
+- `Docs/bug2.md`: #7 ditandai DIPERBAIKI dan dicoret dari daftar.
+
+Catatan: tidak menjalankan `npm run format` untuk seluruh repo — format
+global mengubah 50+ file yang bukan bagian dari fix ini (repo tidak
+prettier-clean). Cukup lint + test.
+
+Verifikasi: `npm run lint` bersih, `npm test` **122/122** hijau.
+
 ## Gelombang Enam Belas — Fitur Rotate Status Bot
 
 Fitur baru: Custom Status bot berganti otomatis tiap 5-10 detik acak,
