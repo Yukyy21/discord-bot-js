@@ -63,7 +63,7 @@ function getContribution(bossId, userId) {
 /** Kontribusi damage semua penyerang, urut dari terbesar. */
 function getContributions(bossId) {
   return db
-    .prepare('SELECT userId, damage, hits FROM boss_damage WHERE bossId = ? ORDER BY damage DESC')
+    .prepare('SELECT userId, damage, hits, lastAttackAt FROM boss_damage WHERE bossId = ? ORDER BY damage DESC')
     .all(bossId);
 }
 
