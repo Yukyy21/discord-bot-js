@@ -143,3 +143,8 @@ tidak bisa di-resolve — kegagalan dicatat lewat log (warn) dan antrean edit
 (`editChains`) tetap dibersihkan. Kalau pesan boss tidak ditemukan saat
 mematikan tombol, ikut dicatat. Tombol tetap dimatikan lewat `queueMessageEdit`
 (serial, konsisten dengan `handleBossAttack`), terpisah dari kirim embed kabur.
+
+**Multi-level-up hanya dapat reward sekali** (need fix, note: gw aja ferr yang kerjain ini besok)
+
+**Logika di baris yang sama (134-139)** (need fix): komentar bilang "pakai locked kalau ada, kalau tidak pakai current", tapi kode sebenarnya mengambil max dari keduanya (Math.max(lockedMult, currentMult)). Perilaku ini kemungkinan disengaja (menguntungkan user), tapi komentarnya menyesatkan soal apa yang benar-benar terjadi.
+**Sistem anti-spam (antispam.js) dan XP cap (xpCap.js) disimpan in-memory (bukan di DB)** — reset saat bot restart. Dampaknya kecil (bukan soal ekonomi kritis), tapi restart yang sering bisa jadi celah kecil untuk spam XP.
