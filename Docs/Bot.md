@@ -51,7 +51,7 @@ level yang terpisah.
 
 | Command | Fungsi |
 |---|---|
-| `/guide` | Panduan interaktif dengan dropdown kategori (11 halaman: Beranda, Ekonomi, Poruv & Level, Aktivitas, Quest, Rank Tier, Item & Rarity, Reward, Utilitas, Admin, Tips) |
+| `/guide` | Panduan interaktif ephemeral dengan dropdown kategori (11 halaman: Beranda, Ekonomi, Poruv & Level, Aktivitas, Quest, Rank Tier, Item & Rarity, Reward, Utilitas, Admin, Tips) |
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim yang membangun bot beserta perannya — 3 halaman (Developer, Executive, Beta Tester) dengan tombol navigasi |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
@@ -254,7 +254,10 @@ server punya channel bosnya sendiri lewat `/boss-channel` (tabel
 `guild_config`); kalau guild belum di-set, dipakai fallback `BOSS_CHANNEL_ID`
 dari `.env`. Penjadwal di `src/lib/bossManager.js` mengiterasi semua guild yang
 terkonfigurasi, jadi bot multi-server memunculkan boss di tiap servernya.
-Player tidak punya HP — yang berdarah hanya boss. Satu klik tombol memberi
+Player tidak punya HP — yang berdarah hanya boss. Cara serang: tombol
+**Toggle Auto Attack** di pesan boss men-trigger loop otomatis (maks 20×
+serangan per aktivasi, berhenti kalau boss tumbang duluan atau di-toggle lagi
+di tengah jalan) — bukan lagi klik manual tiap cooldown. Tiap serangan memberi
 damage acak sesuai rentang boss (300–900 sebelum buff `boss_damage`), dengan
 cooldown 10 detik per orang; boss kabur setelah 6 jam. Hadiah: 60% pool dibagi
 proporsional damage ke semua peserta, sisanya bonus top 3 damager (15%/10%/5%)
@@ -268,15 +271,23 @@ HP); yang dilakukannya adalah memasang debuff atau merampas coin dompet.
 Katalog serangan + aturan penggabungannya ada di `src/lib/bossAttacks.js`
 (modul murni), penyimpanannya di `src/database/debuffs.js`. Debuff numpang di
 tabel `user_buffs` tapi selalu memakai key ber-prefix `debuff:` supaya query
-buff item lama tidak pernah tercampur. Pemicunya dua: serangan balik saat player
-klik **Serang!** (`counterChance` per boss: 25% / 30% / 40%) dan amukan berkala
-tiap `BOSS.RAMPAGE_INTERVAL_MS` ke maksimal `BOSS.RAMPAGE_TARGETS` penyerang
-teraktif (kolom `boss_spawns.lastRampageAt` menjaga jadwalnya tidak dobel).
-Urutan hitung selalu **buff item dulu, debuff belakangan** — `applyBuff()`
-sudah melakukannya otomatis lewat `getDebuffMultiplier()`, jadi ability item
-tidak pernah dibatalkan. Debuff tidak kena bonus durasi Endless Pulse dan tidak
-ikut Rekindle; `cooldown_reset` (Chrono Core) membersihkannya. Catatan: pembagian ini sedang ditinjau ulang,
-lihat [Balancing.md](Balancing.md).
+buff item lama tidak pernah tercampur. Pemicunya dua: serangan balik saat
+auto attack menyerang (`counterChance` per boss: 25% / 30% / 40%), hasilnya
+nempel di pesan hasil serang milik penyerang sendiri (ephemeral, di-edit
+ulang tiap serangan lewat `interaction.editReply()` — bukan pesan baru); dan
+amukan berkala tiap `BOSS.RAMPAGE_INTERVAL_MS` ke maksimal
+`BOSS.RAMPAGE_TARGETS` penyerang teraktif (kolom `boss_spawns.lastRampageAt`
+menjaga jadwalnya tidak dobel), dikirim satu-satu lewat **DM**
+(`client.users.fetch(userId).send(...)`) — bukan diumumkan di channel boss,
+supaya channel tidak menumpuk. Ephemeral asli Discord cuma berlaku untuk
+balasan interaksi; amukan dipicu scheduler jadi DM dipakai sebagai
+penggantinya (kalau DM user tertutup, notifikasi itu dilewati saja, tidak ada
+fallback ke channel publik). Urutan hitung selalu **buff item dulu, debuff
+belakangan** — `applyBuff()` sudah melakukannya otomatis lewat
+`getDebuffMultiplier()`, jadi ability item tidak pernah dibatalkan. Debuff
+tidak kena bonus durasi Endless Pulse dan tidak ikut Rekindle;
+`cooldown_reset` (Chrono Core) membersihkannya. Catatan: pembagian ini sedang
+ditinjau ulang, lihat [Balancing.md](Balancing.md).
 
 ## Panduan Dalam Bot (`/guide`)
 
