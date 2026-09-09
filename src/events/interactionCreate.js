@@ -12,7 +12,7 @@ const { buildStaff } = require('../commands/staff/staff');
 const poruvShopCmd = require('../commands/economy/poruvShop');
 const poruvResolveCmd = require('../commands/admin/poruvResolve');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
-const { handleBossAttack } = require('../lib/bossManager');
+const { handleBossAutoAttack } = require('../lib/bossManager');
 
 // Discord membatalkan token interaksi setelah beberapa detik. Slash command
 // dari sebelum bot restart pasti sudah lewat batas ini, jadi dilewati saja
@@ -43,7 +43,9 @@ async function handleButton(interaction) {
         return await interaction.update(buildGuide('home'));
 
       case 'guide_close':
-        return await interaction.message.delete().catch(() => {});
+        // Pesan guide sekarang ephemeral: message.delete() tidak berlaku untuk
+        // ephemeral (ditolak API Discord), jadi pakai deleteReply() lewat webhook.
+        return await interaction.deferUpdate().then(() => interaction.deleteReply()).catch(() => {});
 
       case 'pager_noop': // tombol indikator halaman, memang tidak melakukan apa-apa
         return;
@@ -93,8 +95,8 @@ async function handleButton(interaction) {
         return await interaction.update(buildQuest(interaction.user, interaction.guildId));
       }
 
-      case 'boss_attack': // a = id boss di tabel boss_spawns
-        return await handleBossAttack(interaction, a);
+      case 'boss_autoattack': // a = id boss di tabel boss_spawns
+        return await handleBossAutoAttack(interaction, a);
 
       case 'lb_page': // a = kategori, b = halaman
         return await interaction.update(buildLeaderboard(a, interaction.guildId, Number(b) || 0));
