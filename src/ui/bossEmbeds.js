@@ -17,12 +17,12 @@ const ROLE_LABEL = {
 
 const num = n => Number(n || 0).toLocaleString('id-ID');
 
-/** Baris tombol serang. bossId ikut di customId supaya tahan restart bot. */
+/** Baris tombol toggle auto-attack. bossId ikut di customId supaya tahan restart bot. */
 function attackRow(bossId, disabled = false) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId(`boss_attack:${bossId}`)
-      .setLabel(disabled ? 'Boss sudah tumbang' : 'Serang!')
+      .setCustomId(`boss_autoattack:${bossId}`)
+      .setLabel(disabled ? 'Boss sudah tumbang' : 'Toggle Auto Attack')
       .setEmoji(eo('boss_hit') ?? eo('boss'))
       .setStyle(disabled ? ButtonStyle.Secondary : ButtonStyle.Danger)
       .setDisabled(disabled),
@@ -89,27 +89,16 @@ function counterLines(counter) {
   return lines;
 }
 
-/** Embed pengumuman boss mengamuk ke beberapa penyerang sekaligus. */
-function bossRampageEmbed(row, hits) {
+/** Embed pengumuman boss mengamuk, dikirim satu per satu ke tiap penyerang lewat DM (bukan diumumkan ke channel, biar tidak menuh-menuhin channel boss). Tanpa gambar boss (kebesaran). */
+function bossRampageHitEmbed(row, hit) {
   const boss = getBoss(row.bossKey);
-  const embed = themedEmbed('boss_hit', `${boss.name} Mengamuk!`, COLORS.warn).setDescription(
-    [`${e('boss')} **${boss.name}** balas menyerang para penyerangnya.`, DIVIDER].join('\n'),
-  );
-  for (const hit of hits) {
-    embed.addFields({
-      name: `${hit.attack.name}`,
-      value: [`<@${hit.userId}>`, ...counterLines(hit).slice(1), hit.attack.text].join('\n'),
-      inline: false,
-    });
-  }
-  embed.setFooter({ text: 'Kutukan bisa dibersihkan dengan Chrono Core (Time Skip)' });
-  const icon = bossIcon(row.bossKey);
-  if (icon) embed.setImage(icon.url);
-  return embed;
+  return themedEmbed('boss_hit', `${boss.name} Mengamuk!`, COLORS.warn).setDescription(
+    [`${e('boss')} **${boss.name}** balas menyerangmu di luar giliran.`, DIVIDER, ...counterLines(hit)].join('\n'),
+  ).setFooter({ text: 'Kutukan bisa dibersihkan dengan Chrono Core (Time Skip)' });
 }
 
-/** Balasan ephemeral setelah satu serangan. */
-function attackResultEmbed(row, result, { multiplier = 1, debuff = 1, missed = false, counter = null } = {}) {
+/** Balasan ephemeral setelah satu serangan. Tanpa gambar boss (kebesaran) — pesan ini di-edit ulang tiap serangan, bukan dikirim baru. */
+function attackResultEmbed(row, result, { multiplier = 1, debuff = 1, missed = false, counter = null, autoAttack = null } = {}) {
   const boss = getBoss(row.bossKey);
   const lines = [
     `${e('boss')} Kamu menyerang **${boss.name}** dan memberi **${num(result.dealt)}** damage.`,
@@ -122,12 +111,18 @@ function attackResultEmbed(row, result, { multiplier = 1, debuff = 1, missed = f
     lines[0] = `${e('warn')} Kamu masih linglung — seranganmu **meleset** dan tidak memberi damage.`;
   }
   if (counter) lines.push(DIVIDER, ...counterLines(counter));
+  if (autoAttack) {
+    lines.push(
+      DIVIDER,
+      autoAttack.done
+        ? `${e('info')} Auto attack selesai (**${autoAttack.count}/${autoAttack.max}**). Klik tombolnya lagi buat lanjut.`
+        : `${e('info')} Auto attack **${autoAttack.count}/${autoAttack.max}** — lanjut otomatis tiap ${autoAttack.cooldownSec} detik.`,
+    );
+  }
   const embed = baseEmbed()
     .setColor(boss.color)
     .setTitle(`${e('boss')} Serangan Masuk`)
     .setDescription(lines.join('\n'));
-  const icon = bossIcon(row.bossKey);
-  if (icon) embed.setImage(icon.url);
   return embed;
 }
 
@@ -186,7 +181,7 @@ module.exports = {
   bossIconFiles,
   bossEmbed,
   attackResultEmbed,
-  bossRampageEmbed,
+  bossRampageHitEmbed,
   counterLines,
   bossDefeatedEmbed,
   bossEscapedEmbed,
