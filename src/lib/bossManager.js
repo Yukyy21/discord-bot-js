@@ -40,7 +40,7 @@ const {
   attackResultEmbed,
   bossDefeatedEmbed,
   bossEscapedEmbed,
-  bossRampageEmbed,
+  bossRampageHitEmbed,
   bossIconFiles,
 } = require('../ui/bossEmbeds');
 const { warnEmbed } = require('../ui/embeds');
@@ -161,32 +161,32 @@ async function rollbackSpawn(row, error) {
   return { ok: false, message: 'Boss gagal muncul (channel tidak bisa dikirimi pesan).' };
 }
 
-/** Tombol serang. Player tidak punya HP — hanya boss yang berdarah. */
-async function handleBossAttack(interaction, bossId) {
-  if (interaction.replied || interaction.deferred) return;
-  const row = getBossById(Number(bossId));
-  if (!row || row.status !== 'active') {
-    return interaction.reply({
-      embeds: [warnEmbed('Boss ini sudah selesai. Tunggu spawn berikutnya jam 12 malam atau 12 siang.')],
-      flags: MessageFlags.Ephemeral,
-    });
-  }
+// Loop auto-attack aktif per (bossId:userId) -> { timer, count }. Simpan di
+// memori proses karena hanya perlu bertahan selama sesi bot berjalan; kalau
+// bot restart, user tinggal klik toggle lagi.
+const autoAttackLoops = new Map();
+const AUTO_ATTACK_MAX = 20;
 
-  const userId = interaction.user.id;
-  const guildId = row.guildId;
-  // Cooldown molor kalau user sedang kena debuff `debuff:cooldown` dari boss.
+function autoAttackKey(bossId, userId) {
+  return `${bossId}:${userId}`;
+}
+
+function stopAutoAttack(bossId, userId) {
+  const key = autoAttackKey(bossId, userId);
+  const loop = autoAttackLoops.get(key);
+  if (loop) clearTimeout(loop.timer);
+  autoAttackLoops.delete(key);
+}
+
+/**
+ * Satu kali serangan (dipakai baik oleh klik tunggal maupun loop auto-attack).
+ * Tidak menyentuh objek interaction — hanya database + update embed boss publik.
+ * Mengembalikan hasil terstruktur supaya pemanggil bebas merender pesannya sendiri.
+ */
+async function performAttack(client, row, userId, guildId) {
   const cooldownMult = getDebuff(userId, guildId, 'debuff:cooldown');
   const left = attackCooldownLeft(getContribution(row.id, userId)?.lastAttackAt, Date.now(), cooldownMult);
-  if (left > 0) {
-    return interaction.reply({
-      embeds: [
-        warnEmbed(
-          `${e('clock')} Senjatamu masih dingin. Coba lagi <t:${Math.floor((Date.now() + left) / 1000)}:R>.`,
-        ),
-      ],
-      flags: MessageFlags.Ephemeral,
-    });
-  }
+  if (left > 0) return { ok: false, reason: 'cooldown', left };
 
   const boss = getBoss(row.bossKey);
   // Buff damage dihitung SAAT serangan terjadi, bukan saat boss mati.
@@ -197,12 +197,7 @@ async function handleBossAttack(interaction, bossId) {
   const missed = consumeDebuffCharge(userId, guildId, 'debuff:miss');
   const damage = missed ? 0 : Math.round(rollDamage(boss) * multiplier * damageDebuff);
   const result = applyDamage(row.id, userId, damage);
-  if (!result.ok) {
-    return interaction.reply({
-      embeds: [warnEmbed('Boss sudah tumbang tepat sebelum seranganmu masuk.')],
-      flags: MessageFlags.Ephemeral,
-    });
-  }
+  if (!result.ok) return { ok: false, reason: 'gone' };
 
   // Quest "ikut event": progres dihitung sekali, saat serangan pertama.
   if (result.hits === 1) addQuestProgress(userId, guildId, 'boss_join', 1);
@@ -216,46 +211,141 @@ async function handleBossAttack(interaction, bossId) {
   }
 
   const after = getBossById(row.id);
-  // Ack dulu supaya interaksi tidak pernah timeout (pesan boss sudah bisa
-  // berubah banyak), lalu update embed boss diantre per-spawn. Task membaca
-  // state terbaru dari DB saat mengeksekusi, jadi dua serangan nyaris
-  // bersamaan tidak akan saling menimpa dengan data basi.
-  //
-  // PENTING: damage sudah di-commit ke DB lewat applyDamage() di atas —
-  // kalau boss sudah defeated di sini, finishBoss() harus tetap jalan
-  // walaupun langkah UI di bawah (deferUpdate/edit/followUp) gagal, misalnya
-  // karena interaksi keburu expire (window ~3 detik dari Discord). Kalau
-  // tidak, boss tertinggal berstatus 'defeated' tanpa reward pernah
-  // dibagikan, dan scheduler tidak akan menolongnya karena hanya memproses
-  // boss yang masih 'active'.
-  try {
-    await interaction.deferUpdate();
-    await queueMessageEdit(row.id, async () => {
-      const latest = getBossById(row.id);
-      if (!latest) return;
-      await interaction.message.edit({
+
+  // Update embed boss publik (HP bar dkk), diantre per-spawn supaya dua
+  // serangan nyaris bersamaan tidak saling menimpa dengan data basi.
+  queueMessageEdit(row.id, async () => {
+    const latest = getBossById(row.id);
+    if (!latest || !latest.messageId) return;
+    const channel = await resolveBossChannel(client, latest.channelId);
+    if (!channel) return;
+    const msg = await channel.messages.fetch(latest.messageId).catch(() => null);
+    if (!msg) return;
+    await msg
+      .edit({
         embeds: [bossEmbed(latest, getContributions(row.id))],
         components: [attackRow(row.id, latest.status !== 'active')],
         // Attachment harus dikirim ulang tiap edit, kalau tidak thumbnail-nya hilang.
         files: bossIconFiles(row.bossKey),
-      });
-    }).catch(error => log.error(`Gagal update embed boss ${row.id}:`, error.message));
-    await interaction.followUp({
-      embeds: [attackResultEmbed(after, result, { multiplier, debuff: damageDebuff, missed, counter })],
-      files: bossIconFiles(row.bossKey),
+      })
+      .catch(() => {});
+  }).catch(error => log.error(`Gagal update embed boss ${row.id}:`, error.message));
+
+  if (result.defeated) await finishBoss(client, after);
+
+  return { ok: true, boss, result, after, multiplier, damageDebuff, missed, counter };
+}
+
+/**
+ * Toggle auto-attack. Klik pertama: mulai loop (serang langsung, lalu ulang
+ * tiap cooldown) sampai maksimal 20× lalu berhenti otomatis — harus klik lagi
+ * buat lanjut. Klik kedua saat loop jalan: matikan loop lebih awal.
+ * Satu pesan ephemeral dipakai untuk seluruh loop (di-edit tiap serangan,
+ * bukan dikirim baru) biar tidak numpuk. Tanpa gambar boss (kebesaran).
+ */
+async function handleBossAutoAttack(interaction, bossId) {
+  if (interaction.replied || interaction.deferred) return;
+  const id = Number(bossId);
+  const userId = interaction.user.id;
+  const key = autoAttackKey(id, userId);
+
+  // Klik kedua: user sudah punya loop jalan -> matikan.
+  if (autoAttackLoops.has(key)) {
+    stopAutoAttack(id, userId);
+    return interaction.reply({
+      embeds: [warnEmbed(`${e('info')} Auto attack dihentikan.`)],
       flags: MessageFlags.Ephemeral,
     });
-  } catch (error) {
-    log.error(`Interaksi serangan boss ${row.id} gagal (kemungkinan expired):`, error.message);
   }
 
-  if (result.defeated) await finishBoss(interaction.client, after);
+  const row = getBossById(id);
+  if (!row || row.status !== 'active') {
+    return interaction.reply({
+      embeds: [warnEmbed('Boss ini sudah selesai. Tunggu spawn berikutnya jam 12 malam atau 12 siang.')],
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  const guildId = row.guildId;
+  const client = interaction.client;
+
+  const state = { count: 0 };
+  autoAttackLoops.set(key, { timer: null, count: 0 });
+
+  const renderAndEdit = async payload => {
+    try {
+      await interaction.editReply(payload);
+    } catch (error) {
+      log.error(`Gagal update pesan auto-attack boss ${id} untuk ${userId}:`, error.message);
+      stopAutoAttack(id, userId);
+    }
+  };
+
+  const runOnce = async () => {
+    const latestRow = getBossById(id);
+    if (!latestRow || latestRow.status !== 'active') {
+      stopAutoAttack(id, userId);
+      return renderAndEdit({ embeds: [warnEmbed('Boss sudah tumbang. Auto attack dihentikan.')] });
+    }
+
+    const attack = await performAttack(client, latestRow, userId, guildId);
+    if (!attack.ok) {
+      if (attack.reason === 'cooldown') {
+        // Seharusnya jarang kena karena kita menjadwalkan sesuai cooldown,
+        // tapi kalau ada debuff cooldown baru masuk di tengah loop, tunggu sisanya.
+        const loop = autoAttackLoops.get(key);
+        if (loop) loop.timer = setTimeout(() => runOnce(), attack.left);
+        return;
+      }
+      stopAutoAttack(id, userId);
+      return renderAndEdit({ embeds: [warnEmbed('Boss sudah tumbang tepat sebelum seranganmu masuk.')] });
+    }
+
+    state.count += 1;
+    const loop = autoAttackLoops.get(key);
+    if (loop) loop.count = state.count;
+
+    const done = attack.result.defeated || state.count >= AUTO_ATTACK_MAX;
+    await renderAndEdit({
+      embeds: [
+        attackResultEmbed(attack.after, attack.result, {
+          multiplier: attack.multiplier,
+          debuff: attack.damageDebuff,
+          missed: attack.missed,
+          counter: attack.counter,
+          autoAttack: { count: state.count, max: AUTO_ATTACK_MAX, done, cooldownSec: Math.round(BOSS.ATTACK_COOLDOWN_MS / 1000) },
+        }),
+      ],
+    });
+
+    if (done) {
+      stopAutoAttack(id, userId);
+      return;
+    }
+
+    const cooldownMult = getDebuff(userId, guildId, 'debuff:cooldown');
+    const delay = Math.round(BOSS.ATTACK_COOLDOWN_MS * cooldownMult);
+    const nextLoop = autoAttackLoops.get(key);
+    if (nextLoop) nextLoop.timer = setTimeout(() => runOnce(), delay);
+  };
+
+  await runOnce();
 }
 
 /**
  * Amukan berkala: tiap RAMPAGE_INTERVAL_MS boss menyerang beberapa penyerang
  * teraktif sekaligus. Aturannya sama dengan serangan balik — tidak ada damage
  * ke player, hanya debuff atau coin dirampas.
+ */
+/**
+ * Amukan boss: dikirim satu-satu lewat DM ke tiap penyerang teraktif, bukan
+ * satu embed gabungan di channel boss — biar channel boss tidak menuh-menuhin
+ * tiap 5 menit. DM bukan flag ephemeral asli (ephemeral cuma berlaku untuk
+ * balasan interaksi, dan amukan ini dipicu scheduler, bukan klik user), tapi
+ * efeknya sama: cuma penerimanya sendiri yang lihat.
+ * Kalau DM user tertutup, pesan itu dilewati saja (tidak fallback ke channel
+ * publik) — sesuai permintaan supaya channel boss tidak ikut menuh-menuhin.
  */
 async function rampageBoss(client, row) {
   const targets = pickRampageTargets(getContributions(row.id));
@@ -272,17 +362,17 @@ async function rampageBoss(client, row) {
   markRampage(row.id);
   if (!hits.length) return [];
 
-  const channel = await resolveBossChannel(client, row.channelId);
-  if (channel) {
-    await channel
-      .send({
-        content: hits.map(h => `<@${h.userId}>`).join(' '),
-        embeds: [bossRampageEmbed(row, hits)],
-        files: bossIconFiles(row.bossKey),
-      })
-      .catch(err => log.error('Gagal mengirim amukan boss:', err.message));
-  }
-  log.info(`Boss ${row.bossKey} (id ${row.id}) mengamuk ke ${hits.length} player`);
+  await Promise.allSettled(
+    hits.map(async hit => {
+      try {
+        const user = await client.users.fetch(hit.userId);
+        await user.send({ embeds: [bossRampageHitEmbed(row, hit)] });
+      } catch (err) {
+        log.warn(`Gagal DM amukan boss ke ${hit.userId} (DM tertutup?):`, err.message);
+      }
+    }),
+  );
+  log.info(`Boss ${row.bossKey} (id ${row.id}) mengamuk ke ${hits.length} player (dikirim lewat DM)`);
   return hits;
 }
 
@@ -432,7 +522,7 @@ function startBossScheduler(client) {
 
 module.exports = {
   spawnBoss,
-  handleBossAttack,
+  handleBossAutoAttack,
   finishBoss,
   rampageBoss,
   escapeBoss,
