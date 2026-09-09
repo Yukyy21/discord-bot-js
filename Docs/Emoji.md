@@ -106,15 +106,15 @@ Detail cara kerja rotasinya di [Bot.md](Bot.md#rotate-status-bot).
 | `ability` | `<:ability:...>` | Ikon universal semua ability item (`/use`) |
 | `buff` | `<:buff:...>` | Judul embed `/buffs` |
 | `buff_active` | `<a:Buffactive:...>` (animated) | Tiap baris buff yang sedang aktif |
-| `boss` | `<:boss:...>` | Judul embed boss, tombol serang (fallback), hasil serangan |
+| `boss` | `<:boss:...>` | Judul embed boss, tombol auto attack (fallback), hasil serangan |
 | `boss_hp` | `<:bosshp:...>` | Baris HP boss |
 | `boss_loot` | `<:lootboss:...>` | Bagian hadiah & loot boss |
-| `boss_hit` | `<:bosshit:...>` | Ikon tombol **Serang!** (ID opsional) |
+| `boss_hit` | `<:bosshit:...>` | Ikon tombol **Toggle Auto Attack** (ID opsional) |
 
 ## Ikon Gambar Boss
 
 Selain emoji, tiap mini boss punya **gambar** sendiri di `assets/boss/`
-(`pump_freakin.png`, `clown_orca.png`, `ancient_mummy.jpeg`). Nama filenya
+(`pump_freakin.png`, `clown_orca.jpg`, `ancient_mummy.jpeg`). Nama filenya
 didaftarkan di field `icon` pada `src/lib/bossCatalog.js`.
 
 ```js
