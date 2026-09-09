@@ -41,7 +41,7 @@ const PAGES = [
       {
         role: 'Boss Artwork',
         emoji: 'artwork',
-        members: ['1537045204169924688'],
+        members: [],
       },
       {
         role: 'UI/UX & Aset Emoji',
@@ -101,11 +101,13 @@ function buildCredit(page = 0) {
       ].join('\n'),
     )
     .addFields(
-      data.groups.map(g => ({
-        name: `${e(g.emoji)} ${g.role}`,
-        value: g.members.map(id => `<@${id}>`).join('\n'),
-        inline: true,
-      })),
+      data.groups
+        .filter(g => g.members.length > 0)
+        .map(g => ({
+          name: `${e(g.emoji)} ${g.role}`,
+          value: g.members.map(id => `<@${id}>`).join('\n'),
+          inline: true,
+        })),
     )
     .setFooter({ text: `Halaman ${current + 1}/${total} • Terima kasih sudah memakai bot ini` });
 
