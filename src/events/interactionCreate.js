@@ -13,6 +13,7 @@ const poruvShopCmd = require('../commands/economy/poruvShop');
 const poruvResolveCmd = require('../commands/admin/poruvResolve');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 const { handleBossAutoAttack } = require('../lib/bossManager');
+const { maybeSendBetaReminder } = require('../lib/betaReminder');
 
 // Discord membatalkan token interaksi setelah beberapa detik. Slash command
 // dari sebelum bot restart pasti sudah lewat batas ini, jadi dilewati saja
@@ -24,9 +25,22 @@ const ALREADY_ACKNOWLEDGED = 40060;
 module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
-    if (interaction.isButton()) return handleButton(interaction);
-    if (interaction.isStringSelectMenu()) return handleSelectMenu(interaction);
-    if (interaction.isChatInputCommand()) return handleCommand(interaction);
+    if (interaction.isButton()) await handleButton(interaction);
+    else if (interaction.isStringSelectMenu()) await handleSelectMenu(interaction);
+    else if (interaction.isChatInputCommand()) await handleCommand(interaction);
+    else return;
+
+    // Numpang di balasan interaksi apa pun (command, tombol, dropdown) yang
+    // baru saja sukses dibalas — bukan pesan terpisah, jadi tidak menambah
+    // notifikasi baru di luar konteks yang sedang user pakai. Dikecualikan
+    // untuk tombol yang menutup/tidak melakukan apa-apa (guide_close,
+    // pager_noop) — muncul pengingat pas user baru saja menutup sesuatu
+    // terasa aneh. No-op diam-diam kalau syarat lain tidak terpenuhi (lihat
+    // betaReminder.js).
+    const skip = interaction.isButton?.() && ['guide_close', 'pager_noop'].includes(interaction.customId?.split(':')[0]);
+    if (!skip) {
+      await maybeSendBetaReminder(interaction).catch(error => logger.error('Beta reminder gagal:', error.message));
+    }
   },
 };
 
