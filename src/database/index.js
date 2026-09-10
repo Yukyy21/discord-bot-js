@@ -19,6 +19,7 @@ const guildConfig = require('./guildConfig');
 const staff = require('./staff');
 const giveDaily = require('./giveDaily');
 const botStats = require('./botStats');
+const betaReminders = require('./betaReminders');
 
 createTables();
 runMigrations();
@@ -58,4 +59,5 @@ module.exports = {
   ...staff,
   ...giveDaily,
   ...botStats,
+  ...betaReminders,
 };
