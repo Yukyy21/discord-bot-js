@@ -80,4 +80,4 @@ async function resolvePointChannel(client, guild, channelId) {
   return guild.channels.cache.find(ch => ch.type === 0) ?? null;
 }
 
-module.exports = { reconcileLevels };
+module.exports = { reconcileLevels, resolvePointChannel };
