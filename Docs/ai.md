@@ -66,6 +66,7 @@ server B.
 |---|---|
 | `/ai-ask <input>` | Tanya apa saja soal bot; jawaban bersumber dari dokumen ini |
 | `/guide` | Panduan interaktif (ephemeral, cuma kamu yang lihat), dropdown 11 kategori, tombol halaman & tombol tutup |
+| `/report type:bug\|saran <text>` | Laporkan bug atau kasih saran soal bot; masuk ke admin lewat DM |
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim pembuat bot |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
@@ -77,6 +78,7 @@ server B.
 | `/admin reset-user <user> <konfirmasi>` | Hapus semua data user (saldo, Poruv, level, inventori, quest) |
 | `/admin set-level <user> <level>` | Set level manual, XP direset ke 0 |
 | `/admin-spawn-boss` | Paksa boss diundi sekarang (buat tes) |
+| `/beta type:on\|off` | Nyala/matikan pengingat berkala "bot masih beta, laporkan lewat `/report`" (per server) |
 
 `/admin` dikunci `setDefaultMemberPermissions(Administrator)` jadi tidak muncul
 untuk member biasa. `reset-user` wajib `konfirmasi: true`.
@@ -384,6 +386,23 @@ member lain di channel tidak ikut kebanjiran.
 
 ---
 
+## 8b. Mode Beta & Report
+
+- `/beta type:on|off` (**admin**) menyala/matikan pengingat mode beta per
+  server. Kalau nyala, bot **numpang** pesan ephemeral di balasan command
+  atau tombol apa pun yang sedang kamu pakai (bukan pesan terpisah di satu
+  channel tetap) — sekali muncul, baru muncul lagi ke kamu setelah jeda acak
+  **40-90 menit**. Isinya mengingatkan bot masih beta dan mengarahkan ke
+  `/report`.
+- `/report type:bug|saran text:<isi>` bisa dipakai siapa saja. Laporan tidak
+  disimpan di database — langsung diteruskan lewat **DM** ke admin server
+  (role yang terdaftar di `ADMIN_ROLE_IDS`, env yang sama dengan notifikasi
+  `/poruv-shop`). Kalau `ADMIN_ROLE_IDS` kosong, laporan tetap dikonfirmasi
+  ke pelapor tapi tidak ada yang otomatis diberi tahu.
+- Balasan `/report` **ephemeral** — cuma pelapor yang lihat konfirmasinya.
+
+---
+
 ## 9. Tampilan & Emoji
 
 Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
@@ -444,6 +463,10 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 **"Kok aku nggak dapat notif amukan boss?"** → Notif amukan dikirim lewat DM, bukan di channel boss. Kalau DM-mu tertutup untuk member server ini, notifnya tidak sampai — tapi efeknya (debuff/coin hilang) tetap berlaku. Buka DM dari member server untuk menerimanya.
 
 **"Ikon/gambar boss-nya kok nggak muncul di pesan serangan?"** → Memang sengaja tanpa gambar (dianggap kebesaran untuk pesan sekali-lihat). Gambar boss cuma muncul di embed saat boss muncul, tumbang, atau kabur.
+
+**"Gimana cara lapor bug/kasih saran?"** → `/report type:bug text:<jelaskan masalahnya>` untuk bug, atau `/report type:saran text:<idemu>` untuk saran. Laporan langsung diteruskan ke admin, tidak perlu japri manual.
+
+**"Kenapa bot suka ngirim pesan 'masih beta' sendiri?"** → Itu pengingat otomatis dari `/beta` yang dinyalakan admin server ini — muncul cuma buat kamu (ephemeral) numpang di command yang lagi kamu pakai, sekali per 40-90 menit. Bukan bug, dan kalau dianggap mengganggu, admin bisa matikan lewat `/beta type:off`.
 
 **"Command bot nggak muncul."** → Itu urusan admin: command harus dideploy ulang; command global butuh waktu menyebar.
 
