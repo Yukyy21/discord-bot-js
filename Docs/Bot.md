@@ -56,6 +56,7 @@ level yang terpisah.
 | `/credit` | Tim yang membangun bot beserta perannya — 3 halaman (Developer, Executive, Beta Tester) dengan tombol navigasi |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
 | `/ai-ask <input>` | Tanya apa saja soal bot; dijawab AI berdasarkan `Docs/ai.md` |
+| `/report type:bug\|saran text:<isi>` | Kirim laporan bug/saran, diteruskan ke admin lewat DM (role `ADMIN_ROLE_IDS`); balasan ephemeral |
 
 | `/admin give-coin <user> <jumlah>` | **Admin:** beri coin ke user (event/hadiah) |
 | `/admin reset-user <user> <konfirmasi>` | **Admin:** hapus semua data user - saldo, Poruv, level, inventori, quest |
@@ -64,11 +65,43 @@ level yang terpisah.
 | `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum 
 di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
 | `/poruv-resolve list\|resolve <id>` | **Admin:** kelola klaim Poruv Shop manual — `list` menampilkan klaim pending + tombol resolve per klaim, `resolve <id>` menandai satu klaim selesai |
+| `/beta type:on\|off` | **Admin:** nyala/matikan pengingat berkala "bot masih beta, laporkan lewat `/report`" (per-guild, tabel `guild_config`) |
 
 | `/staff-set add\|remove` | **Admin:** kelola daftar staff server ini (tabel `staff`); staff ditentukan manual, bukan dari role |
 | `/staff` | Profil satu staff per halaman (1 orang = 1 halaman): divisi, deskripsi, rating, komentar terbaru |
 | `/staff-rating <user> <stars> [comment]` | Beri rating 1-5 bintang ke staff; rating ulang memperbarui, bukan menumpuk |
 | `/best-staff-of-the-month [bulan]` | Leaderboard bulanan staff berdasar 4 metrik sama rata: pesan, voice, tag, announcement |
+
+## Mode Beta & Report
+
+**`/beta type:on|off`** (admin, per-guild) mengatur kolom `betaMode` di tabel
+`guild_config` (migrasi lewat `ensureColumn` di `schema.js`, jadi database
+lama otomatis ketambahan kolom ini tanpa perlu reset). Kalau nyala, bot
+**tidak** mem-broadcast ke satu channel tetap — `src/lib/betaReminder.js`
+(`maybeSendBetaReminder`) dipanggil dari `interactionCreate.js` setelah
+**command atau tombol apa pun** sukses dibalas, lalu numpang satu pesan
+ephemeral (`interaction.followUp`) di balasan itu kalau syaratnya
+terpenuhi: guild sedang `betaMode` aktif, dan user tersebut belum kena
+pengingat dalam cooldown-nya sendiri. Cooldown per-user disimpan di tabel
+`beta_reminders` (`userId, guildId, nextEligibleAt`) — jeda berikutnya
+diundi ulang tiap kali pengingat terkirim, acak `BETA.MIN_INTERVAL_MS`..
+`MAX_INTERVAL_MS` (40-90 menit, `src/config/constants.js`). Cooldown dikunci
+**sebelum** `followUp` dikirim (bukan sesudah) — kalau pengiriman gagal
+(mis. interaksi sudah lewat window Discord), lebih aman kelewat satu giliran
+daripada retry terus di command berikutnya. Dua tombol dikecualikan dari
+pengecekan ini (`guide_close`, `pager_noop`) karena keduanya bukan aksi
+substantif — memunculkan pengingat tepat setelah user menutup sesuatu
+terasa janggal.
+
+**`/report type:bug|saran text:<isi>`** (semua member) tidak menyimpan apa
+pun ke database — laporan langsung diteruskan lewat **DM** ke tiap member
+yang punya salah satu role di `ADMIN_ROLE_IDS` (env yang sama dengan
+notifikasi klaim `/poruv-shop`; lihat `notifyAdmins()` di
+`src/commands/economy/poruvShop.js` sebagai pola yang direplikasi di
+`src/commands/general/report.js`). Kalau `ADMIN_ROLE_IDS` kosong, laporan
+tetap dikonfirmasi ephemeral ke pelapor, hanya tidak ada admin yang
+diberitahu otomatis — dicatat lewat `log.info` di konsol sebagai jejak
+minimal.
 
 ## Aturan Angka
 
