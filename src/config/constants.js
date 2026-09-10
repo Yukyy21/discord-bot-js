@@ -155,6 +155,18 @@ const STATUS = {
   SERVER_INVITE: 'https://discord.gg/ruv',
 };
 
+/**
+ * Pengingat mode beta (/beta). Kalau aktif untuk suatu guild, bot numpang
+ * ephemeral di balasan command/tombol apa pun yang sedang dipakai user —
+ * bukan pesan terpisah ke satu channel tetap. Tiap user punya cooldown
+ * sendiri (tabel `beta_reminders`) supaya tidak kena pengingat di hampir
+ * tiap interaksi; jeda berikutnya diundi ulang tiap kali pengingat terkirim.
+ */
+const BETA = {
+  MIN_INTERVAL_MS: 40 * 60 * 1000, // 40 menit
+  MAX_INTERVAL_MS: 90 * 60 * 1000, // 90 menit
+};
+
 module.exports = {
   CHAT,
   VOICE,
@@ -167,5 +179,6 @@ module.exports = {
   GIVE_FEE_RATE,
   EQUIP_SLOTS,
   STATUS,
+  BETA,
   xpForLevel,
 };
