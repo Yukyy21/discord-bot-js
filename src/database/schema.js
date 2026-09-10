@@ -134,12 +134,26 @@ function createTables() {
     );
 
     -- Konfigurasi per-guild. bossChannelId = channel tempat mini boss spawn
-    -- untuk server itu (diatur lewat /boss-channel). Kalau null, bot memakai
-    -- fallback BOSS_CHANNEL_ID dari .env.
+    -- untuk server itu (diatur lewat /boss-channel). betaMode = 1 kalau bot
+    -- sesekali mengingatkan "masih beta, laporkan lewat /report" (diatur
+    -- lewat /beta, admin). Kalau bossChannelId null, bot memakai fallback
+    -- BOSS_CHANNEL_ID dari .env.
     CREATE TABLE IF NOT EXISTS guild_config (
       guildId TEXT PRIMARY KEY,
       bossChannelId TEXT,
+      betaMode INTEGER DEFAULT 0,
       updatedAt INTEGER
+    );
+
+    -- Kapan tiap user boleh dikirimi pengingat mode beta berikutnya
+    -- (numpang ephemeral di balasan command apa pun yang sedang dia jalankan
+    -- — lihat maybeSendBetaReminder di lib/betaReminder.js). Baris dibuat
+    -- pas pengingat pertama terkirim; sebelum itu user dianggap layak.
+    CREATE TABLE IF NOT EXISTS beta_reminders (
+      userId TEXT NOT NULL,
+      guildId TEXT NOT NULL,
+      nextEligibleAt INTEGER NOT NULL,
+      PRIMARY KEY (userId, guildId)
     );
 
     -- Pemakaian /give per user per hari (kunci dayKey = YYYY-MM-DD lokal event,
@@ -236,6 +250,9 @@ function runMigrations() {
   ensureColumn('boss_spawns', 'lastRampageAt', 'INTEGER DEFAULT 0');
   // Kunci multiplier saat quest selesai supaya buff tidak bisa ditunda klaim.
   ensureColumn('quests', 'lockedMultiplier', 'REAL DEFAULT 1');
+  // Mode beta: kalau 1, bot sesekali kirim pesan pengingat "masih beta,
+  // laporkan bug/saran lewat /report" ke channel. Diatur lewat /beta (admin).
+  ensureColumn('guild_config', 'betaMode', 'INTEGER DEFAULT 0');
 }
 
 module.exports = { createTables, runMigrations };
