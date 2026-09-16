@@ -55,6 +55,7 @@ server B.
 |---|---|
 | `/points` | Total Poruv, level, tier, progress bar XP |
 | `/poruv-shop` | Tukar Poruv jadi Owocash, e-wallet, custom role, atau item Mythic acak |
+| `/redeem <code>` | Tukar redeem code (dibagikan admin) jadi Poruv, XP, coin, buff, atau item |
 | `/quest` | Quest harian, mingguan, bulanan + tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
@@ -78,6 +79,10 @@ server B.
 | `/admin reset-user <user> <konfirmasi>` | Hapus semua data user (saldo, Poruv, level, inventori, quest) |
 | `/admin set-level <user> <level>` | Set level manual, XP direset ke 0 |
 | `/admin-spawn-boss` | Paksa boss diundi sekarang (buat tes) |
+| `/poruv-shop-set add\|edit\|remove\|list` | Atur isi katalog `/poruv-shop` server ini (nama, harga, emoji, tipe fulfillment) |
+| `/code-create code: expired-hari: max-redeem:` | Buat redeem code baru — lanjut pilih reward (Poruv/XP/Coin/Buff/Item) lewat dropdown & form |
+| `/buff-apply user: buff: duration:` | Pasang buff eksklusif admin (mis. Beta Tester) ke seorang user |
+| `/give-item user: id: jumlah:` | Beri item `/shop` langsung ke user, tanpa lewat toko |
 | `/beta type:on\|off` | Nyala/matikan pengingat berkala "bot masih beta, laporkan lewat `/report`" (per server) |
 
 `/admin` dikunci `setDefaultMemberPermissions(Administrator)` jadi tidak muncul
@@ -156,18 +161,26 @@ Pesan **tidak dihitung sama sekali** (tanpa Poruv, XP, akumulasi kata, progres q
 di luar bot, jadi **hampir semua diproses manual oleh admin**, kecuali item
 Mythic yang otomatis masuk `/inventory` lewat sistem yang sama dengan `/shop`.
 
+Katalognya **bisa diatur per server** oleh admin lewat `/poruv-shop-set
+add|edit|remove|list` — nama, harga, emoji, deskripsi, dan tipe fulfillment
+item boleh berbeda-beda tiap server. Daftar di bawah ini adalah **default**
+bawaan bot; kalau admin server ini pernah mengubahnya, harga/isi sebenarnya
+bisa berbeda — arahkan user cek `/poruv-shop` langsung untuk yang terbaru.
+
 ### Cara kerja klaim
 1. User pilih item lewat tombol di `/poruv-shop`.
 2. Poruv langsung terpotong dan klaim tercatat.
-3. Untuk Owocash / e-wallet / custom role: klaim berstatus **pending**, dan
+3. Item bertipe **manual** (Owocash / e-wallet / custom role secara default,
+   atau item custom lain yang dibuat admin): klaim berstatus **pending**, dan
    bot mengirim **DM** ke tiap member yang punya salah satu role di
    `ADMIN_ROLE_IDS` (`.env`, comma-separated). Admin memproses manual di luar
    bot. Kalau `ADMIN_ROLE_IDS` kosong, tidak ada notifikasi terkirim — klaim
    tetap tercatat di database, cuma tidak ada yang diberi tahu otomatis.
-4. Untuk item Mythic: langsung digenapi otomatis, statusnya **fulfilled**
-   seketika, tanpa menunggu admin, tanpa DM.
+4. Item bertipe **otomatis** (mis. Item Mythic secara default): langsung
+   digenapi otomatis, statusnya **fulfilled** seketika, tanpa menunggu admin,
+   tanpa DM.
 
-### Daftar item
+### Daftar item (default)
 
 | Item | Harga | Fulfillment |
 |---|---|---|
@@ -179,7 +192,7 @@ Mythic yang otomatis masuk `/inventory` lewat sistem yang sama dengan `/shop`.
 ### Perkiraan waktu tebus
 Harga ditentukan langsung oleh owner. Sebagai gambaran kasar, dengan proyeksi
 Poruv dua profil user — **santai** (±76 Poruv/hari) dan **grinding**
-(±524 Poruv/hari) — waktu tebus tiap item kira-kira:
+(±524 Poruv/hari) — waktu tebus tiap item default kira-kira:
 
 | Item | Grinding | Santai |
 |---|---|---|
@@ -193,6 +206,29 @@ Catatan: E-Wallet 25.000 sengaja jadi item termahal meski nilainya konkret
 dibanding tiga item lain.
 
 ---
+
+## 3c. Redeem Code
+
+`/redeem <code>` adalah cara lain dapat reward, terpisah dari Poruv Shop —
+biasanya buat event atau giveaway. Bedanya dengan Poruv Shop: satu code bisa
+membagikan **campuran** reward sekaligus (Poruv, XP, Coin, Buff, dan/atau
+Item — item boleh lebih dari satu jenis), bukan cuma satu jenis barang.
+
+- Code dibuat admin lewat `/code-create code: expired-hari: max-redeem:`,
+  lalu admin memilih reward yang mau dimasukkan lewat dropdown dan mengisi
+  nilainya lewat form.
+- Satu user **hanya bisa redeem satu code sekali**. Code bisa punya batas
+  kedaluwarsa (hari) dan/atau kuota maksimum berapa orang bisa redeem — kalau
+  admin tidak mengisinya, code itu tidak pernah kedaluwarsa / tanpa batas
+  kuota.
+- Kalau `/redeem` gagal, kemungkinan: code salah ketik, sudah kedaluwarsa,
+  kuota sudah habis, atau kamu sudah pernah redeem code itu sebelumnya.
+- Reward XP dari `/redeem` langsung dihitung naik level kalau cukup, sama
+  seperti `/use`.
+
+---
+
+
 
 ## 4. Shop, Item & Rarity
 
@@ -258,6 +294,14 @@ Cek yang sedang aktif dengan `/buffs`.
 Ability bertanda **[boss]** sudah benar-benar terasa di sistem mini boss:
 `boss_damage` menaikkan damage per klik, `boss_loot_rate` peluang drop, dan
 `boss_drop_amount` jumlah item yang jatuh.
+
+### Buff eksklusif admin
+Selain dari item, ada buff yang **hanya** bisa dipasang admin lewat
+`/buff-apply user: buff: duration:` — tidak bisa didapat dari `/shop`,
+`/poruv-shop`, atau `/redeem`. Saat ini ada **Beta Tester**: damage boss
+×1.15, XP ×1.2, dan coin ×1.3 sekaligus, selama durasi yang ditentukan admin
+(dalam menit). Buff ini tetap ikut aturan "tidak menumpuk, pakai pengali
+terbesar" kalau kamu juga punya buff coin/XP/damage dari item lain.
 
 ---
 
@@ -444,7 +488,13 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 
 **"Poruv-ku dipakai buat apa?"** → Belanja di `/poruv-shop`: Item Mythic acak (2.500 Poruv), Owocash 1.000.000 (5.000 Poruv), Custom Role (10.000 Poruv), atau E-Wallet 25.000 (15.000 Poruv).
 
-**"Kok item dari `/poruv-shop` nggak langsung kukirim?"** → Wajar untuk Owocash, e-wallet, dan custom role — ketiganya diproses manual oleh admin setelah klaim (bot DM admin otomatis), bukan otomatis dari bot. Hanya item Mythic yang langsung masuk `/inventory`.
+**"Kok item dari `/poruv-shop` nggak langsung kukirim?"** → Wajar untuk item bertipe manual (secara default: Owocash, e-wallet, dan custom role) — diproses manual oleh admin setelah klaim (bot DM admin otomatis), bukan otomatis dari bot. Item bertipe otomatis (secara default: item Mythic) langsung masuk `/inventory`. Admin server ini bisa saja mengubah katalog atau tipe fulfillment-nya lewat `/poruv-shop-set`, jadi kalau ragu, cek langsung isi terbaru di `/poruv-shop`.
+
+**"Punya redeem code, gimana cara pakainya?"** → `/redeem code:<kode>`. Satu code cuma bisa dipakai sekali per orang, dan bisa saja sudah kedaluwarsa atau kuotanya habis — kalau gagal, coba tanya lagi ke yang membagikan code-nya.
+
+**"Redeem code-ku gagal terus."** → Kemungkinan: salah ketik code, code sudah kedaluwarsa, kuota maksimum sudah habis, atau kamu sudah pernah redeem code itu (satu code cuma sekali per user).
+
+**"Apa itu buff Beta Tester?"** → Buff eksklusif yang cuma admin bisa pasang lewat `/buff-apply`, bukan dari item atau shop. Efeknya damage boss ×1.15, XP ×1.2, dan coin ×1.3 sekaligus, selama durasi yang admin tentukan. Cek `/buffs` untuk lihat sisa waktunya.
 
 **"Gimana cara naik tier?"** → Tier ditentukan level: Novice 1, Apprentice 6, Adept 11, Veteran 21, Champion 36, Hero 51, Demigod 71. Cek `/rank` atau `/points`.
 
