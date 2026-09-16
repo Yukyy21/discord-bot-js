@@ -33,6 +33,9 @@ function resetUser(userId, guildId) {
       .prepare('DELETE FROM boss_damage WHERE userId = ? AND bossId IN (SELECT id FROM boss_spawns WHERE guildId = ?)')
       .run(userId, guildId);
     const poruv = db.prepare('DELETE FROM poruv_redemptions WHERE userId = ? AND guildId = ?').run(userId, guildId);
+    const redeemUses = db
+      .prepare('DELETE FROM redeem_code_uses WHERE userId = ? AND guildId = ?')
+      .run(userId, guildId);
     return {
       users: users.changes,
       points: points.changes,
@@ -44,6 +47,7 @@ function resetUser(userId, guildId) {
       weekly: weekly.changes,
       bossDmg: bossDmg.changes,
       poruv: poruv.changes,
+      redeemUses: redeemUses.changes,
     };
   });
   return wipe();
