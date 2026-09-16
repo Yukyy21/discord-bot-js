@@ -100,6 +100,7 @@ module.exports = {
             `${e('point')} Snapshot poin pekan: **${wiped.weekly}**`,
             `${e('info')} Kontribusi boss: **${wiped.bossDmg}**`,
             `${e('info')} Klaim Poruv Shop: **${wiped.poruv}**`,
+            `${e('info')} Riwayat redeem code: **${wiped.redeemUses}**`,
           ].join('\n'),
           inline: false,
         });
