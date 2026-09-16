@@ -41,6 +41,7 @@ level yang terpisah.
 |---|---|
 | `/points` | Total Poruv, level, tier, dan progress bar XP |
 | `/poruv-shop` | Tukar Poruv jadi Owocash, e-wallet, custom role, atau item Mythic acak — lihat bagian **Poruv Shop** di bawah |
+| `/redeem <code>` | Tukar redeem code (dibuat admin lewat `/code-create`) jadi Poruv/XP/coin/buff/item — lihat bagian **Redeem Code** di bawah |
 | `/quest` | Quest harian, mingguan & bulanan: progres dan tombol klaim reward |
 | `/profile` | Kartu gambar berisi semua statistik |
 | `/rank` | Kartu gambar ringkas: level, tier, progres XP |
@@ -65,6 +66,10 @@ level yang terpisah.
 | `/boss-channel set\|show\|clear` | **Admin:** atur channel mini boss per-guild (tabel `guild_config`); kalau belum 
 di-set, dipakai `BOSS_CHANNEL_ID` dari `.env` |
 | `/poruv-resolve list\|resolve <id>` | **Admin:** kelola klaim Poruv Shop manual — `list` menampilkan klaim pending + tombol resolve per klaim, `resolve <id>` menandai satu klaim selesai |
+| `/poruv-shop-set add\|edit\|remove\|list` | **Admin:** atur isi katalog `/poruv-shop` per server (nama, harga, emoji, deskripsi, tipe fulfillment) — lihat bagian **Poruv Shop** |
+| `/code-create code: expired-hari: max-redeem:` | **Admin:** buat redeem code baru (Poruv/XP/Coin/Buff/Item lewat dropdown + form) — lihat bagian **Redeem Code** |
+| `/buff-apply user: buff: duration:` | **Admin:** pasang buff eksklusif (mis. Beta Tester) ke seorang user, tidak bisa didapat lewat `/shop`/`/poruv-shop` |
+| `/give-item user: id: jumlah:` | **Admin:** beri item `/shop` langsung ke user (event/hadiah), tanpa lewat toko |
 | `/beta type:on\|off` | **Admin:** nyala/matikan pengingat berkala "bot masih beta, laporkan lewat `/report`" (per-guild, tabel `guild_config`) |
 
 | `/staff-set add\|remove` | **Admin:** kelola daftar staff server ini (tabel `staff`); staff ditentukan manual, bukan dari role |
@@ -162,23 +167,40 @@ harian** per user: maksimal `GIVE.DAILY_LIMIT_COUNT` (5) kali transfer dan
 ganti hari waktu lokal event — ditelusuri lewat tabel `give_daily` untuk
 menutup santet alt.
 
-**Poruv Shop.** `/poruv-shop` (`src/config/constants.js`, array `PORUV_SHOP`;
-logic di `src/database/poruvShop.js`) adalah tempat membelanjakan Poruv untuk
-barang bernilai di luar bot — bukan item dalam game seperti `/shop` biasa:
+**Poruv Shop.** `/poruv-shop` (default katalog di `src/config/constants.js`,
+array `PORUV_SHOP`; logic di `src/database/poruvShop.js`) adalah tempat
+membelanjakan Poruv untuk barang bernilai di luar bot — bukan item dalam game
+seperti `/shop` biasa. Katalognya **bisa diatur per server** lewat
+`/poruv-shop-set` (admin) — `add`/`edit`/`remove`/`list`:
 
-| Item | Harga | Fulfillment |
+| Item (default) | Harga | Fulfillment |
 |---|---|---|
 | Item Mythic (Acak) | 2.500 Poruv | Otomatis — masuk `/inventory` langsung |
 | Owocash 1.000.000 | 5.000 Poruv | Manual — admin |
 | Custom Role | 10.000 Poruv | Manual — admin |
 | E-Wallet 25.000 | 15.000 Poruv | Manual — admin |
 
+Katalog guild **kosong secara default** (tabel `poruv_shop_items` tidak
+punya baris) — selama itu, `getPoruvShopItems()` jatuh ke `PORUV_SHOP` di
+atas tanpa menulis apa pun ke DB. Begitu admin pertama kali menjalankan
+`/poruv-shop-set add|edit|remove`, `ensureSeeded()` menyalin seluruh default
+itu ke `poruv_shop_items` untuk guild tersebut lebih dulu (supaya item
+bawaan pun bisa diedit/dihapus, bukan cuma item baru yang bisa diatur),
+baru operasi yang diminta dijalankan. Tiap item punya `fulfillment`:
+`manual` (masuk antrean `/poruv-resolve`) atau `mythic_random` (langsung
+genap otomatis — 1 item Mythic acak dari katalog `/shop`, filter tier
+`Mythic` lewat `weightedRandom()`). Emoji item disimpan mentah (unicode
+atau mention `<a:nama:id>`/`<:nama:id>` yang otomatis ditulis Discord kalau
+admin memilih lewat emoji picker bawaan di kolom `emoji`) — bukan lagi
+harus key di registry `lib/emojis.js`; `parseEmojiInput()` mem-parsing ini
+jadi bentuk `ButtonBuilder#setEmoji` yang benar.
+
 Redeem memotong Poruv dan mencatat baris ke tabel `poruv_redemptions` dalam
 satu transaksi (`db.transaction()`), jadi tidak mungkin Poruv terpotong tanpa
-tercatat atau sebaliknya. Item Mythic diundi dari katalog `/shop` yang sudah
-ada (filter tier `Mythic`, pakai `weightedRandom()` yang sama dengan sistem
-loot lain) lalu langsung di-`grantItem()` ke inventori — statusnya otomatis
-`fulfilled`, tanpa notifikasi. Tiga item lain butuh proses manual, jadi masuk
+tercatat atau sebaliknya. Item `mythic_random` diundi lebih dulu (transaksi
+dibatalkan kalau katalog Mythic kosong — Poruv tidak terpotong tanpa
+barang), lalu langsung di-`grantItem()` ke inventori — statusnya otomatis
+`fulfilled`, tanpa notifikasi. Item `manual` butuh proses admin, jadi masuk
 status `pending` dan memicu **DM** ke tiap member yang punya salah satu role
 di `ADMIN_ROLE_IDS` (`.env`, comma-separated role ID; lihat `.env.example`).
 Bot mengambil member dari `role.members` (fetch seluruh guild sekali kalau
@@ -197,6 +219,45 @@ ulang), atau `resolve <id>` untuk menandai langsung tanpa buka daftar.
 Pemrosesan menetapkan `status = fulfilled` + `resolvedAt` di tabel
 `poruv_redemptions` (logikanya `resolveRedemption()` di
 `src/database/poruvShop.js`; command di `src/commands/admin/poruvResolve.js`).
+
+**Redeem Code.** `/code-create` (admin) → `/redeem` (semua member) adalah
+alur terpisah dari Poruv Shop, dipakai buat event/giveaway: satu code bisa
+membagikan **campuran** reward Poruv, XP, Coin, Buff, dan Item (item boleh
+lebih dari satu baris sekaligus) ke banyak orang sekaligus, bukan satu jenis
+reward seperti Poruv Shop. Alurnya 3 langkah karena keterbatasan Discord
+(modal maksimum 5 text input):
+
+1. `/code-create code: expired-hari: max-redeem:` — admin isi nama code
+   (3-32 karakter, huruf/angka/`-`/`_`, dinormalisasi uppercase lewat
+   `normalizeCode()`), lama kedaluwarsa dalam hari (kosong = tidak pernah),
+   dan kuota maksimum berapa orang bisa redeem (kosong = tanpa batas).
+2. Bot menampilkan **dropdown** (`StringSelectMenuBuilder`, `customId`
+   `code_create_select:<code>:<expiredHari>:<maxRedeem>`) untuk memilih
+   reward apa saja yang mau dimasukkan — bisa lebih dari satu, maksimum 5
+   (Poruv/XP/Coin/Buff/Item), pas dengan batas 5 text input modal Discord.
+3. Setelah dipilih, `interactionCreate.js` (`handleSelectMenu`) memanggil
+   `codeCreate.buildRewardModal()` yang menyusun **modal** dinamis — cuma
+   field reward yang dipilih yang muncul. Field Buff pakai format teks
+   `key nilai menit` (mis. `coin 1.5 60`; key dibatasi ke
+   `REDEEM_BUFF_KEYS` di `src/lib/redeemCodes.js`: `coin`, `xp`, `points`,
+   `boss_damage`). Field Item pakai satu baris per item, `itemId jumlah`
+   (mis. `5 2` lalu baris baru `9 1`) — `itemId` mengacu ke katalog `/shop`.
+   Submit modal (`handleModalSubmit`) mem-parsing tiap field lewat
+   `parseAmountField`/`parseBuffField`/`parseItemField`, dan kalau salah satu
+   formatnya salah, **seluruh code batal dibuat** (bukan sebagian diam-diam
+   terlewat) — pesan error menunjuk field mana yang salah beserta contoh
+   formatnya.
+4. Code tersimpan di tabel `redeem_codes` (`code, guildId, createdBy,
+   createdAt, expiresAt, maxUses, usesCount, rewards` — `rewards` array JSON).
+   `/redeem <code>` (`src/database/redeemCodes.js`, `redeemCode()`) memvalidasi
+   ada/belum expired/kuota belum habis/user belum pernah pakai (tabel
+   `redeem_code_uses`, primary key `code, guildId, userId` — satu user cuma
+   bisa redeem satu code sekali), lalu menerapkan semua reward + mencatat
+   pemakaian dalam **satu transaksi**. Reward XP memicu `reconcileLevels()`
+   susulan di command (sama seperti `/use`) supaya level-up langsung
+   ter-reconcile tanpa menunggu chat berikutnya.
+
+
 
 **Shop.** Stok berisi 10 item yang diundi ulang tiap 10 menit. Peluang muncul
 ditentukan rarity: Common 30, Uncommon 25, Rare 20, Epic 12, Legendary 8,
@@ -250,6 +311,20 @@ beli-pakai-beli tidak jadi mesin cetak uang. XP dari item tidak langsung
 memunculkan level baru; level ter-reconcile saat pesan chat berikutnya,
 mengikuti pola event `messageCreate`.
 
+**Buff admin (`/buff-apply`) & pemberian item (`/give-item`).** Dua command
+admin di luar jalur `/shop`/`/poruv-shop`/`/redeem` buat kasus manual
+(event, kompensasi, testing). `/buff-apply user: buff: duration:` memasang
+salah satu preset di `BUFF_APPLY_PRESETS` (`src/config/constants.js`) lewat
+`addBuff()` yang sama dipakai item — jadi ikut aturan "pengali terbesar
+menang" kalau user juga punya buff sejenis dari sumber lain. Preset yang ada
+sekarang cuma `beta_tester` (damage boss ×1.15, XP ×1.2, coin ×1.3, tiga baris
+buff sekaligus dengan durasi yang sama) — **sengaja eksklusif**, tidak
+tercapai lewat item atau redeem code mana pun, cuma admin yang bisa
+memasangnya. `/give-item user: id: jumlah:` cuma memanggil `grantItem()`
+langsung (kini menerima parameter `qty`, dipakai ulang oleh `/redeem` untuk
+reward item juga) tanpa mengurangi coin siapa pun — dipakai buat kompensasi
+atau hadiah event tanpa lewat rotasi stok `/shop`.
+
 **Quest.** Tiap user dapat 2 quest harian + 1 mingguan + 1 bulanan yang
 diundi dari katalog (`src/lib/quests.js`) saat pertama kali disentuh di
 periode itu. Periode harian memakai tanggal lokal server (sama dengan
@@ -262,13 +337,16 @@ stateless (pemilik + periode + quest ada di `customId`), jadi tetap berfungsi
 setelah bot restart. Tipe "ikut/menang event" sengaja belum ada — menunggu
 sistem event/boss.
 
-**Command admin.** `/admin` (give-coin, reset-user, set-level) terkunci lewat
-`setDefaultMemberPermissions(Administrator)`, jadi tidak muncul untuk member
-biasa. Pemilik server tetap bisa membukanya untuk role moderator tertentu
-lewat pengaturan integrasi bot. `reset-user` butuh opsi `konfirmasi: true`
-secara eksplisit; dia menghapus baris user di keempat tabel (users, points,
-user_items, quests), bukan sekadar men-nol-kan. Semua aksi admin tercatat di
-log konsol dengan awalan `[Admin]`.
+**Command admin.** `/admin` (give-coin, reset-user, set-level),
+`/poruv-shop-set`, `/code-create`, `/buff-apply`, dan `/give-item` semuanya
+terkunci lewat `setDefaultMemberPermissions(Administrator)`, jadi tidak
+muncul untuk member biasa. Pemilik server tetap bisa membukanya untuk role
+moderator tertentu lewat pengaturan integrasi bot. `reset-user` butuh opsi
+`konfirmasi: true` secara eksplisit; dia menghapus baris user di 11 tabel
+(lihat `resetUser()` di `src/database/admin.js` — bertambah tiap ada sistem
+baru yang menyimpan jejak per-user; terbaru `redeem_code_uses`), dalam satu
+transaksi, bukan sekadar men-nol-kan. Semua aksi admin tercatat di log
+konsol dengan awalan `[Admin]`.
 
 **Leaderboard mingguan.** `/leaderboard mingguan` menampilkan Poruv yang
 didapat user di pekan berjalan (kunci pekan ISO yang sama dengan quest
@@ -346,7 +424,9 @@ struktur folder. Menambah command = menambah file, tidak ada daftar manual yang
 perlu diperbarui.
 
 **`src/database/`** dipecah per domain: `users.js` (saldo, daily, transfer),
-`points.js` (Poruv, XP, leaderboard), `poruvShop.js` (redeem Poruv Shop),
+`points.js` (Poruv, XP, leaderboard), `poruvShop.js` (katalog & redeem Poruv
+Shop, per-guild lewat tabel `poruv_shop_items`), `redeemCodes.js` (redeem
+code `/code-create` & `/redeem`, tabel `redeem_codes`/`redeem_code_uses`),
 `shop.js` (katalog, pembelian, inventori).
 `index.js` menyatukan semuanya, jadi pemakai cukup
 `require('../../database')`. Skema dibuat lewat `CREATE TABLE IF NOT EXISTS`
@@ -460,4 +540,5 @@ unicode kalau ID-nya dihapus.
 Semua kegagalan provider (401/402/429/5xx/timeout) diterjemahkan jadi pesan
 Bahasa Indonesia di embed error, dan tidak pernah dilempar sebagai exception.
 
-Karena ada command baru, jalankan `npm run deploy` sekali setelah update ini.
+Karena ada command baru (`/redeem`, `/poruv-shop-set`, `/code-create`,
+`/buff-apply`, `/give-item`), jalankan `npm run deploy` sekali setelah update ini.
