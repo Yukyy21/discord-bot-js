@@ -65,14 +65,14 @@ function rebalancePrices(ids) {
   }
 }
 
-/** Tambah satu item ke inventori, atau naikkan jumlahnya kalau sudah punya. */
-function grantItem(userId, guildId, itemId) {
+/** Tambah `qty` item ke inventori, atau naikkan jumlahnya kalau sudah punya. */
+function grantItem(userId, guildId, itemId, qty = 1) {
   db.prepare(
     `
-    INSERT INTO user_items (userId, guildId, itemId, quantity) VALUES (?, ?, ?, 1)
-    ON CONFLICT(userId, guildId, itemId) DO UPDATE SET quantity = quantity + 1
+    INSERT INTO user_items (userId, guildId, itemId, quantity) VALUES (?, ?, ?, ?)
+    ON CONFLICT(userId, guildId, itemId) DO UPDATE SET quantity = quantity + excluded.quantity
   `,
-  ).run(userId, guildId, itemId);
+  ).run(userId, guildId, itemId, qty);
 }
 
 /**
