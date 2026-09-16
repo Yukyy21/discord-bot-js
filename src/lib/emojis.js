@@ -159,4 +159,27 @@ function medal(index) {
   return `\`#${index + 1}\``;
 }
 
-module.exports = { e, eo, tierEmoji, medal, REGISTRY, EMOJI_NAMES: Object.keys(REGISTRY) };
+/**
+ * Parse input emoji bebas dari admin (mis. opsi `emoji` di /poruv-shop-set).
+ * Discord otomatis menaruh teks mention lengkap `<a:nama:id>` / `<:nama:id>`
+ * ke kolom teks saat admin pilih emoji custom lewat picker bawaan client, atau
+ * karakter unicode polos kalau emoji standar. Dipakai untuk dua kebutuhan:
+ *  - `raw`   : disimpan ke DB & ditaruh langsung di teks embed (keduanya valid
+ *              dirender apa adanya oleh Discord).
+ *  - `forComponent` : bentuk siap pakai untuk ButtonBuilder#setEmoji /
+ *              SelectMenuOption#setEmoji (object {id,name,animated} untuk
+ *              custom emoji, atau string unicode apa adanya).
+ * Mengembalikan null kalau input kosong/bukan emoji sama sekali.
+ */
+function parseEmojiInput(raw) {
+  const text = String(raw ?? '').trim();
+  if (!text) return null;
+  const custom = text.match(/^<(a)?:(\w+):(\d+)>$/);
+  if (custom) {
+    const [, animated, name, id] = custom;
+    return { raw: text, forComponent: { id, name, animated: Boolean(animated) } };
+  }
+  return { raw: text, forComponent: text };
+}
+
+module.exports = { e, eo, tierEmoji, medal, parseEmojiInput, REGISTRY, EMOJI_NAMES: Object.keys(REGISTRY) };
