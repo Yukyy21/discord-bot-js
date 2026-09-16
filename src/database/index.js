@@ -20,6 +20,7 @@ const staff = require('./staff');
 const giveDaily = require('./giveDaily');
 const botStats = require('./botStats');
 const betaReminders = require('./betaReminders');
+const redeemCodes = require('./redeemCodes');
 
 createTables();
 runMigrations();
@@ -60,4 +61,5 @@ module.exports = {
   ...giveDaily,
   ...botStats,
   ...betaReminders,
+  ...redeemCodes,
 };
