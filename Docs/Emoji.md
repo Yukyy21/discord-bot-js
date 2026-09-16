@@ -56,10 +56,27 @@ kerja redeem-nya.
 
 | Key | Emoji | Dipakai di |
 |---|---|---|
-| `owocash` | `<:Owocash:...>` | Item "Owocash 1.000.000" |
-| `wallet` | `<:wallet:...>` | Item "E-Wallet 25.000" |
-| `role` | `<:Role:...>` | Item "Custom Role" |
-| `inventory` | `<:tas:...>` | Item "Item Mythic (Acak)" (dipakai ulang dari ikon inventori) |
+| `owocash` | `<:Owocash:...>` | Item default "Owocash 1.000.000" |
+| `wallet` | `<:wallet:...>` | Item default "E-Wallet 25.000" |
+| `role` | `<:Role:...>` | Item default "Custom Role" |
+| `inventory` | `<:tas:...>` | Item default "Item Mythic (Acak)" (dipakai ulang dari ikon inventori) |
+
+Item **custom** yang dibuat admin lewat `/poruv-shop-set add|edit` **tidak**
+lewat registry di atas — emoji-nya disimpan mentah (unicode atau mention
+`<a:nama:id>`/`<:nama:id>`) persis seperti yang diketik/dipilih admin di
+kolom `emoji` (Discord otomatis menaruh teks mention lengkap kalau admin
+pilih lewat emoji picker bawaan client). `parseEmojiInput()` di
+`src/lib/emojis.js` mem-parsing teks itu jadi bentuk yang valid untuk
+`ButtonBuilder#setEmoji()` — object `{id, name, animated}` untuk emoji
+custom, atau string unicode apa adanya. `src/commands/economy/poruvShop.js`
+mencoba `eo(item.emoji)` dulu (buat item default berbasis key registry),
+baru jatuh ke `parseEmojiInput()` kalau itemnya custom.
+
+## Emoji Buff Admin (`/buff-apply`)
+
+| Key | Emoji | Dipakai di |
+|---|---|---|
+| `betatester` | `<:Betatester:...>` | Judul embed konfirmasi saat buff **Beta Tester** dipasang lewat `/buff-apply` (dipakai ulang dari emoji Credit halaman 3) |
 
 ## Emoji Sistem Staff
 
