@@ -11,6 +11,7 @@ const { buildCredit } = require('../commands/general/credit');
 const { buildStaff } = require('../commands/staff/staff');
 const poruvShopCmd = require('../commands/economy/poruvShop');
 const poruvResolveCmd = require('../commands/admin/poruvResolve');
+const codeCreateCmd = require('../commands/admin/codeCreate');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 const { handleBossAutoAttack } = require('../lib/bossManager');
 const { maybeSendBetaReminder } = require('../lib/betaReminder');
@@ -27,6 +28,7 @@ module.exports = {
   async execute(interaction) {
     if (interaction.isButton()) await handleButton(interaction);
     else if (interaction.isStringSelectMenu()) await handleSelectMenu(interaction);
+    else if (interaction.isModalSubmit()) await handleModalSubmit(interaction);
     else if (interaction.isChatInputCommand()) await handleCommand(interaction);
     else return;
 
@@ -179,9 +181,28 @@ async function handleSelectMenu(interaction) {
     if (interaction.customId === 'lb_filter') {
       return await renderLeaderboardCard(interaction, interaction.values[0]);
     }
+    if (interaction.customId.startsWith('code_create_select:')) {
+      // Format: code_create_select:<code>:<expiredHari|x>:<maxRedeem|x>
+      const [, code, expiredHari, maxRedeem] = interaction.customId.split(':');
+      const types = interaction.values; // urutan dropdown = urutan field modal
+      return await interaction.showModal(codeCreateCmd.buildRewardModal(code, expiredHari, maxRedeem, types));
+    }
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Select menu "${interaction.customId}" gagal:`, error);
+  }
+}
+
+async function handleModalSubmit(interaction) {
+  try {
+    const [action, code, expiredHari, maxRedeem, typesJoined] = interaction.customId.split(':');
+    if (action === 'code_create_modal') {
+      const types = typesJoined.split(',');
+      return await codeCreateCmd.handleModalSubmit(interaction, code, expiredHari, maxRedeem, types);
+    }
+  } catch (error) {
+    if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
+    logger.error(`Modal "${interaction.customId}" gagal:`, error);
   }
 }
 
