@@ -60,4 +60,5 @@ Docs/               dokumentasi lengkap
 - [Docs/ToDo.md](Docs/ToDo.md) — yang masih menganggur (gelombang pertama)
 - [Docs/ToDoV2.md](Docs/ToDoV2.md) — rencana berikutnya: asset rank baru, tambah quest, mini boss, stat item
 - [Docs/Contributor.md](Docs/Contributor.md) — cara ikut ngoding di sini
-- [Docs/Changelog.md](Docs/Changelog.md) — riwayat perubahan
+- [Docs/ChangelogV2.md](Docs/ChangelogV2.md) — riwayat perubahan terbaru
+- [Docs/Changelog.md](Docs/Changelog.md) — riwayat perubahan lama
