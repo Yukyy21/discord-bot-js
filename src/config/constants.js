@@ -66,15 +66,20 @@ const SHOP = {
 };
 
 /**
- * Katalog /poruv-shop. Harga ditentukan langsung oleh owner (bukan hasil
- * proyeksi income otomatis lagi):
+ * Katalog default /poruv-shop, dipakai sebagai isian awal tiap guild sampai
+ * admin mengubahnya lewat /poruv-shop-set (lihat ensureSeeded di
+ * database/poruvShop.js — begitu diubah, katalog guild itu pindah ke tabel
+ * poruv_shop_items dan file ini tidak dipakai lagi untuk guild tersebut).
  *  - Item Mythic (Acak)   : 2.500 Poruv
  *  - Owocash 1.000.000    : 5.000 Poruv
  *  - Custom Role          : 10.000 Poruv
  *  - E-Wallet 25.000      : 15.000 Poruv
  * `fulfillment: 'manual'` artinya redeem masuk antrean dan admin di-DM
  * (lihat notifyAdmins di poruvShop.js command) — bot tidak menyerahkan
- * barangnya sendiri, kecuali item Mythic yang otomatis lewat /inventory.
+ * barangnya sendiri. `fulfillment: 'mythic_random'` otomatis kasih 1 item
+ * Mythic acak dari katalog /shop lewat /inventory, tanpa antrean admin.
+ * emoji: nama key di lib/emojis.js REGISTRY (item bawaan) ATAU emoji
+ * mentah/custom (item hasil /poruv-shop-set, lihat parseEmojiInput).
  */
 const PORUV_SHOP = [
   {
@@ -82,7 +87,7 @@ const PORUV_SHOP = [
     name: 'Item Mythic (Acak)',
     emoji: 'inventory',
     price: 2500,
-    fulfillment: 'manual',
+    fulfillment: 'mythic_random',
     description: 'Satu item Mythic acak dari katalog /shop (Starbreaker Claymore, Genesis Scepter, dst).',
   },
   {
@@ -110,6 +115,26 @@ const PORUV_SHOP = [
     description: 'Saldo e-wallet Rp25.000, dikirim admin setelah verifikasi.',
   },
 ];
+
+/**
+ * Preset buff khusus /buff-apply (admin). Buff-buff ini SENGAJA tidak ada di
+ * katalog /shop biasa — cuma admin yang bisa memasangnya manual ke seseorang
+ * (mis. reward beta tester). Key di dalam `buffs` memakai key generik yang
+ * sama dengan sistem buff item (lib/buffs.js), jadi otomatis ikut kena
+ * pengali terbesar kalau user juga punya buff sejenis dari item lain.
+ */
+const BUFF_APPLY_PRESETS = {
+  beta_tester: {
+    label: 'Beta Tester',
+    emoji: 'betatester',
+    description: 'Damage boss ×1.15, XP ×1.2, Coin ×1.3 — reward eksklusif buat beta tester.',
+    buffs: [
+      { key: 'boss_damage', value: 1.15 },
+      { key: 'xp', value: 1.2 },
+      { key: 'coin', value: 1.3 },
+    ],
+  },
+};
 
 /** Quest harian, mingguan & bulanan. Jumlah yang ditugaskan per periode per user. */
 const QUEST = {
@@ -173,6 +198,7 @@ module.exports = {
   DAILY,
   SHOP,
   PORUV_SHOP,
+  BUFF_APPLY_PRESETS,
   QUEST,
   BOSS,
   GIVE,
