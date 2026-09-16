@@ -218,6 +218,53 @@ function createTables() {
       key TEXT PRIMARY KEY,
       value INTEGER NOT NULL DEFAULT 0
     );
+
+    -- Katalog /poruv-shop per-guild. Kosong = guild belum pernah mengubah apa
+    -- pun, jadi masih pakai default bawaan (config/constants.js PORUV_SHOP).
+    -- Begitu admin pertama kali /poruv-shop-set, seluruh default disalin ke
+    -- sini (lihat ensureSeeded di database/poruvShop.js) supaya item bawaan
+    -- pun bisa diedit/dihapus, bukan cuma item baru yang bisa diatur.
+    -- fulfillment: 'manual' (antre admin) atau 'mythic_random' (langsung
+    -- masuk /inventory, ambil 1 item Mythic acak dari katalog /shop).
+    CREATE TABLE IF NOT EXISTS poruv_shop_items (
+      guildId TEXT,
+      key TEXT,
+      name TEXT NOT NULL,
+      emoji TEXT NOT NULL,
+      price INTEGER NOT NULL,
+      description TEXT DEFAULT '',
+      fulfillment TEXT NOT NULL DEFAULT 'manual',
+      sortOrder INTEGER DEFAULT 0,
+      createdAt INTEGER NOT NULL,
+      PRIMARY KEY (guildId, key)
+    );
+
+    -- Kode redeem buatan admin (/code-create). rewards = JSON array berisi
+    -- campuran reward poruv/xp/coin/buff/item (item boleh lebih dari satu
+    -- baris sekaligus). expiresAt/maxUses NULL = tidak ada batas.
+    CREATE TABLE IF NOT EXISTS redeem_codes (
+      code TEXT,
+      guildId TEXT,
+      createdBy TEXT NOT NULL,
+      createdAt INTEGER NOT NULL,
+      expiresAt INTEGER,
+      maxUses INTEGER,
+      usesCount INTEGER DEFAULT 0,
+      rewards TEXT NOT NULL,
+      PRIMARY KEY (code, guildId)
+    );
+
+    -- Satu user cuma boleh redeem satu code sekali (/redeem). Baris ini juga
+    -- yang dipakai menghitung usesCount naik.
+    CREATE TABLE IF NOT EXISTS redeem_code_uses (
+      code TEXT,
+      guildId TEXT,
+      userId TEXT,
+      redeemedAt INTEGER NOT NULL,
+      PRIMARY KEY (code, guildId, userId)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_redeem_guild ON redeem_codes (guildId);
   `);
 }
 
