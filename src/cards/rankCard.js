@@ -1,6 +1,6 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const fs = require('node:fs');
-const { roundRect, loadAvatar, fitText, drawRankLogo } = require('./canvasKit');
+const { roundRect, drawCover, loadAvatar, fitText, drawRankLogo, FONT } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 
 async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rankName, rankLogo }) {
@@ -11,7 +11,7 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
   if (fs.existsSync(bgPath)) {
     try {
       const bg = await loadImage(bgPath);
-      ctx.drawImage(bg, 0, 0, 600, 200);
+      drawCover(ctx, bg, 0, 0, 600, 200);
     } catch (e) {
       roundRect(ctx, 0, 0, 600, 200, 20);
       ctx.fillStyle = '#2b2d31';
@@ -40,7 +40,7 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
   fitText(ctx, username, 150, 65, 410, { size: 26, minSize: 15 });
 
   ctx.fillStyle = '#b5bac1';
-  ctx.font = '16px sans-serif';
+  ctx.font = `16px ${FONT.body}`;
   const rankText = `${rankName || 'Novice'}  •  Level ${level}  •  #${rank}`;
   ctx.fillText(rankText, 150, 95);
 
@@ -63,7 +63,7 @@ async function buildRankCard({ avatar, username, level, rank, xp, xpNeeded, rank
     ctx.fill();
   }
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 13px sans-serif';
+  ctx.font = `bold 13px ${FONT.body}`;
   ctx.textAlign = 'center';
   ctx.fillText(xpNeeded > 0 ? `${xp}/${xpNeeded} XP` : `${xp} XP`, x0 + barW / 2, y0 + barH - 5);
   ctx.textAlign = 'left';

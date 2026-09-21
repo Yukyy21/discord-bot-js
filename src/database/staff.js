@@ -11,14 +11,32 @@ function isStaff(userId, guildId) {
   return !!db.prepare('SELECT 1 FROM staff WHERE userId = ? AND guildId = ?').get(userId, guildId);
 }
 
-/** Tambah staff. Gagal ('exists') kalau user itu sudah terdaftar di guild ini. */
-function addStaff(userId, guildId, divisi, deskripsi, addedBy) {
+/** Tambah staff. Gagal ('exists') kalau user itu sudah terdaftar di guild ini.
+ * `weight` opsional — kalau diisi, jadi bobot urutan untuk SELURUH divisi ini
+ * (bukan cuma orang ini), lihat setDivisiWeight(). */
+function addStaff(userId, guildId, divisi, deskripsi, addedBy, weight) {
   if (isStaff(userId, guildId)) return { ok: false, message: 'User itu sudah terdaftar sebagai staff di server ini.' };
   const addedAt = Date.now();
   db.prepare(
     'INSERT INTO staff (userId, guildId, divisi, deskripsi, addedAt, addedBy) VALUES (?, ?, ?, ?, ?, ?)',
   ).run(userId, guildId, divisi, deskripsi || null, addedAt, addedBy);
+  if (weight !== undefined && weight !== null) setDivisiWeight(guildId, divisi, weight);
   return { ok: true, row: getStaff(userId, guildId) };
+}
+
+/** Set/ubah bobot urutan satu divisi (dipakai opsional lewat /staff-set add). */
+function setDivisiWeight(guildId, divisi, weight) {
+  const key = String(divisi).trim().toLowerCase();
+  db.prepare(
+    `INSERT INTO staff_divisi (guildId, divisiKey, weight, updatedAt) VALUES (?, ?, ?, ?)
+     ON CONFLICT (guildId, divisiKey) DO UPDATE SET weight = excluded.weight, updatedAt = excluded.updatedAt`,
+  ).run(guildId, key, weight, Date.now());
+}
+
+/** Peta divisiKey -> weight untuk satu guild, dipakai listStaff() mengurutkan grup. */
+function getDivisiWeights(guildId) {
+  const rows = db.prepare('SELECT divisiKey, weight FROM staff_divisi WHERE guildId = ?').all(guildId);
+  return new Map(rows.map(r => [r.divisiKey, r.weight]));
 }
 
 /** Hapus staff. Gagal ('missing') kalau user itu belum terdaftar. */
@@ -35,25 +53,35 @@ function getStaff(userId, guildId) {
   return withRating(row);
 }
 
-/** Semua staff di guild, urut menurut divisi lalu addedAt. */
+/** Semua staff di guild, dikelompokkan per divisi dan diurut menurut bobot
+ * divisi (tinggi ke rendah, lihat setDivisiWeight) lalu nama divisi, lalu
+ * addedAt di dalam grup yang sama. */
 function listStaff(guildId) {
   const rows = db
     .prepare('SELECT * FROM staff WHERE guildId = ? ORDER BY divisi COLLATE NOCASE, addedAt ASC')
     .all(guildId);
   const withName = rows.map(withRating);
 
-  // Kelompokkan per divisi (urutan sesuai kemunculan pertama di daftar).
+  // Kelompokkan per divisi (urutan kemunculan dulu, nanti disortir ulang di bawah).
   const groups = [];
   const index = new Map();
   for (const row of withName) {
     const key = row.divisi.toLowerCase();
     if (!index.has(key)) {
       index.set(key, groups.length);
-      groups.push({ divisi: row.divisi, members: [] });
+      groups.push({ divisi: row.divisi, key, members: [] });
     }
     groups[index.get(key)].members.push(row);
   }
-  return groups;
+
+  const weights = getDivisiWeights(guildId);
+  groups.sort((a, b) => {
+    const wa = weights.get(a.key) ?? 0;
+    const wb = weights.get(b.key) ?? 0;
+    if (wa !== wb) return wb - wa; // bobot besar duluan
+    return a.divisi.localeCompare(b.divisi, 'id', { sensitivity: 'base' });
+  });
+  return groups.map(({ key, ...g }) => g);
 }
 
 /** Lengkapi satu baris staff dengan rata-rata bintang rating di guild itu. */
@@ -65,15 +93,16 @@ function withRating(staffRow) {
 }
 
 /**
- * Komentar terbaru untuk satu staff (yang komentarnya diisi), terbaru dulu.
- * Dipakai halaman detail /staff supaya bukan cuma angka rata-rata yang
- * tampil, tapi juga suara asli dari member yang menilai.
+ * Rating terbaru untuk satu staff, terbaru dulu — komentar boleh kosong
+ * (beda dari getRecentComments lama yang cuma ambil yang ada komentarnya).
+ * Dipakai kartu /staff supaya bukan cuma angka rata-rata yang tampil, tapi
+ * juga 5 rating terakhir apa adanya (bintang doang atau bintang+komentar).
  */
-function getRecentComments(staffUserId, guildId, limit = 3) {
+function getRecentRatings(staffUserId, guildId, limit = 5) {
   return db
     .prepare(
       `SELECT raterUserId, stars, comment, updatedAt FROM staff_ratings
-       WHERE staffUserId = ? AND guildId = ? AND comment IS NOT NULL AND TRIM(comment) != ''
+       WHERE staffUserId = ? AND guildId = ?
        ORDER BY updatedAt DESC LIMIT ?`,
     )
     .all(staffUserId, guildId, limit);
@@ -191,9 +220,11 @@ module.exports = {
   isStaff,
   addStaff,
   removeStaff,
+  setDivisiWeight,
+  getDivisiWeights,
   getStaff,
   listStaff,
-  getRecentComments,
+  getRecentRatings,
   setRating,
   getActivity,
   bumpActivity,

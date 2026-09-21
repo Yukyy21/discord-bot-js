@@ -1,8 +1,7 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
-const { getPoints, redeemPoruvItem } = require('../../database');
+const { getPoints, redeemPoruvItem, getPoruvShopItems } = require('../../database');
 const { themedEmbed, errorEmbed, successEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
-const { e, eo } = require('../../lib/emojis');
-const { PORUV_SHOP } = require('../../config/constants');
+const { e, eo, parseEmojiInput } = require('../../lib/emojis');
 
 // Role yang membernya di-DM saat ada klaim manual baru (Owocash, e-wallet,
 // custom role). Format: comma-separated role ID, isi di .env (lihat
@@ -12,16 +11,30 @@ const ADMIN_ROLE_IDS = (process.env.ADMIN_ROLE_IDS || '')
   .map(id => id.trim())
   .filter(Boolean);
 
+/**
+ * Emoji item bisa berupa key REGISTRY (item bawaan, mis. "inventory") atau
+ * emoji mentah/custom hasil /poruv-shop-set (mis. "<:foo:123>" atau "🎯").
+ * eo()/e() balik falsy kalau key-nya tidak dikenal REGISTRY, jadi tinggal
+ * fallback ke parseEmojiInput untuk kasus itu.
+ */
+function itemEmojiText(item) {
+  return e(item.emoji) || parseEmojiInput(item.emoji)?.raw || '🛍️';
+}
+
+function itemEmojiComponent(item) {
+  return eo(item.emoji) ?? parseEmojiInput(item.emoji)?.forComponent;
+}
+
 /** Tombol redeem satu baris per item, dinonaktifkan kalau Poruv belum cukup. */
-function buildRedeemRow(balance) {
+function buildRedeemRow(items, balance) {
   const row = new ActionRowBuilder();
-  for (const item of PORUV_SHOP) {
+  for (const item of items) {
     const btn = new ButtonBuilder()
       .setCustomId(`poruv_redeem:${item.key}`)
       .setLabel(`${item.name} · ${item.price.toLocaleString()}`)
       .setStyle(ButtonStyle.Primary)
       .setDisabled(balance < item.price);
-    const emoji = eo(item.emoji);
+    const emoji = itemEmojiComponent(item);
     if (emoji) btn.setEmoji(emoji);
     row.addComponents(btn);
   }
@@ -31,18 +44,19 @@ function buildRedeemRow(balance) {
 function buildPoruvShop(userId, guildId) {
   const stats = getPoints(userId, guildId);
   const balance = stats.points;
+  const items = getPoruvShopItems(guildId);
 
   const lines = [
     `${e('point')} Saldo Poruv kamu: **${balance.toLocaleString()}**`,
     DIVIDER,
-    `${e('warn')} Semua item di sini butuh proses manual admin — klaim masuk antrean, bukan langsung cair (kecuali item Mythic yang otomatis masuk \`/inventory\`).`,
+    `${e('warn')} Sebagian item di sini butuh proses manual admin — klaim masuk antrean, bukan langsung cair (kecuali item bertanda otomatis, langsung masuk \`/inventory\`).`,
     '',
   ];
 
-  for (const item of PORUV_SHOP) {
+  for (const item of items) {
     const afford = balance >= item.price ? ` ${e('success')}` : '';
     lines.push(
-      `${e(item.emoji)} **${item.name}** — \`${item.price.toLocaleString()} Poruv\`${afford}`,
+      `${itemEmojiText(item)} **${item.name}** — \`${item.price.toLocaleString()} Poruv\`${afford}`,
       `-# ${item.description}`,
     );
   }
@@ -51,9 +65,17 @@ function buildPoruvShop(userId, guildId) {
     .setDescription(lines.join('\n'))
     .setFooter({ text: 'Kumpulkan Poruv dari chat & voice, lalu tukar di sini' });
 
+  // Discord membatasi 5 tombol per baris & 5 baris per pesan, jadi maks 25
+  // item bisa punya tombol redeem. Lebih dari itu, sisanya tetap tampil di
+  // teks (embed) tapi tanpa tombol — pakai /poruv-shop-set list untuk cek key.
+  const rows = [];
+  for (let i = 0; i < items.length && rows.length < 5; i += 5) {
+    rows.push(buildRedeemRow(items.slice(i, i + 5), balance));
+  }
+
   return {
     embeds: [embed],
-    components: [buildRedeemRow(balance)],
+    components: rows,
   };
 }
 
@@ -65,14 +87,13 @@ function buildPoruvShop(userId, guildId) {
  */
 async function notifyAdmins(interaction, result) {
   if (!ADMIN_ROLE_IDS.length) return;
+  if (result.grantedItemName) return; // sudah otomatis genap, tidak perlu antre admin
 
   const embed = themedEmbed('warn', 'Klaim Poruv Shop Baru', COLORS.warn).setDescription(
     [
       `${interaction.user} menukar **${result.item.name}** seharga **${result.item.price.toLocaleString()} Poruv**.`,
       `${e('info')} Status: \`${result.redemption.status}\``,
-      result.grantedItemName
-        ? `${e('success')} Item Mythic **${result.grantedItemName}** sudah otomatis masuk inventori user.`
-        : `${e('warn')} Butuh tindak lanjut manual (Owocash / e-wallet / custom role).`,
+      `${e('warn')} Butuh tindak lanjut manual (Owocash / e-wallet / custom role / item custom).`,
     ].join('\n'),
   );
 
@@ -106,7 +127,7 @@ module.exports = {
   notifyAdmins,
   data: new SlashCommandBuilder()
     .setName('poruv-shop')
-    .setDescription('Tukar Poruv jadi Owocash, e-wallet, custom role, atau item Mythic'),
+    .setDescription('Tukar Poruv jadi Owocash, e-wallet, custom role, atau item lain'),
   async execute(interaction) {
     await interaction.reply(buildPoruvShop(interaction.user.id, interaction.guildId));
   },
@@ -124,3 +145,4 @@ module.exports = {
     await notifyAdmins(interaction, result);
   },
 };
+

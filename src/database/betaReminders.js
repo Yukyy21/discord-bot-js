@@ -26,3 +26,4 @@ function markBetaReminderSent(userId, guildId, nextEligibleAt) {
 }
 
 module.exports = { isBetaReminderDue, markBetaReminderSent };
+

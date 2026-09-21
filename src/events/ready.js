@@ -17,9 +17,10 @@ module.exports = {
     setInterval(clearExpiredBuffs, BUFF_CLEANUP_MS);
     startStatusRotator(client);
 
-    // Boss yang massih hidup dari sesi sebelumnya dipulihkan dulu, baru
+    // Boss yang masih hidup dari sesi sebelumnya dipulihkan dulu, baru
     // penjaga jadwal spawn (jam 12 malam & 12 siang) dinyalakan.
     await restoreBosses(client).catch(error => logger.error('Gagal memulihkan boss:', error));
     startBossScheduler(client);
   },
 };
+

@@ -1,6 +1,6 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const fs = require('node:fs');
-const { roundRect, loadAvatar, fitText, drawRankLogo } = require('./canvasKit');
+const { roundRect, drawCover, loadAvatar, fitText, drawRankLogo, FONT } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 
 async function buildProfileCard({
@@ -24,7 +24,7 @@ async function buildProfileCard({
   if (fs.existsSync(bgPath)) {
     try {
       const bg = await loadImage(bgPath);
-      ctx.drawImage(bg, 0, 0, 600, 340);
+      drawCover(ctx, bg, 0, 0, 600, 340);
     } catch (e) {
       roundRect(ctx, 0, 0, 600, 340, 20);
       ctx.fillStyle = '#2b2d31';
@@ -53,7 +53,7 @@ async function buildProfileCard({
   fitText(ctx, username, 150, 80, 410, { size: 28, minSize: 16 });
 
   ctx.fillStyle = '#b5bac1';
-  ctx.font = '18px sans-serif';
+  ctx.font = `18px ${FONT.body}`;
   const rankText = `${rankName || 'Novice'}  •  Level ${level}  •  Rank #${rank}`;
   ctx.fillText(rankText, 150, 110);
 
@@ -76,7 +76,7 @@ async function buildProfileCard({
     ctx.fill();
   }
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 14px sans-serif';
+  ctx.font = `bold 14px ${FONT.body}`;
   ctx.textAlign = 'center';
   ctx.fillText(xpNeeded > 0 ? `${xp}/${xpNeeded} XP` : `${xp} XP`, x0 + barW / 2, y0 + barH - 6);
   ctx.textAlign = 'left';
@@ -102,11 +102,11 @@ async function buildProfileCard({
     ctx.fill();
 
     ctx.fillStyle = '#b5bac1';
-    ctx.font = 'bold 13px sans-serif';
+    ctx.font = `bold 13px ${FONT.body}`;
     ctx.fillText(s.label, sx + 18, sy + 12);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 20px sans-serif';
+    ctx.font = `bold 20px ${FONT.display}`;
     ctx.fillText(s.value, sx, sy + 36);
   });
 

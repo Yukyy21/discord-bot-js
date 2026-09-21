@@ -194,6 +194,18 @@ function createTables() {
       PRIMARY KEY (staffUserId, raterUserId, guildId)
     );
 
+    -- Bobot urutan per DIVISI (bukan per-orang) — dipakai buat nyortir /staff
+    -- (mis. Founder tampil duluan, baru Moderator, dst) alih-alih alfabetis.
+    -- Diisi lewat opsi 'weight' opsional di /staff-set add; kalau satu divisi
+    -- belum pernah diisi weight-nya, dianggap 0 (paling belakang).
+    CREATE TABLE IF NOT EXISTS staff_divisi (
+      guildId TEXT,
+      divisiKey TEXT,
+      weight INTEGER NOT NULL DEFAULT 0,
+      updatedAt INTEGER NOT NULL,
+      PRIMARY KEY (guildId, divisiKey)
+    );
+
     -- Aktivitas per staff per bulan (kunci yearMonth YYYY-MM waktu lokal event).
     -- Baris baru per bulan = reset alami tiap ganti bulan, histori tetap ada.
     CREATE TABLE IF NOT EXISTS staff_activity (
@@ -205,6 +217,50 @@ function createTables() {
       tagCount INTEGER DEFAULT 0,
       announcementCount INTEGER DEFAULT 0,
       PRIMARY KEY (userId, guildId, yearMonth)
+    );
+
+    -- Katalog kustom /poruv-shop per guild. Kosong = masih pakai default
+    -- dari config/constants.js (lihat getPoruvShopItems di database/poruvShop.js).
+    -- Baru terisi begitu admin mengubah katalog lewat /poruv-shop-set (ensureSeeded
+    -- menyalin default ke sini dulu sebelum insert/edit/delete pertama).
+    CREATE TABLE IF NOT EXISTS poruv_shop_items (
+      guildId TEXT NOT NULL,
+      key TEXT NOT NULL,
+      name TEXT NOT NULL,
+      emoji TEXT,
+      price INTEGER NOT NULL,
+      description TEXT DEFAULT '',
+      fulfillment TEXT NOT NULL DEFAULT 'manual',
+      sortOrder INTEGER NOT NULL DEFAULT 0,
+      createdAt INTEGER NOT NULL,
+      PRIMARY KEY (guildId, key)
+    );
+
+    -- Redeem code dibuat admin lewat /code-create. rewards disimpan sebagai
+    -- JSON (array reward tervalidasi, lihat lib/redeemCodes.js parseAmountField
+    -- dkk). expiresAt/maxUses null = tidak ada batas. usesCount naik tiap
+    -- redeem sukses (lihat redeem_code_uses untuk mencegah redeem dobel).
+    CREATE TABLE IF NOT EXISTS redeem_codes (
+      code TEXT NOT NULL,
+      guildId TEXT NOT NULL,
+      createdBy TEXT NOT NULL,
+      createdAt INTEGER NOT NULL,
+      expiresAt INTEGER,
+      maxUses INTEGER,
+      usesCount INTEGER NOT NULL DEFAULT 0,
+      rewards TEXT NOT NULL,
+      PRIMARY KEY (guildId, code)
+    );
+
+    -- Riwayat siapa saja yang sudah redeem code apa, dipakai untuk
+    -- mencegah satu user redeem code yang sama dua kali (lihat redeemCode
+    -- di database/redeemCodes.js).
+    CREATE TABLE IF NOT EXISTS redeem_code_uses (
+      code TEXT NOT NULL,
+      guildId TEXT NOT NULL,
+      userId TEXT NOT NULL,
+      redeemedAt INTEGER NOT NULL,
+      PRIMARY KEY (code, guildId, userId)
     );
 
     CREATE INDEX IF NOT EXISTS idx_boss_active ON boss_spawns (guildId, status);

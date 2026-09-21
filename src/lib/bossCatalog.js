@@ -54,7 +54,7 @@ const BOSS_CATALOG = {
     name: 'Clown Orca',
     chance: 45,
     special: false,
-    icon: 'clown_orca.png',
+    icon: 'clown_orca.jpg',
     color: 0x3498db,
     hp: 30000,
     damage: { min: 350, max: 800 },

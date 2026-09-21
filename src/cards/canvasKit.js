@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 
 const logger = require('../lib/logger');
+const { FONT } = require('../lib/fonts'); // side-effect: registerFonts() jalan sekali di sini
 
 const FALLBACK_COLOR = '#5865f2';
 const AVATAR_TIMEOUT_MS = 6000;
@@ -33,6 +34,26 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+/**
+ * Gambar background image "cover" — di-crop & di-scale rata (rasio ASLI
+ * dipertahankan, TIDAK di-stretch), persis kayak CSS `background-size:
+ * cover`. Pakai ini, JANGAN `ctx.drawImage(img, 0, 0, w, h)` polos — itu
+ * maksa gambar mengikuti rasio kanvas apa adanya dan bikin isinya gepeng
+ * kalau rasio sumbernya beda (kejadian di leaderboard: source-nya potret
+ * tinggi, kanvasnya landscape lebar → planet2 di background jadi lonjong).
+ * `anchor` (0-1, default tengah) geser titik crop kalau bagian penting
+ * gambar condong ke satu sisi — mis. anchorY: 1 buat nampilin bagian BAWAH
+ * gambar (dipakai leaderboard.jpeg yang lengkungan buminya di bawah).
+ */
+function drawCover(ctx, img, x, y, w, h, { anchorX = 0.5, anchorY = 0.5 } = {}) {
+  const scale = Math.max(w / img.width, h / img.height);
+  const sw = w / scale;
+  const sh = h / scale;
+  const sx = (img.width - sw) * anchorX;
+  const sy = (img.height - sh) * anchorY;
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
   return {
@@ -51,7 +72,7 @@ function fallbackAvatar(name = '', size = 128) {
   ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#ffffff';
-  ctx.font = `bold ${size / 2}px sans-serif`;
+  ctx.font = `bold ${size / 2}px ${FONT.display}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText((name || '?').charAt(0).toUpperCase(), size / 2, size / 2);
@@ -118,7 +139,7 @@ function fitText(
   x,
   y,
   maxWidth,
-  { weight = 'bold', size = 28, minSize = 14, family = 'sans-serif' } = {},
+  { weight = 'bold', size = 28, minSize = 14, family = FONT.display } = {},
 ) {
   let current = size;
   const setFont = s => {
@@ -156,4 +177,4 @@ async function drawRankLogo(ctx, logoPath, x, baselineY, maxSize = 26) {
   }
 }
 
-module.exports = { roundRect, hexToRgb, fetchAvatarBuffer, loadAvatar, fitText, drawRankLogo };
+module.exports = { roundRect, drawCover, hexToRgb, fetchAvatarBuffer, loadAvatar, fitText, drawRankLogo, FONT };

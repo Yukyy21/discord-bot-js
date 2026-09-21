@@ -65,8 +65,7 @@ server B.
 | Command | Fungsi |
 |---|---|
 | `/ai-ask <input>` | Tanya apa saja soal bot; jawaban bersumber dari dokumen ini |
-| `/guide` | Panduan interaktif (ephemeral, cuma kamu yang lihat), dropdown 11 kategori, tombol halaman & tombol tutup |
-| `/report type:bug\|saran <text>` | Laporkan bug atau kasih saran soal bot; masuk ke admin lewat DM |
+| `/guide` | Panduan interaktif, dropdown 11 kategori, tombol halaman & tombol tutup |
 | `/ping` | Latency websocket bot |
 | `/credit` | Tim pembuat bot |
 | `/botinfo` | Info teknis: versi Node.js, discord.js, SQLite3, uptime, statistik |
@@ -78,7 +77,6 @@ server B.
 | `/admin reset-user <user> <konfirmasi>` | Hapus semua data user (saldo, Poruv, level, inventori, quest) |
 | `/admin set-level <user> <level>` | Set level manual, XP direset ke 0 |
 | `/admin-spawn-boss` | Paksa boss diundi sekarang (buat tes) |
-| `/beta type:on\|off` | Nyala/matikan pengingat berkala "bot masih beta, laporkan lewat `/report`" (per server) |
 
 `/admin` dikunci `setDefaultMemberPermissions(Administrator)` jadi tidak muncul
 untuk member biasa. `reset-user` wajib `konfirmasi: true`.
@@ -293,14 +291,9 @@ Quest event sudah ada: `boss_join` (harian, ikut serang mini boss) dan
   server masing-masing (channel per-guild diatur admin lewat `/boss-channel`;
   fallback `BOSS_CHANNEL_ID`).
   Admin bisa memaksa lewat `/admin-spawn-boss`.
-- Cara ikut: klik tombol **Toggle Auto Attack** di pesan boss. Sekali klik,
-  bot otomatis menyerang berulang untukmu tiap jeda cooldown sampai
-  **20 kali serangan**, lalu berhenti — klik lagi kalau mau lanjut. Klik
-  sekali lagi selagi auto attack jalan untuk menghentikannya lebih awal.
-  Player tidak punya HP, jadi tidak ada risiko mati. Jeda antar serangan
-  **10 detik** per orang (bisa molor kalau kena debuff cooldown dari boss).
-  Hasil tiap serangan tampil di **satu pesan yang sama** (di-edit ulang tiap
-  serangan), bukan pesan baru — supaya tidak menumpuk.
+- Cara ikut: klik tombol **Serang!** di pesan boss. Player tidak punya HP, jadi
+  tidak ada risiko mati. Jeda antar serangan **10 detik** per orang (bisa molor
+  kalau kena debuff cooldown dari boss).
 - Boss kabur kalau belum tumbang dalam **6 jam** — hadiah tidak dibagikan.
 - Hadiah: **60% pool** dibagi proporsional damage ke semua peserta, sisa 40% jadi
   bonus **top 3 damager** (15% / 10% / 5%) dan **pemberi last hit** (10%) — satu
@@ -321,15 +314,10 @@ Boss **tidak bisa membunuh** player — player tetap tanpa HP. Yang dilakukan
 boss adalah memasang **debuff** atau merampas coin di dompet (bank aman).
 
 Dua cara boss menyerang:
-1. **Serangan balik** — tiap kali auto attack-mu menyerang, ada peluang boss
+1. **Serangan balik** — tiap kali kamu klik **Serang!**, ada peluang boss
    membalas: Pump Freakin **25%**, Clown Orca **30%**, Ancient Mummy **40%**.
-   Hasilnya tampil di pesan hasil serangmu sendiri (ephemeral, cuma kamu yang
-   lihat).
 2. **Amukan** — tiap **5 menit** boss menyerang sampai **3 penyerang teraktif**
-   (yang menyerang dalam 15 menit terakhir) sekaligus, dikirim lewat **DM**
-   satu-satu ke tiap orang yang kena (bukan diumumkan di channel boss, biar
-   channel-nya tidak penuh). Kalau DM-mu tertutup, pesan amukan itu dilewati
-   — debuff/kehilangan coinnya tetap berlaku, cuma notifikasinya tidak sampai.
+   (yang menyerang dalam 15 menit terakhir) sekaligus, diumumkan di channel boss.
 
 #### Daftar serangan boss
 | Serangan | Efek | Dipakai boss |
@@ -358,11 +346,9 @@ Dua cara boss menyerang:
 - Debuff yang sedang aktif tampil di `/buffs` di bagian **Debuff dari Mini Boss**.
 - Coin yang dirampas hanya diambil dari **dompet**, tidak dari **bank**.
 
-Tiap boss punya **gambar ikon sendiri** yang tampil di embed boss saat
-**muncul**, **tumbang**, dan **kabur**. Pesan hasil serangan (termasuk kena
-serangan balik) dan DM amukan sengaja **tanpa gambar boss** — dianggap
-kebesaran untuk konteks pesan sekali-lihat itu. Kalau file ikonnya hilang,
-embed tetap terkirim — hanya tanpa gambar.
+Tiap boss punya **gambar ikon sendiri** yang tampil sebagai thumbnail di embed
+boss: saat muncul, tiap serangan, saat tumbang, dan saat kabur. Kalau file
+ikonnya hilang, embed tetap terkirim — hanya tanpa gambar.
 
 ---
 
@@ -381,25 +367,6 @@ embed tetap terkirim — hanya tanpa gambar.
 11 halaman: Beranda, Ekonomi, Poruv & Level, Aktivitas, Quest, Rank Tier,
 Item & Rarity, Reward, Utilitas, Admin, Tips. Navigasi lewat dropdown
 kategori + tombol halaman sebelumnya/berikutnya, dan tombol tutup.
-Pesannya **ephemeral** — hanya yang memanggil `/guide` yang bisa lihat,
-member lain di channel tidak ikut kebanjiran.
-
----
-
-## 8b. Mode Beta & Report
-
-- `/beta type:on|off` (**admin**) menyala/matikan pengingat mode beta per
-  server. Kalau nyala, bot **numpang** pesan ephemeral di balasan command
-  atau tombol apa pun yang sedang kamu pakai (bukan pesan terpisah di satu
-  channel tetap) — sekali muncul, baru muncul lagi ke kamu setelah jeda acak
-  **40-90 menit**. Isinya mengingatkan bot masih beta dan mengarahkan ke
-  `/report`.
-- `/report type:bug|saran text:<isi>` bisa dipakai siapa saja. Laporan tidak
-  disimpan di database — langsung diteruskan lewat **DM** ke admin server
-  (role yang terdaftar di `ADMIN_ROLE_IDS`, env yang sama dengan notifikasi
-  `/poruv-shop`). Kalau `ADMIN_ROLE_IDS` kosong, laporan tetap dikonfirmasi
-  ke pelapor tapi tidak ada yang otomatis diberi tahu.
-- Balasan `/report` **ephemeral** — cuma pelapor yang lihat konfirmasinya.
 
 ---
 
@@ -452,21 +419,13 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 
 **"Kenapa tombol serang boss-ku lama banget?"** → Cooldown normalnya 10 detik. Kalau lebih lama, kamu kena debuff cooldown dari serangan balik boss (×2, ×2.5, atau ×3). Cek `/buffs`, atau pakai Chrono Core untuk membersihkannya.
 
-**"Auto attack-ku berhenti sendiri?"** → Wajar — auto attack otomatis berhenti setelah 20 kali serangan atau kalau boss keburu tumbang. Klik tombol **Toggle Auto Attack** lagi buat mulai batch baru.
-
 **"Boss bisa bunuh aku nggak?"** → Tidak. Player tidak punya HP. Boss cuma memasang debuff atau merampas sebagian coin di dompet (bank aman).
 
 **"Coin-ku tiba-tiba berkurang pas lawan boss."** → Itu serangan Rampas Koin / Perampokan Makam. Simpan coin di `/bank` sebelum ikut boss kalau tidak mau kena.
 
 **"Debuff-ku numpuk nggak?"** → Tidak. Debuff sejenis memakai efek terparah saja, dan buff item tidak pernah dibatalkan — hanya dikalikan setelahnya.
 
-**"Kok aku nggak dapat notif amukan boss?"** → Notif amukan dikirim lewat DM, bukan di channel boss. Kalau DM-mu tertutup untuk member server ini, notifnya tidak sampai — tapi efeknya (debuff/coin hilang) tetap berlaku. Buka DM dari member server untuk menerimanya.
-
-**"Ikon/gambar boss-nya kok nggak muncul di pesan serangan?"** → Memang sengaja tanpa gambar (dianggap kebesaran untuk pesan sekali-lihat). Gambar boss cuma muncul di embed saat boss muncul, tumbang, atau kabur.
-
-**"Gimana cara lapor bug/kasih saran?"** → `/report type:bug text:<jelaskan masalahnya>` untuk bug, atau `/report type:saran text:<idemu>` untuk saran. Laporan langsung diteruskan ke admin, tidak perlu japri manual.
-
-**"Kenapa bot suka ngirim pesan 'masih beta' sendiri?"** → Itu pengingat otomatis dari `/beta` yang dinyalakan admin server ini — muncul cuma buat kamu (ephemeral) numpang di command yang lagi kamu pakai, sekali per 40-90 menit. Bukan bug, dan kalau dianggap mengganggu, admin bisa matikan lewat `/beta type:off`.
+**"Ikon/gambar boss-nya kok nggak muncul?"** → Gambar boss dikirim sebagai lampiran pesan. Kalau tidak muncul, biasanya bot tidak punya izin **Attach Files** di channel mini boss.
 
 **"Command bot nggak muncul."** → Itu urusan admin: command harus dideploy ulang; command global butuh waktu menyebar.
 

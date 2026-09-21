@@ -10,6 +10,7 @@ const { buildLeaderboard } = require('../commands/general/leaderboard');
 const { buildCredit } = require('../commands/general/credit');
 const { buildStaff } = require('../commands/staff/staff');
 const poruvShopCmd = require('../commands/economy/poruvShop');
+const codeCreateCmd = require('../commands/admin/codeCreate');
 const poruvResolveCmd = require('../commands/admin/poruvResolve');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
 const { handleBossAutoAttack } = require('../lib/bossManager');
@@ -27,6 +28,7 @@ module.exports = {
   async execute(interaction) {
     if (interaction.isButton()) await handleButton(interaction);
     else if (interaction.isStringSelectMenu()) await handleSelectMenu(interaction);
+    else if (interaction.isModalSubmit()) await handleModalSubmit(interaction);
     else if (interaction.isChatInputCommand()) await handleCommand(interaction);
     else return;
 
@@ -119,7 +121,8 @@ async function handleButton(interaction) {
         return await interaction.update(buildCredit(Number(a) || 0));
 
       case 'staff_page': // a = halaman
-        return await interaction.update(await buildStaff(interaction.client, interaction.guildId, Number(a) || 0));
+        await interaction.deferUpdate();
+        return await interaction.editReply(await buildStaff(interaction.client, interaction.guildId, Number(a) || 0));
 
       case 'poruv_redeem': // a = item key
         return await poruvShopCmd.handleRedeem(interaction, a);
@@ -179,9 +182,28 @@ async function handleSelectMenu(interaction) {
     if (interaction.customId === 'lb_filter') {
       return await renderLeaderboardCard(interaction, interaction.values[0]);
     }
+    if (interaction.customId.startsWith('code_create_select:')) {
+      const [, code, expiredHari, maxRedeem] = interaction.customId.split(':');
+      const types = interaction.values;
+      const modal = codeCreateCmd.buildRewardModal(code, expiredHari, maxRedeem, types);
+      return await interaction.showModal(modal);
+    }
   } catch (error) {
     if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
     logger.error(`Select menu "${interaction.customId}" gagal:`, error);
+  }
+}
+
+async function handleModalSubmit(interaction) {
+  try {
+    if (interaction.customId.startsWith('code_create_modal:')) {
+      const [, code, expiredHari, maxRedeem, typesRaw] = interaction.customId.split(':');
+      const types = typesRaw.split(',');
+      return await codeCreateCmd.handleModalSubmit(interaction, code, expiredHari, maxRedeem, types);
+    }
+  } catch (error) {
+    if (error.code === UNKNOWN_INTERACTION || error.code === ALREADY_ACKNOWLEDGED) return;
+    logger.error(`Modal "${interaction.customId}" gagal:`, error);
   }
 }
 

@@ -1,7 +1,7 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const { AttachmentBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
-const { roundRect, loadAvatar, fitText } = require('./canvasKit');
+const { roundRect, drawCover, loadAvatar, fitText, FONT } = require('./canvasKit');
 const { asset } = require('../lib/paths');
 const {
   getBalanceLeaderboard,
@@ -16,19 +16,22 @@ const logger = require('../lib/logger');
 const RANK_COLORS = { 1: '#ffd700', 2: '#c0c0c0', 3: '#cd7f32' };
 
 async function buildLeaderboardCard(entries, label) {
-  const rowH = 64;
+  const rowH = 68;
   const pad = 24;
-  const headerH = 56;
+  const headerH = 64;
   const w = 700;
   const h = headerH + rowH * entries.length + pad;
   const canvas = createCanvas(w, h);
   const ctx = canvas.getContext('2d');
 
+  // Background cover-fit, condong ke BAWAH (anchorY:1) — leaderboard.jpeg
+  // potret tinggi dengan lengkungan bumi di bagian bawah, jadi itu yang mau
+  // dipertahankan kelihatan (bukan di-stretch paksa jadi gepeng kayak sebelumnya).
   const bgPath = asset('leaderboard', 'leaderboard.jpeg');
   if (fs.existsSync(bgPath)) {
     try {
       const bg = await loadImage(bgPath);
-      ctx.drawImage(bg, 0, 0, w, h);
+      drawCover(ctx, bg, 0, 0, w, h, { anchorY: 1 });
     } catch (e) {
       ctx.fillStyle = '#232428';
       ctx.fillRect(0, 0, w, h);
@@ -43,8 +46,8 @@ async function buildLeaderboardCard(entries, label) {
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 26px sans-serif';
-  ctx.fillText(`Leaderboard ${label}`, pad, 40);
+  ctx.font = `bold 30px ${FONT.display}`;
+  ctx.fillText(`Leaderboard ${label}`, pad, 46);
 
   const images = await Promise.all(entries.map(e => loadAvatar(e.avatar, e.name, 64)));
 
@@ -52,41 +55,51 @@ async function buildLeaderboardCard(entries, label) {
     const e = entries[i];
     const y = headerH + i * rowH;
 
-    if (i % 2 === 0) {
+    // Baris 1 (rank #1) sengaja dibiarkan tanpa panel gelap — badge emasnya
+    // sudah cukup menonjol sendiri, zebra-stripe baru mulai dari baris ke-2.
+    if (i > 0 && i % 2 === 0) {
       ctx.fillStyle = '#2b2d31';
-      roundRect(ctx, pad, y, w - pad * 2, rowH - 8, 12);
+      roundRect(ctx, pad, y, w - pad * 2, rowH - 8, 14);
       ctx.fill();
     }
 
     const badgeColor = RANK_COLORS[e.rank] || '#4e5058';
+    const badgeCy = y + rowH / 2 - 4;
     ctx.beginPath();
-    ctx.arc(40, y + rowH / 2 - 4, 16, 0, Math.PI * 2);
+    ctx.arc(42, badgeCy, 18, 0, Math.PI * 2);
     ctx.fillStyle = badgeColor;
     ctx.fill();
     ctx.fillStyle = RANK_COLORS[e.rank] ? '#000000' : '#ffffff';
-    ctx.font = 'bold 16px sans-serif';
+    ctx.font = `bold 17px ${FONT.display}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(String(e.rank), 40, y + rowH / 2 - 4);
+    ctx.fillText(String(e.rank), 42, badgeCy + 1);
 
     const img = images[i];
+    const avatarCx = 80;
     ctx.save();
     ctx.beginPath();
-    ctx.arc(75, y + rowH / 2 - 4, 20, 0, Math.PI * 2);
+    ctx.arc(avatarCx, badgeCy, 22, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
-    ctx.drawImage(img, 55, y + rowH / 2 - 24, 40, 40);
+    ctx.drawImage(img, avatarCx - 22, badgeCy - 22, 44, 44);
     ctx.restore();
+    // Ring tipis di sekeliling avatar biar kelihatan lebih "premium", tidak nempel polos ke bg.
+    ctx.beginPath();
+    ctx.arc(avatarCx, badgeCy, 22, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#ffffff';
-    fitText(ctx, e.name, 110, y + rowH / 2 + 4, w - pad - 110 - 160, { size: 18, minSize: 12 });
+    fitText(ctx, e.name, 118, badgeCy + 7, w - pad - 118 - 170, { size: 20, minSize: 13 });
 
     ctx.fillStyle = '#b5bac1';
-    ctx.font = '16px sans-serif';
+    ctx.font = `16px ${FONT.body}`;
     ctx.textAlign = 'right';
-    ctx.fillText(`${e.value} ${label}`, w - pad, y + rowH / 2 + 4);
+    ctx.fillText(`${e.value} ${label}`, w - pad - 4, badgeCy + 6);
     ctx.textAlign = 'left';
   }
 

@@ -16,7 +16,13 @@ module.exports = {
         .setDescription('Tambah user sebagai staff')
         .addUserOption(o => o.setName('user').setDescription('User yang mau dijadikan staff').setRequired(true))
         .addStringOption(o => o.setName('divisi').setDescription('Divisi/tim (mis. Moderator)').setRequired(true))
-        .addStringOption(o => o.setName('deskripsi').setDescription('Deskripsi singkat (opsional)')),
+        .addStringOption(o => o.setName('deskripsi').setDescription('Deskripsi singkat (opsional)'))
+        .addIntegerOption(o =>
+          o
+            .setName('weight')
+            .setDescription('Bobot urutan divisi ini di /staff (makin besar makin depan) — berlaku 1 divisi')
+            .setRequired(false),
+        ),
     )
     .addSubcommand(sc =>
       sc
@@ -33,7 +39,8 @@ module.exports = {
     if (sub === 'add') {
       const divisi = interaction.options.getString('divisi');
       const deskripsi = interaction.options.getString('deskripsi');
-      const result = addStaff(userId, guildId, divisi, deskripsi, interaction.user.id);
+      const weight = interaction.options.getInteger('weight');
+      const result = addStaff(userId, guildId, divisi, deskripsi, interaction.user.id, weight);
       if (!result.ok) {
         return interaction.reply({ embeds: [errorEmbed(result.message)], flags: MessageFlags.Ephemeral });
       }
@@ -45,6 +52,13 @@ module.exports = {
           { name: 'Divisi', value: divisi, inline: true },
           { name: 'Deskripsi', value: deskripsi || '—', inline: true },
         );
+      if (weight != null) {
+        embed.addFields({
+          name: 'Weight divisi',
+          value: `\`${weight}\` — berlaku buat semua staff di divisi **${divisi}**, dipakai buat urutan \`/staff\``,
+          inline: false,
+        });
+      }
       return interaction.reply({ embeds: [embed] });
     }
 

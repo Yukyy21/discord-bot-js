@@ -2,9 +2,9 @@ const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } = requi
 const { getShopStock, getShopTimers, getShopRefreshAt, TIER_CONFIG } = require('../../lib/shopRotation');
 const { parseEffect, describeEffect } = require('../../database/shopCatalog');
 const { getUser } = require('../../database');
-const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
+const { themedEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
-const { itemEmoji } = require('../../lib/itemEmojis');
+const { itemEmoji, tierMark } = require('../../lib/itemEmojis');
 const { paginate, pagerRow } = require('../../ui/pager');
 
 const TIER_ORDER = Object.keys(TIER_CONFIG);
@@ -76,9 +76,10 @@ function buildShop(page = 0, filter = {}, viewer = null) {
     }
   }
 
-  const header = [
-    `${e('clock')} Refresh <t:${Math.floor(getShopRefreshAt(guildId) / 1000)}:R> · \`${minutes}m ${seconds}s\``,
-  ];
+  // Baris waktu refresh tanpa duplikasi info — timestamp relatif Discord
+  // (`<t:...:R>`) sudah otomatis menghitung mundur sendiri di klien user,
+  // jadi tidak perlu ditulis ulang manual di sebelahnya.
+  const header = [`${e('clock')} Refresh <t:${Math.floor(getShopRefreshAt(guildId) / 1000)}:R>`];
   if (balance !== null) header.push(`${e('coin')} Saldo **${balance.toLocaleString()}**`);
 
   const filterBits = [];
@@ -92,8 +93,8 @@ function buildShop(page = 0, filter = {}, viewer = null) {
   );
 
   const lines = [header.join(' · ')];
-  if (filterBits.length) lines.push(`${filterBits.join(' · ')} — **${items.length}** item`);
-  lines.push(DIVIDER);
+  if (filterBits.length) lines.push(`-# ${filterBits.join(' · ')} — ${items.length} item cocok`);
+  lines.push('');
 
   if (!items.length) {
     lines.push(
@@ -102,20 +103,25 @@ function buildShop(page = 0, filter = {}, viewer = null) {
         : `${e('warn')} Stok sedang di-refresh, coba sebentar lagi.`,
     );
   } else {
+    // Nama item menonjol, detail (tier/harga/ID/efek) diredupkan jadi
+    // subtext di bawahnya — tapi tetap rapat antar item, bukan berjarak.
     for (const i of slice) {
       const info = describeEffect(parseEffect(i.effect));
-      lines.push(
-        `${itemEmoji(i.name)} **${i.name}** · \`ID ${i.id}\`\n` +
-          `-# ${i.price.toLocaleString()} coin${affordability(i.price, balance)} · ${i.tier}` +
-          `${info ? ` · ${info.text}` : ''}`,
-      );
+      const meta = [
+        `${tierMark(i.tier)} ${i.tier}`,
+        `${i.price.toLocaleString()} coin${affordability(i.price, balance)}`,
+        `\`ID ${i.id}\``,
+      ];
+      if (info) meta.push(info.text);
+      lines.push(`${itemEmoji(i.name)} **${i.name}**`, `-# ${meta.join(' · ')}`);
     }
-    lines.push(DIVIDER, `-# Beli dengan \`/buy <id>\``);
   }
 
   embed.setDescription(lines.join('\n'));
 
-  embed.setFooter({ text: `Halaman ${current + 1}/${totalPages} • ${items.length} item di etalase` });
+  embed.setFooter({
+    text: `Halaman ${current + 1}/${totalPages} · ${items.length} item di etalase · /buy <id> buat beli`,
+  });
 
   return {
     embeds: [embed],

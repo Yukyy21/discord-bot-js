@@ -19,6 +19,7 @@ module.exports = [
         __dirname: 'readonly',
         setTimeout: 'readonly',
         setInterval: 'readonly',
+        clearTimeout: 'readonly',
         clearInterval: 'readonly',
         fetch: 'readonly',
         AbortSignal: 'readonly',

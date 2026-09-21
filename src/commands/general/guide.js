@@ -8,3 +8,4 @@ module.exports = {
     await interaction.reply({ ...buildGuide('home'), flags: MessageFlags.Ephemeral });
   },
 };
+

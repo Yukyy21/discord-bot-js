@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getInventory } = require('../../database');
 const { parseEffect, describeEffect } = require('../../database/shopCatalog');
-const { themedEmbed, COLORS, DIVIDER } = require('../../ui/embeds');
+const { themedEmbed, COLORS } = require('../../ui/embeds');
 const { e } = require('../../lib/emojis');
 const { itemEmoji, tierMark } = require('../../lib/itemEmojis');
 const { getTier } = require('../../lib/tiers');
@@ -28,31 +28,34 @@ function buildInventory(user, guildId, page = 0) {
   const equippedCount = items.filter(i => i.equipped === 1).length;
   embed
     .setDescription(
-      `**${items.length}** jenis item • total **${totalQty}** buah • dipasang **${equippedCount}**/${EQUIP_SLOTS}\n${DIVIDER}`,
+      `**${items.length}** jenis item · total **${totalQty}** buah · terpasang **${equippedCount}**/${EQUIP_SLOTS}`,
     )
     .addFields(
       slice.map((i, idx) => {
         const info = describeEffect(parseEffect(i.effect));
         const tier = getTier(i.price ?? 0, i.name);
-        const lines = [`Jumlah **x${i.quantity}** · ${tierMark(tier)} ${tier}`];
+        const equipped = i.equipped === 1;
+
+        // Baris 1 (bold, info utama): jumlah + tier. Baris 2: efek kalau ada
+        // (kalau tidak, "item koleksi" biasa). Baris 3 (subtext, redup):
+        // status equip + command singkat — sengaja diredupkan supaya nama
+        // item & efek yang lebih penting tetap paling menonjol.
+        const lines = [`${tierMark(tier)} ${tier} · x${i.quantity}`];
+        lines.push(info ? `${e(info.emoji)} ${info.text} — \`/use ${i.id}\`` : '-# Item koleksi, tidak ada efek');
         lines.push(
-          info
-            ? `${e(info.emoji)} Bisa dipakai: **${info.text}** — \`/use ${i.id}\``
-            : 'Item koleksi',
+          equipped
+            ? `-# ${e('inventory')} Terpasang · \`/equip unequip ${i.id}\` buat lepas`
+            : `-# \`/equip equip ${i.id}\``,
         );
-        lines.push(
-          i.equipped === 1
-            ? `${e('inventory')} **Terpasang** di slot equip — \`/equip unequip ${i.id}\``
-            : `\`/equip equip ${i.id}\` untuk menandai di slot equip`,
-        );
+
         return {
-          name: `${i.equipped === 1 ? e('inventory') : ''} ${itemEmoji(i.name)} ${offset + idx + 1}. ${i.name}`,
+          name: `${offset + idx + 1}. ${itemEmoji(i.name)} ${i.name}${equipped ? ` ${e('inventory')}` : ''}`,
           value: lines.join('\n'),
           inline: false,
         };
       }),
     )
-    .setFooter({ text: `Halaman ${current + 1} dari ${totalPages} • equip maks ${EQUIP_SLOTS} item` });
+    .setFooter({ text: `Halaman ${current + 1} dari ${totalPages} · equip maks ${EQUIP_SLOTS} item` });
 
   return { embeds: [embed], components: pagerRow(`inv_page:${user.id}`, current, totalPages) };
 }
