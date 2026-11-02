@@ -2,16 +2,15 @@ File yang berubah / ditambah pada update ini
 ============================================
 
 Diubah:
-- src/lib/emojis.js
-- src/ui/pager.js
-- src/ui/guidePages.js
-- src/commands/economy/quest.js
-- src/commands/economy/buffs.js
-- src/database/shopCatalog.js
+- src/config/constants.js      (E-Wallet 15.000, harga 20.000 Poruv, key ewallet_15k)
+- test/poruvResolve.test.js    (key & saldo uji disesuaikan)
+- Docs/Bot.md
+- Docs/ai.md
 - Docs/Emoji.md
-- Docs/Changelog.md
 
 Ditambah:
 - (tidak ada file baru)
 
-Catatan: tidak ada command baru, tidak perlu `npm run deploy`.
+Catatan: katalog /poruv-shop guild yang sudah tersimpan di database ikut
+dimigrasi manual (key ewallet_25k -> ewallet_15k, harga 20.000, nominal
+Rp15.000). Tidak ada command baru, tidak perlu `npm run deploy`.

@@ -138,7 +138,7 @@ barang bernilai di luar bot — bukan item dalam game seperti `/shop` biasa:
 | Item Mythic (Acak) | 2.500 Poruv | Otomatis — masuk `/inventory` langsung |
 | Owocash 1.000.000 | 5.000 Poruv | Manual — admin |
 | Custom Role | 10.000 Poruv | Manual — admin |
-| E-Wallet 25.000 | 15.000 Poruv | Manual — admin |
+| E-Wallet 15.000 | 20.000 Poruv | Manual — admin |
 
 Redeem memotong Poruv dan mencatat baris ke tabel `poruv_redemptions` dalam
 satu transaksi (`db.transaction()`), jadi tidak mungkin Poruv terpotong tanpa

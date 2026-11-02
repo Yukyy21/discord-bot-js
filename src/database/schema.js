@@ -312,3 +312,4 @@ function runMigrations() {
 }
 
 module.exports = { createTables, runMigrations };
+

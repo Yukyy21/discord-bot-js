@@ -172,7 +172,7 @@ Mythic yang otomatis masuk `/inventory` lewat sistem yang sama dengan `/shop`.
 | Item Mythic (Acak) | **2.500 Poruv** | Otomatis — 1 item Mythic acak dari katalog `/shop`, langsung masuk `/inventory` |
 | Owocash 1.000.000 | **5.000 Poruv** | Manual — transfer 1.000.000 Owocash (OwO bot), diproses admin |
 | Custom Role | **10.000 Poruv** | Manual — role custom (nama & warna sesuai request), dibuatkan admin |
-| E-Wallet 25.000 | **15.000 Poruv** | Manual — saldo e-wallet Rp25.000, dikirim admin |
+| E-Wallet 15.000 | **20.000 Poruv** | Manual — saldo e-wallet Rp15.000, dikirim admin |
 
 ### Perkiraan waktu tebus
 Harga ditentukan langsung oleh owner. Sebagai gambaran kasar, dengan proyeksi
@@ -184,9 +184,9 @@ Poruv dua profil user — **santai** (±76 Poruv/hari) dan **grinding**
 | Item Mythic (Acak) | ±5 hari | ±33 hari (±1,1 bulan) |
 | Owocash 1.000.000 | ±10 hari | ±66 hari (±2,2 bulan) |
 | Custom Role | ±19 hari | ±132 hari (±4,4 bulan) |
-| E-Wallet 25.000 | ±29 hari | ±197 hari (±6,6 bulan) |
+| E-Wallet 15.000 | ±38 hari | ±263 hari (±8,8 bulan) |
 
-Catatan: E-Wallet 25.000 sengaja jadi item termahal meski nilainya konkret
+Catatan: E-Wallet 15.000 sengaja jadi item termahal meski nilainya konkret
 (uang beneran nominal kecil), karena redeem-nya paling berat diproses admin
 dibanding tiga item lain.
 
@@ -409,7 +409,7 @@ Semua ikon memakai custom emoji terpusat. Yang perlu diketahui user:
 
 **"Coin dari `/give` kok nggak kena multiplier?"** → Multiplier coin memang tidak berlaku di `/give`.
 
-**"Poruv-ku dipakai buat apa?"** → Belanja di `/poruv-shop`: Item Mythic acak (2.500 Poruv), Owocash 1.000.000 (5.000 Poruv), Custom Role (10.000 Poruv), atau E-Wallet 25.000 (15.000 Poruv).
+**"Poruv-ku dipakai buat apa?"** → Belanja di `/poruv-shop`: Item Mythic acak (2.500 Poruv), Owocash 1.000.000 (5.000 Poruv), Custom Role (10.000 Poruv), atau E-Wallet 15.000 (20.000 Poruv).
 
 **"Kok item dari `/poruv-shop` nggak langsung kukirim?"** → Wajar untuk Owocash, e-wallet, dan custom role — ketiganya diproses manual oleh admin setelah klaim (bot DM admin otomatis), bukan otomatis dari bot. Hanya item Mythic yang langsung masuk `/inventory`.
 

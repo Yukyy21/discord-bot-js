@@ -73,7 +73,7 @@ const SHOP = {
  *  - Item Mythic (Acak)   : 2.500 Poruv
  *  - Owocash 1.000.000    : 5.000 Poruv
  *  - Custom Role          : 10.000 Poruv
- *  - E-Wallet 25.000      : 15.000 Poruv
+ *  - E-Wallet 15.000      : 20.000 Poruv
  * `fulfillment: 'manual'` artinya redeem masuk antrean dan admin di-DM
  * (lihat notifyAdmins di poruvShop.js command) — bot tidak menyerahkan
  * barangnya sendiri. `fulfillment: 'mythic_random'` otomatis kasih 1 item
@@ -107,12 +107,12 @@ const PORUV_SHOP = [
     description: 'Role custom (nama & warna sesuai request), dibuatkan admin manual.',
   },
   {
-    key: 'ewallet_25k',
-    name: 'E-Wallet 25.000',
+    key: 'ewallet_15k',
+    name: 'E-Wallet 15.000',
     emoji: 'wallet',
-    price: 15000,
+    price: 20000,
     fulfillment: 'manual',
-    description: 'Saldo e-wallet Rp25.000, dikirim admin setelah verifikasi.',
+    description: 'Saldo e-wallet Rp15.000, dikirim admin setelah verifikasi.',
   },
 ];
 

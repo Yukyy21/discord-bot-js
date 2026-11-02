@@ -57,7 +57,7 @@ kerja redeem-nya.
 | Key | Emoji | Dipakai di |
 |---|---|---|
 | `owocash` | `<:Owocash:...>` | Item "Owocash 1.000.000" |
-| `wallet` | `<:wallet:...>` | Item "E-Wallet 25.000" |
+| `wallet` | `<:wallet:...>` | Item "E-Wallet 15.000" |
 | `role` | `<:Role:...>` | Item "Custom Role" |
 | `inventory` | `<:tas:...>` | Item "Item Mythic (Acak)" (dipakai ulang dari ikon inventori) |
 

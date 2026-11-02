@@ -53,8 +53,8 @@ test('resolve ditolak: id tidak ada, atau klaim sudah bukan pending', () => {
 });
 
 test('resolve hanya berlaku dalam guild yang sama', () => {
-  addPoints('u3', 'guild-lain', 20000);
-  const res = redeemPoruvItem('u3', 'guild-lain', 'ewallet_25k');
+  addPoints('u3', 'guild-lain', 25000);
+  const res = redeemPoruvItem('u3', 'guild-lain', 'ewallet_15k');
   assert.strictEqual(res.ok, true);
   // Coba resolve dari guild lain — harus gagal karena id/guild tidak cocok.
   const wrong = resolveRedemption(res.redemption.id, G);
