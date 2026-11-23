@@ -4,6 +4,7 @@ const { getProfile, getXpRank } = require('../../database');
 const { buildProfileCard } = require('../../cards/profileCard');
 const { getRank } = require('../../lib/ranks');
 const { xpForLevel } = require('../../config/constants');
+const { getUserBackground } = require('../../lib/supabase');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,6 +17,9 @@ module.exports = {
     const rankInfo = getRank(p.level);
     const rankLogo = asset('ranks', rankInfo.logo);
     const avatar = interaction.user.displayAvatarURL({ extension: 'png', size: 256 });
+
+    const background = await getUserBackground(interaction.user.id, interaction.guildId, { level: p.level });
+
     const buffer = await buildProfileCard({
       avatar,
       username: interaction.user.displayName,
@@ -29,6 +33,7 @@ module.exports = {
       points: p.points,
       rankName: rankInfo.name,
       rankLogo,
+      background,
     });
     const file = new AttachmentBuilder(buffer, { name: 'profile.png' });
     await interaction.editReply({ files: [file] });

@@ -8,6 +8,7 @@ const {
   getVoiceSession,
   deleteVoiceSession,
   getAllVoiceSessions,
+  resetGuildMembers,
 } = require('../database');
 const { isStaff, addVoiceMinutes } = require('../database');
 const { VOICE } = require('../config/constants');
@@ -276,6 +277,41 @@ function restoreVoiceTracking(ref) {
   return { resumed, fresh };
 }
 
+function resetGuildMemberData(guildId, now = Date.now()) {
+  const fresh = [];
+  const guild = clientRef?.guilds.cache.get(guildId);
+  const members = guild
+    ? [...guild.voiceStates.cache.values()].filter(
+        state => state.channelId && state.member && !state.member.user.bot,
+      )
+    : [...sessions.values()]
+        .filter(session => session.guildId === guildId)
+        .map(session => ({ id: session.userId }));
+  for (const member of members) {
+    fresh.push({
+      userId: member.id,
+      guildId,
+      joinedAt: now,
+      lastGrant: now,
+      eligible: isEligible(guildId, member.id),
+    });
+  }
+  const result = resetGuildMembers(guildId, fresh);
+  for (const [key, session] of sessions) {
+    if (session.guildId === guildId) sessions.delete(key);
+  }
+  for (const session of fresh) sessions.set(`${guildId}:${session.userId}`, session);
+  return result;
+}
+
+function resetSeasonVoiceSessions(guildId, now) {
+  for (const session of sessions.values()) {
+    if (session.guildId !== guildId) continue;
+    session.joinedAt = now;
+    session.lastGrant = now;
+  }
+}
+
 module.exports = {
   name: 'voiceStateUpdate',
   async execute(oldState, newState) {
@@ -303,6 +339,8 @@ module.exports = {
     }
   },
   restoreVoiceTracking,
+  resetSeasonVoiceSessions,
+  resetGuildMemberData,
   isEligible,
   endSession, // diekspos untuk smoke test
 };

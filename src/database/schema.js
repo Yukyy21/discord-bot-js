@@ -24,6 +24,30 @@ function createTables() {
       PRIMARY KEY (userId, guildId)
     );
 
+    CREATE TABLE IF NOT EXISTS seasons (
+      guildId TEXT NOT NULL,
+      seasonNumber INTEGER NOT NULL,
+      archivedAt INTEGER NOT NULL,
+      actorId TEXT NOT NULL,
+      weeklyPeriod TEXT NOT NULL,
+      userCount INTEGER NOT NULL,
+      PRIMARY KEY (guildId, seasonNumber)
+    );
+
+    CREATE TABLE IF NOT EXISTS season_stats (
+      guildId TEXT NOT NULL,
+      seasonNumber INTEGER NOT NULL,
+      userId TEXT NOT NULL,
+      balance INTEGER NOT NULL DEFAULT 0,
+      bank INTEGER NOT NULL DEFAULT 0,
+      points INTEGER NOT NULL DEFAULT 0,
+      voice_seconds INTEGER NOT NULL DEFAULT 0,
+      weeklyPoints INTEGER NOT NULL DEFAULT 0,
+      weeklyRows TEXT NOT NULL DEFAULT '[]',
+      PRIMARY KEY (guildId, seasonNumber, userId),
+      FOREIGN KEY (guildId, seasonNumber) REFERENCES seasons (guildId, seasonNumber)
+    );
+
     CREATE TABLE IF NOT EXISTS shop_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE,
@@ -312,4 +336,3 @@ function runMigrations() {
 }
 
 module.exports = { createTables, runMigrations };
-

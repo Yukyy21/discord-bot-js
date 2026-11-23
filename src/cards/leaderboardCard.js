@@ -10,98 +10,142 @@ const {
   getLevelLeaderboard,
 } = require('../database');
 const { baseEmbed } = require('../ui/embeds');
+const { seasonControls } = require('../ui/season');
 const { getRank } = require('../lib/ranks');
 const logger = require('../lib/logger');
 
-const RANK_COLORS = { 1: '#ffd700', 2: '#c0c0c0', 3: '#cd7f32' };
+const RANK_COLORS = { 1: '#ffbe55', 2: '#d5dee9', 3: '#edb48e' };
 
 async function buildLeaderboardCard(entries, label) {
-  const rowH = 68;
-  const pad = 24;
-  const headerH = 64;
-  const w = 700;
-  const h = headerH + rowH * entries.length + pad;
+  const w = 1000;
+  const pad = 36;
+  const headerH = 148;
+  const rowH = 84;
+  const leaderH = 124;
+  const gap = 8;
+  const contentH = entries.reduce((total, entry) => total + (entry.rank === 1 ? leaderH : rowH) + gap, 0);
+  const h = headerH + Math.max(contentH, 100) + 60;
   const canvas = createCanvas(w, h);
   const ctx = canvas.getContext('2d');
+  const amber = RANK_COLORS[1];
+  const muted = '#c7cbd2';
 
-  // Background cover-fit, condong ke BAWAH (anchorY:1) — leaderboard.jpeg
-  // potret tinggi dengan lengkungan bumi di bagian bawah, jadi itu yang mau
-  // dipertahankan kelihatan (bukan di-stretch paksa jadi gepeng kayak sebelumnya).
+  roundRect(ctx, 0, 0, w, h, 26);
+  ctx.clip();
+  ctx.fillStyle = '#10151e';
+  ctx.fillRect(0, 0, w, h);
   const bgPath = asset('leaderboard', 'leaderboard.jpeg');
   if (fs.existsSync(bgPath)) {
     try {
       const bg = await loadImage(bgPath);
       drawCover(ctx, bg, 0, 0, w, h, { anchorY: 1 });
-    } catch (e) {
-      ctx.fillStyle = '#232428';
+    } catch {
+      ctx.fillStyle = '#10151e';
       ctx.fillRect(0, 0, w, h);
     }
-  } else {
-    ctx.fillStyle = '#232428';
-    ctx.fillRect(0, 0, w, h);
   }
+  ctx.fillStyle = 'rgba(10, 14, 20, 0.78)';
+  ctx.fillRect(0, 0, w, h);
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#49505b';
+  roundRect(ctx, 1, 1, w - 2, h - 2, 26);
+  ctx.stroke();
 
-  roundRect(ctx, 0, 0, w, h, 0);
-  ctx.fillStyle = 'rgba(0,0,0,0.45)';
-  ctx.fill();
-
+  ctx.fillStyle = muted;
+  ctx.font = `bold 13px ${FONT.body}`;
+  ctx.fillText('PERINGKAT KOMUNITAS', pad, 38);
   ctx.fillStyle = '#ffffff';
-  ctx.font = `bold 30px ${FONT.display}`;
-  ctx.fillText(`Leaderboard ${label}`, pad, 46);
+  ctx.font = `bold 38px ${FONT.display}`;
+  ctx.fillText('Leaderboard', pad, 87);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = amber;
+  fitText(ctx, label || 'Poin', w - pad, 78, 380, { size: 26, minSize: 16 });
+  ctx.fillStyle = muted;
+  ctx.font = `14px ${FONT.body}`;
+  ctx.fillText(`${entries.length} anggota ditampilkan`, w - pad, 103);
+  ctx.textAlign = 'left';
+  ctx.font = `bold 11px ${FONT.body}`;
+  ctx.fillText('POSISI', pad + 19, 132);
+  ctx.fillText('ANGGOTA', pad + 186, 132);
+  ctx.textAlign = 'right';
+  ctx.fillText('NILAI', w - pad - 24, 132);
+  ctx.textAlign = 'left';
 
-  const images = await Promise.all(entries.map(e => loadAvatar(e.avatar, e.name, 64)));
-
+  const images = await Promise.all(entries.map(entry => loadAvatar(entry.avatar, entry.name, 128)));
+  let y = headerH;
   for (let i = 0; i < entries.length; i++) {
-    const e = entries[i];
-    const y = headerH + i * rowH;
+    const entry = entries[i];
+    const isLeader = entry.rank === 1;
+    const panelH = isLeader ? leaderH : rowH;
+    const cy = y + panelH / 2;
+    const rankColor = RANK_COLORS[entry.rank] || muted;
 
-    // Baris 1 (rank #1) sengaja dibiarkan tanpa panel gelap — badge emasnya
-    // sudah cukup menonjol sendiri, zebra-stripe baru mulai dari baris ke-2.
-    if (i > 0 && i % 2 === 0) {
-      ctx.fillStyle = '#2b2d31';
-      roundRect(ctx, pad, y, w - pad * 2, rowH - 8, 14);
-      ctx.fill();
-    }
-
-    const badgeColor = RANK_COLORS[e.rank] || '#4e5058';
-    const badgeCy = y + rowH / 2 - 4;
-    ctx.beginPath();
-    ctx.arc(42, badgeCy, 18, 0, Math.PI * 2);
-    ctx.fillStyle = badgeColor;
+    roundRect(ctx, pad, y, w - pad * 2, panelH, isLeader ? 16 : 10);
+    ctx.fillStyle = isLeader ? '#292219' : '#111923';
     ctx.fill();
-    ctx.fillStyle = RANK_COLORS[e.rank] ? '#000000' : '#ffffff';
-    ctx.font = `bold 17px ${FONT.display}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(String(e.rank), 42, badgeCy + 1);
-
-    const img = images[i];
-    const avatarCx = 80;
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(avatarCx, badgeCy, 22, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
-    ctx.drawImage(img, avatarCx - 22, badgeCy - 22, 44, 44);
-    ctx.restore();
-    // Ring tipis di sekeliling avatar biar kelihatan lebih "premium", tidak nempel polos ke bg.
-    ctx.beginPath();
-    ctx.arc(avatarCx, badgeCy, 22, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = isLeader ? '#9a753e' : '#36404d';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
+    ctx.fillStyle = rankColor;
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${isLeader ? 40 : 27}px ${FONT.display}`;
+    ctx.fillText(String(entry.rank).padStart(2, '0'), pad + 47, cy + (isLeader ? 14 : 10), 68);
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#ffffff';
-    fitText(ctx, e.name, 118, badgeCy + 7, w - pad - 118 - 170, { size: 20, minSize: 13 });
 
-    ctx.fillStyle = '#b5bac1';
-    ctx.font = `16px ${FONT.body}`;
+    const avatarCx = pad + 128;
+    const radius = isLeader ? 42 : 27;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(avatarCx, cy, radius, 0, Math.PI * 2);
+    ctx.clip();
+    drawCover(ctx, images[i], avatarCx - radius, cy - radius, radius * 2, radius * 2);
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(avatarCx, cy, radius + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = isLeader ? amber : '#596373';
+    ctx.lineWidth = isLeader ? 2 : 1;
+    ctx.stroke();
+
+    const nameX = pad + 186;
+    if (isLeader) {
+      ctx.fillStyle = amber;
+      ctx.font = `bold 11px ${FONT.body}`;
+      ctx.fillText('PERINGKAT PERTAMA', nameX, cy - 22);
+    }
+    ctx.fillStyle = '#ffffff';
+    fitText(ctx, entry.name || 'Pengguna', nameX, cy + (isLeader ? 14 : 8), 380, {
+      size: isLeader ? 30 : 23,
+      minSize: 17,
+    });
+
     ctx.textAlign = 'right';
-    ctx.fillText(`${e.value} ${label}`, w - pad - 4, badgeCy + 6);
+    ctx.fillStyle = isLeader ? amber : '#ffffff';
+    fitText(ctx, entry.value ?? '0', w - pad - 24, cy + 2, 294, {
+      size: isLeader ? 32 : 25,
+      minSize: 15,
+    });
+    ctx.fillStyle = muted;
+    fitText(ctx, label || 'Poin', w - pad - 24, cy + 24, 294, {
+      size: 12,
+      minSize: 10,
+      family: FONT.body,
+      weight: 'normal',
+    });
     ctx.textAlign = 'left';
+    y += panelH + gap;
   }
+
+  if (entries.length === 0) {
+    ctx.fillStyle = muted;
+    ctx.font = `20px ${FONT.body}`;
+    ctx.fillText('Belum ada data peringkat di server ini.', pad, headerH + 50);
+  }
+  ctx.fillStyle = muted;
+  ctx.font = `11px ${FONT.body}`;
+  ctx.fillText('EKONOMI & AKTIVITAS SERVER', pad, h - 26);
+  ctx.textAlign = 'right';
+  ctx.fillText('/leaderboard card', w - pad, h - 26);
 
   return canvas.toBuffer('image/png');
 }
@@ -111,8 +155,10 @@ async function renderLeaderboardCard(interaction, kategori) {
     try {
       await interaction.deferUpdate();
     } catch {
-      return; // interaksi sudah expired atau sudah di-acknowledge, abaikan
+      return;
     }
+  } else {
+    await interaction.deferReply();
   }
 
   let rows;
@@ -137,7 +183,10 @@ async function renderLeaderboardCard(interaction, kategori) {
     const send = interaction.deferred
       ? interaction.editReply.bind(interaction)
       : interaction.reply.bind(interaction);
-    return send({ embeds: [baseEmbed().setDescription('Belum ada data di server ini.')], components: [] });
+    return send({
+      embeds: [baseEmbed().setDescription('Belum ada data di server ini.')],
+      components: [seasonControls()],
+    });
   }
 
   const users = await Promise.all(
@@ -180,7 +229,7 @@ async function renderLeaderboardCard(interaction, kategori) {
       : interaction.reply.bind(interaction);
     return send({
       embeds: [baseEmbed().setDescription('Belum ada data yang bisa ditampilkan di server ini.')],
-      components: [],
+      components: [seasonControls()],
     });
   }
 
@@ -202,7 +251,7 @@ async function renderLeaderboardCard(interaction, kategori) {
     ? interaction.editReply.bind(interaction)
     : interaction.reply.bind(interaction);
 
-  await send({ files: [file], components: [row] });
+  await send({ embeds: [], files: [file], attachments: [], components: [row, seasonControls()] });
 }
 
 module.exports = { buildLeaderboardCard, renderLeaderboardCard };

@@ -13,6 +13,8 @@ const poruvShopCmd = require('../commands/economy/poruvShop');
 const codeCreateCmd = require('../commands/admin/codeCreate');
 const poruvResolveCmd = require('../commands/admin/poruvResolve');
 const { renderLeaderboardCard } = require('../cards/leaderboardCard');
+const { handleSeasonButton, handleSeasonArchive } = require('../ui/season');
+const { handleMemberReset } = require('../ui/memberReset');
 const { handleBossAutoAttack } = require('../lib/bossManager');
 const { maybeSendBetaReminder } = require('../lib/betaReminder');
 
@@ -39,9 +41,12 @@ module.exports = {
     // pager_noop) — muncul pengingat pas user baru saja menutup sesuatu
     // terasa aneh. No-op diam-diam kalau syarat lain tidak terpenuhi (lihat
     // betaReminder.js).
-    const skip = interaction.isButton?.() && ['guide_close', 'pager_noop'].includes(interaction.customId?.split(':')[0]);
+    const skip =
+      interaction.isButton?.() && ['guide_close', 'pager_noop'].includes(interaction.customId?.split(':')[0]);
     if (!skip) {
-      await maybeSendBetaReminder(interaction).catch(error => logger.error('Beta reminder gagal:', error.message));
+      await maybeSendBetaReminder(interaction).catch(error =>
+        logger.error('Beta reminder gagal:', error.message),
+      );
     }
   },
 };
@@ -55,13 +60,27 @@ async function handleButton(interaction) {
 
   try {
     switch (action) {
+      case 'members_reset':
+      case 'members_confirm':
+      case 'members_cancel':
+        return await handleMemberReset(interaction);
+
+      case 'season_reset':
+      case 'season_confirm':
+      case 'season_cancel':
+      case 'season_history':
+        return await handleSeasonButton(interaction);
+
       case 'guide_home':
         return await interaction.update(buildGuide('home'));
 
       case 'guide_close':
         // Pesan guide sekarang ephemeral: message.delete() tidak berlaku untuk
         // ephemeral (ditolak API Discord), jadi pakai deleteReply() lewat webhook.
-        return await interaction.deferUpdate().then(() => interaction.deleteReply()).catch(() => {});
+        return await interaction
+          .deferUpdate()
+          .then(() => interaction.deleteReply())
+          .catch(() => {});
 
       case 'pager_noop': // tombol indikator halaman, memang tidak melakukan apa-apa
         return;
@@ -122,12 +141,15 @@ async function handleButton(interaction) {
 
       case 'staff_page': // a = halaman
         await interaction.deferUpdate();
-        return await interaction.editReply(await buildStaff(interaction.client, interaction.guildId, Number(a) || 0));
+        return await interaction.editReply(
+          await buildStaff(interaction.client, interaction.guildId, Number(a) || 0),
+        );
 
       case 'poruv_redeem': // a = item key
         return await poruvShopCmd.handleRedeem(interaction, a);
 
-      case 'poruv_resolve': { // a = redemption id
+      case 'poruv_resolve': {
+        // a = redemption id
         const { resolveRedemption } = require('../database');
         // Tombol ini setara /poruv-resolve yang berizin Administrator; tanpa
         // cek ini siapa pun yang menyalin tombol bisa menyelesaikan klaim.
@@ -178,6 +200,9 @@ async function handleSelectMenu(interaction) {
           },
         ),
       );
+    }
+    if (interaction.customId === 'season_archive') {
+      return await handleSeasonArchive(interaction);
     }
     if (interaction.customId === 'lb_filter') {
       return await renderLeaderboardCard(interaction, interaction.values[0]);
@@ -234,4 +259,3 @@ async function handleCommand(interaction) {
     }
   }
 }
-

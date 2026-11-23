@@ -2,6 +2,7 @@
 // pembagian hadiah, dan despawn. Angka & undian ada di lib/boss.js,
 // penyimpanan di database/boss.js.
 const { MessageFlags } = require('discord.js');
+const { clearTimeout } = require('node:timers');
 const {
   getActiveBoss,
   getBossById,

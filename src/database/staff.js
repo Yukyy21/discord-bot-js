@@ -81,7 +81,7 @@ function listStaff(guildId) {
     if (wa !== wb) return wb - wa; // bobot besar duluan
     return a.divisi.localeCompare(b.divisi, 'id', { sensitivity: 'base' });
   });
-  return groups.map(({ key, ...g }) => g);
+  return groups.map(({ divisi, members }) => ({ divisi, members }));
 }
 
 /** Lengkapi satu baris staff dengan rata-rata bintang rating di guild itu. */

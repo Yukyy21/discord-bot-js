@@ -21,6 +21,7 @@ const giveDaily = require('./giveDaily');
 const botStats = require('./botStats');
 const betaReminders = require('./betaReminders');
 const redeemCodes = require('./redeemCodes');
+const seasons = require('./seasons');
 
 createTables();
 runMigrations();
@@ -42,9 +43,15 @@ function getProfile(userId, guildId) {
   };
 }
 
+function getProfileLevel(userId, guildId) {
+  const row = db.prepare('SELECT level FROM points WHERE userId = ? AND guildId = ?').get(userId, guildId);
+  return row ? row.level : 0;
+}
+
 module.exports = {
   db,
   getProfile,
+  getProfileLevel,
   ...users,
   ...points,
   ...shop,
@@ -62,5 +69,5 @@ module.exports = {
   ...botStats,
   ...betaReminders,
   ...redeemCodes,
+  ...seasons,
 };
-

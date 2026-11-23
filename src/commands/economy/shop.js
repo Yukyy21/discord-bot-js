@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
-const { getShopStock, getShopTimers, getShopRefreshAt, TIER_CONFIG } = require('../../lib/shopRotation');
+const { getShopStock, getShopRefreshAt, TIER_CONFIG } = require('../../lib/shopRotation');
 const { parseEffect, describeEffect } = require('../../database/shopCatalog');
 const { getUser } = require('../../database');
 const { themedEmbed, COLORS } = require('../../ui/embeds');
@@ -64,7 +64,6 @@ function buildShop(page = 0, filter = {}, viewer = null) {
   const tier = TIER_ORDER.includes(filter.tier) ? filter.tier : '';
   const query = sanitizeQuery(filter.query);
   const items = sortStock(filterStock(getShopStock(guildId), { tier, query }));
-  const { minutes, seconds } = getShopTimers(guildId);
   const { slice, page: current, totalPages } = paginate(items, page);
 
   let balance = null;

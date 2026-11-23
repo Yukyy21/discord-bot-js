@@ -59,4 +59,22 @@ process.on('uncaughtException', error => logger.error('Uncaught exception:', err
 loadCommands();
 loadEvents();
 
+client.once('clientReady', () => {
+  try {
+    const { profileLevelConfig, createProfileLevelServer } = require('./lib/profileLevelApi');
+    const config = profileLevelConfig();
+    if (!config) return;
+    const server = createProfileLevelServer({
+      ...config,
+      getLevel: (userId, guildId) => require('./database').getProfileLevel(userId, guildId),
+      hasGuild: guildId => client.isReady() && client.guilds.cache.has(guildId),
+      renderPreview: (body, signal) => require('./lib/profilePreview').renderProfilePreview(body, {
+        db: require('./database/connection').db, client, signal,
+      }),
+    });
+    server.on('error', () => logger.error('Profile level API unavailable'));
+    server.listen(config.port, config.host);
+  } catch { logger.error('Profile level API disabled: invalid configuration'); }
+});
+
 client.login(process.env.DISCORD_TOKEN);
